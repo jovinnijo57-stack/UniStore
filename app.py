@@ -2,6 +2,7 @@ from flask import Flask, jsonify, g, render_template, request, session, redirect
 from functools import wraps
 import os
 import sys
+import requests
 
 # Ensure the project root is in the Python path so local imports work
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -253,44 +254,38 @@ def login_required(f):
     return decorated_function
 
 def send_email(to_email, subject, message):
-    sender_email = "unistore153@gmail.com"
-    sender_password = "sxqn xknm dezd eryw"
+    # Retrieve API Key from Environment Variables (Set this in Railway Variables tab)
+    # Falling back to the provided key if env var is missing
+    api_key = os.environ.get("BREVO_API_KEY", "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")
 
-    msg = MIMEMultipart()
-    msg["From"] = sender_email
-    msg["To"] = to_email
-    msg["Subject"] = subject
+    
+    
+    url = "https://api.brevo.com/v3/smtp/email"
+    
+    payload = {
+        "sender": {"name": "UniStore", "email": "unistore153@gmail.com"},
+        "to": [{"email": to_email}],
+        "subject": subject,
+        "textContent": message
+    }
+    
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "api-key": api_key
+    }
 
-    msg.attach(MIMEText(message, "plain"))
-
-    # Method 1: Try SMTP with STARTTLS (port 587)
     try:
-        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=30)
-        server.ehlo()
-        server.starttls()
-        server.ehlo()
-        server.login(sender_email, sender_password)
-        server.send_message(msg)
-        server.quit()
-        print(f"Email sent to {to_email} via STARTTLS (587)")
-        return True
+        response = requests.post(url, json=payload, headers=headers, timeout=10)
+        if response.status_code in (200, 201):
+            print(f"✅ Email sent successfully to {to_email} via Brevo API")
+            return True
+        else:
+            print(f"❌ Brevo API Error ({response.status_code}): {response.text}")
+            return False
     except Exception as e:
-        print(f"STARTTLS (587) failed for {to_email}: {e}")
-
-    # Method 2: Fallback to SMTP_SSL (port 465) — needed on some cloud hosts like Render
-    try:
-        server = smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30)
-        server.ehlo()
-        server.login(sender_email, sender_password)
-        server.send_message(msg)
-        server.quit()
-        print(f"Email sent to {to_email} via SSL (465)")
-        return True
-    except Exception as e:
-        print(f"SSL (465) also failed for {to_email}: {e}")
-
-    print(f"All email methods failed for {to_email}")
-    return False
+        print(f"❌ Failed to connect to Email API: {e}")
+        return False
 
 # Mock Data
 PRODUCTS = [
