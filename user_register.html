@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join UniStore | Premium Shopping</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <a href="/" class="logo" style="text-decoration: none;">
+                <i class="fas fa-shopping-bag"></i> UniStore
+            </a>
+            <h2>Create Account</h2>
+
+            <div class="input-group">
+                <label class="input-label">FULL NAME</label>
+                <input type="text" id="name" placeholder="Alex Johnson" required>
+            </div>
+            <div class="input-group">
+                <label class="input-label">EMAIL ADDRESS</label>
+                <input type="email" id="email" placeholder="name@company.com" required>
+            </div>
+            <div class="input-group">
+                <label class="input-label">COLLEGE</label>
+                <select id="college" required
+                    style="width: 100%; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; outline: none; transition: 0.3s;">
+                    <option value="" disabled selected>Select College</option>
+                    <option value="Arts & Science">Arts & Science</option>
+                    <option value="Polytechnic">Polytechnic</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Pharmacy">Pharmacy</option>
+                    <option value="Technology">Technology</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label class="input-label">PASSWORD</label>
+                <div style="position: relative; display: flex; align-items: center;">
+                    <input type="password" id="password" placeholder="Min 8 characters (Visible on toggle)" required
+                        style="width: 100%; padding-right: 40px;">
+                    <i class="fas fa-eye" id="togglePassword"
+                        style="position: absolute; right: 12px; color: #94a3b8; cursor: pointer; z-index: 10;"></i>
+                </div>
+            </div>
+            <div class="input-group">
+                <label class="input-label">REFERRAL CODE <span
+                        style="font-weight: 400; color: #94a3b8;">(Optional)</span></label>
+                <input type="text" id="referral_code" placeholder="e.g. UNI-ABC123" style="text-transform: uppercase;">
+            </div>
+
+            <button onclick="register()" id="reg-btn">Register</button>
+
+            <p id="result"
+                style="margin-top: 2rem; display: none; padding: 1rem; border-radius: 12px; font-weight: 600;"></p>
+
+            <div style="margin-top: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+                Member already? <a href="/login"
+                    style="color: var(--primary); font-weight: 600; text-decoration: none;">Sign In</a>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="success-overlay" id="successModal">
+        <div class="success-card">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2>Success</h2>
+            <p>Your account has been successfully created.</p>
+            <button onclick="window.location.href='/login'" class="continue-btn">Continue</button>
+        </div>
+    </div>
+
+    <style>
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .success-overlay.show {
+            opacity: 1;
+        }
+
+        .success-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 24px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transform: translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .success-overlay.show .success-card {
+            transform: translateY(0);
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #dcfce7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: #16a34a;
+            font-size: 2.5rem;
+        }
+
+        .success-card h2 {
+            font-size: 1.8rem;
+            color: #111827;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .success-card p {
+            color: #6b7280;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .continue-btn {
+            background: #111827;
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        .continue-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+
+    <script>
+        function register() {
+            const btn = document.getElementById('reg-btn');
+            const result = document.getElementById('result');
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const college = document.getElementById("college").value;
+            const password = document.getElementById("password").value;
+
+            // Client-side validation
+            if (!name || !email || !password || !college) {
+                result.innerText = "Please fill in all fields including college";
+                result.style.display = "block";
+                result.style.background = "#fef2f2";
+                result.style.color = "#ef4444";
+                return;
+            }
+
+            if (password.length < 8) {
+                result.innerText = "Password must be at least 8 characters";
+                result.style.display = "block";
+                result.style.background = "#fef2f2";
+                result.style.color = "#ef4444";
+                return;
+            }
+
+            if (!email.includes("@") || !email.includes(".")) {
+                result.innerText = "Please enter a valid email address";
+                result.style.display = "block";
+                result.style.background = "#fef2f2";
+                result.style.color = "#ef4444";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Creating Account...";
+
+            fetch("/user/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: name,
+                    email: email,
+                    college: college,
+                    password: password
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const modal = document.getElementById('successModal');
+                        modal.style.display = 'flex';
+                        // Trigger reflow
+                        modal.offsetHeight;
+                        modal.classList.add('show');
+                    } else {
+                        result.innerText = data.message || "Registration failed";
+                        result.style.display = "block";
+                        result.style.background = "#fef2f2";
+                        result.style.color = "#ef4444";
+                        btn.disabled = false;
+                        btn.innerText = "Register";
+                    }
+                })
+                .catch(err => {
+                    console.error("Registration error:", err);
+                    result.innerText = "Connection Error. Please try again.";
+                    result.style.display = "block";
+                    result.style.background = "#fef2f2";
+                    result.style.color = "#ef4444";
+                    btn.disabled = false;
+                    btn.innerText = "Register";
+                });
+        }
+
+        // Allow Enter key to submit
+        document.addEventListener('DOMContentLoaded', function () {
+            // Password Toggle Logic
+            const togglePassword = document.getElementById('togglePassword');
+            const password = document.getElementById('password');
+            if (togglePassword && password) {
+                togglePassword.addEventListener('click', function () {
+                    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                    password.setAttribute('type', type);
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+
+            ['name', 'email', 'password'].forEach(id => {
+                document.getElementById(id).addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') register();
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

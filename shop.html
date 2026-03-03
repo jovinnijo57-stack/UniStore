@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop | UniStore</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .shop-nav {
+            padding: 1.5rem 5%;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        /* Search Box in Nav */
+        .search-box {
+            position: relative;
+            width: 260px;
+            transition: width 0.3s ease;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border: 2px solid #e5e7eb;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            background: #f9fafb;
+            color: #1f2937;
+            transition: all 0.3s;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .search-box input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            background: white;
+            width: 100%;
+        }
+
+        .search-box input::placeholder {
+            color: #94a3b8;
+        }
+
+        .search-box .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 0.85rem;
+            pointer-events: none;
+            transition: color 0.3s;
+        }
+
+        .search-box input:focus~.search-icon {
+            color: #6366f1;
+        }
+
+        .search-box .clear-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #e5e7eb;
+            border: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: #6b7280;
+            font-size: 0.65rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .search-box .clear-btn:hover {
+            background: #d1d5db;
+            color: #374151;
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #94a3b8;
+            grid-column: 1 / -1;
+        }
+
+        .no-results i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.4;
+        }
+
+        .no-results h3 {
+            font-size: 1.3rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+
+        .no-results button {
+            margin-top: 1rem;
+            padding: 10px 24px;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .no-results button:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+        }
+
+        /* Product card fade-in */
+        .product-card {
+            animation: fadeInUp 0.4s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .search-box {
+                width: 180px;
+            }
+
+            .search-box input:focus {
+                width: 100%;
+            }
+
+            .nav-right {
+                gap: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .search-box {
+                width: 140px;
+            }
+        }
+    </style>
+</head>
+
+<body style="background: #f8fafc;">
+    <nav class="shop-nav">
+        <a href="/" class="logo" style="margin-bottom: 0; font-size: 1.8rem; text-decoration: none;">
+            <i class="fas fa-shopping-bag"></i> UniStore
+        </a>
+        <div class="nav-right">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search products..." oninput="handleSearch()">
+                <i class="fas fa-search search-icon"></i>
+                <button class="clear-btn" id="clearSearchBtn" onclick="clearSearch()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <a href="/cart" style="position: relative; color: var(--text-main); font-size: 1.5rem;">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="cart-count"
+                    style="position: absolute; top: -8px; right: -8px; background: var(--secondary); color: white; font-size: 0.7rem; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800;">0</span>
+            </a>
+            <a href="/user/dashboard" class="nav-item"
+                style="color: var(--text-main); text-decoration: none; font-weight: 600;">Dashboard</a>
+        </div>
+    </nav>
+
+    <header style="padding: 60px 5%; text-align: center;">
+        <h1 style="font-size: 3rem; margin-bottom: 1rem;">Our <span class="text-gradient">Collection</span></h1>
+        <p style="color: var(--text-muted); font-size: 1.2rem;">Quality you can feel, style you can see.</p>
+    </header>
+
+    <div style="padding: 0 5% 100px; max-width: 1400px; margin: 0 auto;">
+        <div id="product-grid"
+            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 3rem;">
+            <!-- Loaded by JS -->
+        </div>
+    </div>
+
+    <script>
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let allProducts = [];
+
+        function updateUI() {
+            const count = cart.reduce((acc, item) => acc + item.quantity, 0);
+            document.getElementById('cart-count').innerText = count;
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        async function loadProducts() {
+            const res = await fetch('/api/products');
+            allProducts = await res.json();
+            applySearch();
+        }
+
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value;
+            document.getElementById('clearSearchBtn').style.display = query.length > 0 ? 'flex' : 'none';
+            applySearch();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearchBtn').style.display = 'none';
+            applySearch();
+        }
+
+        function applySearch() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+
+            let filtered = allProducts;
+            if (query) {
+                filtered = allProducts.filter(p =>
+                    p.name.toLowerCase().includes(query) ||
+                    p.category.toLowerCase().includes(query) ||
+                    (p.description && p.description.toLowerCase().includes(query))
+                );
+            }
+
+            renderProducts(filtered);
+        }
+
+        function renderProducts(products) {
+            const grid = document.getElementById('product-grid');
+
+            if (products.length === 0) {
+                grid.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <h3>No products found</h3>
+                        <p>Try a different search term.</p>
+                        <button onclick="clearSearch()">
+                            <i class="fas fa-redo"></i> Clear Search
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = products.map((p, index) => {
+                const isOutOfStock = p.stock <= 0;
+                const isService = p.is_service;
+                return `
+                <div class="product-card" style="${isOutOfStock ? 'opacity: 0.6;' : ''} position: relative; animation-delay: ${index * 0.05}s;">
+                    <button 
+                        class="wishlist-btn" 
+                        id="wishlist-${p.id}"
+                        onclick="toggleWishlist(${p.id})"
+                        style="position: absolute; top: 1rem; right: 1rem; background: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-size: 1.3rem; color: #e5e7eb; transition: all 0.3s; z-index: 10;"
+                        title="Add to wishlist">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                    <img src="${p.image}" alt="${p.name}" class="product-image">
+                    <div class="product-details">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <small style="text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 1px;">${p.category}</small>
+                            <div style="color: #f59e0b; font-size: 0.8rem;">
+                                <i class="fas fa-star"></i> ${p.rating || 0} (${p.reviews_count || 0})
+                            </div>
+                        </div>
+                        <h3 style="margin-top: 0.5rem; font-size: 1.3rem;">${highlightMatch(p.name)}</h3>
+                        ${p.description ? `<p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.4rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${p.description}</p>` : ''}
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
+                            <span class="product-price">${isService ? 'From ' : ''}Rs ${p.price.toFixed(2)}</span>
+                            <button 
+                                onclick="${isOutOfStock ? '' : (isService ? "location.href='/print-service'" : `add('${p.id}', '${p.name}', ${p.price}, '${p.image}', ${p.stock})`)}" 
+                                style="width: auto; padding: 10px 20px; border-radius: 50px; font-size: 0.9rem; background: ${isOutOfStock ? '#94a3b8' : ''}; cursor: ${isOutOfStock ? 'not-allowed' : 'pointer'};"
+                                ${isOutOfStock ? 'disabled' : ''}>
+                                ${isOutOfStock ? 'Unavailable' : (isService ? 'Use Service' : 'Add to Cart')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            checkWishlistStatus();
+        }
+
+        function highlightMatch(text) {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return text;
+            const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return text.replace(regex, '<mark style="background: #fef08a; color: #1f2937; padding: 0 2px; border-radius: 3px;">$1</mark>');
+        }
+
+        function add(id, name, price, image, stock) {
+            const exists = cart.find(i => String(i.id) === String(id));
+            if (exists) {
+                if (exists.quantity >= stock) {
+                    alert(`Only ${stock} items available in stock!`);
+                    return;
+                }
+                exists.quantity++;
+                exists.stock = stock;
+            } else {
+                cart.push({ id, name, price, image, quantity: 1, stock });
+            }
+            updateUI();
+
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "Added! ✨";
+            btn.style.background = "var(--success)";
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.background = "";
+            }, 1000);
+        }
+
+        // Wishlist Functions
+        async function toggleWishlist(productId) {
+            const btn = document.getElementById(`wishlist-${productId}`);
+            const isInWishlist = btn.style.color === 'rgb(239, 68, 68)';
+
+            try {
+                const endpoint = isInWishlist ? '/api/wishlist/remove' : '/api/wishlist/add';
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: productId })
+                });
+
+                const data = await response.json();
+
+                if (data.success || response.ok) {
+                    if (isInWishlist) {
+                        btn.style.color = '#e5e7eb';
+                        btn.title = 'Add to wishlist';
+                    } else {
+                        btn.style.color = '#ef4444';
+                        btn.title = 'Remove from wishlist';
+                        btn.style.transform = 'scale(1.2)';
+                        setTimeout(() => btn.style.transform = 'scale(1)', 200);
+                    }
+                }
+            } catch (error) {
+                console.log('Wishlist toggle error:', error);
+            }
+        }
+
+        async function checkWishlistStatus() { }
+
+        loadProducts();
+        updateUI();
+    </script>
+</body>
+
+</html>
