@@ -254,7 +254,7 @@ def login_required(f):
 
 def send_email(to_email, subject, message):
     sender_email = "unistore153@gmail.com"
-    sender_password = "bfqp ipxb kfsq teps"
+    sender_password = "sxqn xknm dezd eryw"
 
     msg = MIMEMultipart()
     msg["From"] = sender_email
