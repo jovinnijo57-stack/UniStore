@@ -1,0 +1,2146 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard | UniStore</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            --sidebar-width: 280px;
+        }
+
+        body {
+            background: #f3f4f6;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Glassmorphism Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid var(--glass-border);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .nav-links {
+            list-style: none;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 4px;
+        }
+
+        /* Custom Scrollbar for Sidebar */
+        .nav-links::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .nav-links::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .nav-links::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.25);
+            border-radius: 10px;
+        }
+
+        .nav-links::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.5);
+        }
+
+        .nav-item {
+            margin-bottom: 0.8rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.2rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .nav-link i {
+            margin-right: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 2rem;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            background: var(--glass-bg);
+            padding: 1rem 2rem;
+            border-radius: 20px;
+            backdrop-filter: blur(12px);
+            box-shadow: var(--glass-shadow);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--bg-gradient);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .user-info h4 {
+            font-size: 1rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .user-tier {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+        }
+
+        /* Notification Bell */
+        .notification-btn {
+            position: relative;
+            background: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .notification-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--secondary);
+            color: white;
+            font-size: 0.7rem;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+        }
+
+        /* Content Sections */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .page-title {
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            color: var(--text-main);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 20px;
+            box-shadow: var(--glass-shadow);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-info h3 {
+            font-size: 1.8rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .stat-info p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Gradients */
+        .bg-purple {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .bg-pink {
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+        }
+
+        .bg-orange {
+            background: linear-gradient(135deg, #f6d365, #fda085);
+        }
+
+        .bg-green {
+            background: linear-gradient(135deg, #84fab0, #8fd3f4);
+        }
+
+        /* Loyalty Section */
+        .loyalty-card {
+            background: var(--bg-gradient);
+            color: white;
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);
+        }
+
+        .loyalty-level {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .points-display {
+            font-size: 3.5rem;
+            font-weight: 800;
+        }
+
+        .progress-container {
+            background: rgba(255, 255, 255, 0.2);
+            height: 10px;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: white;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 1s ease;
+        }
+
+        .tiers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .tier-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s;
+            opacity: 0.6;
+        }
+
+        .tier-card.active {
+            border-color: var(--primary);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.15);
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        /* Orders Timeline */
+        .order-timeline {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .timeline-step {
+            text-align: center;
+            z-index: 2;
+            flex: 1;
+        }
+
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            background: #e5e7eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            color: #6b7280;
+            transition: all 0.3s;
+        }
+
+        .timeline-step.completed .step-icon {
+            background: var(--success);
+            color: white;
+        }
+
+        .timeline-line {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #e5e7eb;
+            z-index: 1;
+        }
+
+        .timeline-progress {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            height: 2px;
+            background: var(--success);
+            z-index: 1;
+            width: 0;
+            transition: width 1s ease;
+        }
+
+        /* Wishlist Grid */
+        .wishlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .wishlist-item {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--glass-shadow);
+            transition: transform 0.3s;
+            position: relative;
+        }
+
+        .wishlist-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .wishlist-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .wishlist-content {
+            padding: 1rem;
+        }
+
+        .remove-wishlist {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+            cursor: pointer;
+            border: none;
+        }
+
+        /* Notification Panel */
+        .notification-panel {
+            position: fixed;
+            right: -350px;
+            top: 0;
+            width: 350px;
+            height: 100vh;
+            background: white;
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .notification-panel.open {
+            right: 0;
+        }
+
+        .notif-item {
+            padding: 1rem;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .notif-item.unread {
+            background: #fdf2f8;
+            border-left: 3px solid var(--secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 250px;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 1rem;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: var(--glass-shadow);
+        }
+
+
+
+        .nav-item-logout:hover {
+            background: rgba(239, 68, 68, 0.1);
+            transform: translateX(5px);
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        }
+
+        /* Avatar Grid */
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .avatar-option {
+            background: #f3f4f6;
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .avatar-option:hover {
+            background: #e0e7ff;
+            transform: translateY(-2px);
+        }
+
+        .avatar-option.selected {
+            border-color: var(--primary);
+            background: #e0e7ff;
+        }
+
+        .avatar-emoji {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Notification Panel -->
+    <div class="notification-panel" id="notificationPanel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h3>Notifications</h3>
+            <button onclick="toggleNotifications()"
+                style="background: #f3f4f6; border: none; font-size: 0.8rem; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; color: #6b7280; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div id="notificationList">
+            {% if notifications %}
+            {% for n in notifications %}
+            <div class="notif-item {{ 'unread' if not n.read else '' }}">
+                <div style="color: #3b82f6;"><i class="fa-solid fa-bell"></i></div>
+                <div>
+                    <p style="font-size: 0.9rem; margin-bottom: 0.2rem;">{{ n.message }}</p>
+                    <small style="color: var(--text-muted);">{{ n.timestamp }}</small>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p style="text-align: center; color: var(--text-muted);">No new notifications</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="logo">
+            <i class="fa-solid fa-graduation-cap"></i> UniStore
+        </div>
+
+        <ul class="nav-links">
+            <li class="nav-item">
+                <a href="#" class="nav-link active" onclick="switchTab('overview', this)">
+                    <i class="fa-solid fa-border-all"></i> Overview
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/shop" class="nav-link"
+                    style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; font-weight: 600;">
+                    <i class="fa-solid fa-bag-shopping"></i> Go to Shop
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" onclick="switchTab('orders', this)">
+                    <i class="fa-solid fa-box"></i> Orders
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" onclick="switchTab('loyalty', this)">
+                    <i class="fa-solid fa-crown"></i> Loyalty & Rewards
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" onclick="switchTab('analytics', this)">
+                    <i class="fa-solid fa-chart-pie"></i> Analytics
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" onclick="switchTab('wishlist', this)">
+                    <i class="fa-solid fa-heart"></i> Wishlist
+                    <span class="badge" style="position: static; margin-left: auto;">{{ wishlist_count }}</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" onclick="switchTab('referral', this)">
+                    <i class="fa-solid fa-users"></i> Referral Program
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" onclick="switchTab('support', this)">
+                    <i class="fa-solid fa-headset"></i> Support
+                </a>
+            </li>
+        </ul>
+
+
+        <div style="margin-top: auto;">
+            <!-- Animated Logout Button -->
+            <style>
+                .logoutButton {
+                    --figure-duration: 100ms;
+                    --transform-figure: none;
+                    --walking-duration: 100ms;
+                    --transform-arm1: none;
+                    --transform-wrist1: none;
+                    --transform-arm2: none;
+                    --transform-wrist2: none;
+                    --transform-leg1: none;
+                    --transform-calf1: none;
+                    --transform-leg2: none;
+                    --transform-calf2: none;
+                    background: none;
+                    border: 0;
+                    color: #111827;
+                    cursor: pointer;
+                    display: block;
+                    font-family: inherit;
+                    font-size: 14px;
+                    font-weight: 500;
+                    height: 40px;
+                    outline: none;
+                    padding: 0 0 0 20px;
+                    perspective: 100px;
+                    position: relative;
+                    text-align: left;
+                    width: 100%;
+                    -webkit-tap-highlight-color: transparent;
+                    margin-top: 1rem;
+                }
+
+                .logoutButton::before {
+                    background-color: #e5e7eb;
+                    border-radius: 12px;
+                    content: "";
+                    display: block;
+                    height: 100%;
+                    left: 0;
+                    position: absolute;
+                    top: 0;
+                    transform: none;
+                    transition: transform 50ms ease;
+                    width: 100%;
+                    z-index: 2;
+                }
+
+                .logoutButton:hover .door {
+                    transform: rotateY(20deg);
+                }
+
+                .logoutButton:active::before {
+                    transform: scale(0.96);
+                }
+
+                .logoutButton:active .door {
+                    transform: rotateY(28deg);
+                }
+
+                .logoutButton.clicked::before {
+                    transform: none;
+                }
+
+                .logoutButton.clicked .door {
+                    transform: rotateY(35deg);
+                }
+
+                .logoutButton.door-slammed .door {
+                    transform: none;
+                    transition: transform 100ms ease-in 250ms;
+                }
+
+                .logoutButton.falling {
+                    animation: shake 200ms linear;
+                }
+
+                .logoutButton.falling .bang {
+                    animation: flash 300ms linear;
+                }
+
+                .logoutButton.falling .figure {
+                    animation: spin 1000ms infinite linear;
+                    bottom: -1080px;
+                    opacity: 0;
+                    right: 1px;
+                    transition: transform calc(var(--figure-duration) * 1ms) linear, bottom calc(var(--figure-duration) * 1ms) cubic-bezier(0.7, 0.1, 1, 1) 100ms, opacity calc(var(--figure-duration) * 0.25ms) linear calc(var(--figure-duration) * 0.75ms);
+                    z-index: 1;
+                }
+
+                .button-text {
+                    color: #111827;
+                    font-weight: 600;
+                    position: relative;
+                    z-index: 10;
+                    margin-left: 10px;
+                }
+
+                .anim-svg {
+                    display: block;
+                    position: absolute;
+                }
+
+                .figure {
+                    bottom: 5px;
+                    fill: #e5e7eb;
+                    /* match bg color to hide initially */
+                    right: 18px;
+                    transform: var(--transform-figure);
+                    transition: transform calc(var(--figure-duration) * 1ms) cubic-bezier(0.2, 0.1, 0.8, 0.9);
+                    width: 30px;
+                    z-index: 4;
+                }
+
+                /* When animating, figure becomes visible */
+                .logoutButton.clicked .figure {
+                    fill: #4371f7;
+                }
+
+                .door,
+                .doorway {
+                    bottom: 4px;
+                    fill: #111827;
+                    /* Dark styling for contrast */
+                    right: 12px;
+                    width: 32px;
+                }
+
+                .door {
+                    transform: rotateY(20deg);
+                    transform-origin: 100% 50%;
+                    transform-style: preserve-3d;
+                    transition: transform 200ms ease;
+                    z-index: 5;
+                }
+
+                .door path {
+                    fill: #4371f7;
+                    stroke: #4371f7;
+                    stroke-width: 4;
+                }
+
+                .doorway {
+                    z-index: 3;
+                    fill: #111827;
+                }
+
+                .bang {
+                    opacity: 0;
+                }
+
+                .arm1,
+                .wrist1,
+                .arm2,
+                .wrist2,
+                .leg1,
+                .calf1,
+                .leg2,
+                .calf2 {
+                    transition: transform calc(var(--walking-duration) * 1ms) ease-in-out;
+                }
+
+                .arm1 {
+                    transform: var(--transform-arm1);
+                    transform-origin: 52% 45%;
+                }
+
+                .wrist1 {
+                    transform: var(--transform-wrist1);
+                    transform-origin: 59% 55%;
+                }
+
+                .arm2 {
+                    transform: var(--transform-arm2);
+                    transform-origin: 47% 43%;
+                }
+
+                .wrist2 {
+                    transform: var(--transform-wrist2);
+                    transform-origin: 35% 47%;
+                }
+
+                .leg1 {
+                    transform: var(--transform-leg1);
+                    transform-origin: 47% 64.5%;
+                }
+
+                .calf1 {
+                    transform: var(--transform-calf1);
+                    transform-origin: 55.5% 71.5%;
+                }
+
+                .leg2 {
+                    transform: var(--transform-leg2);
+                    transform-origin: 43% 63%;
+                }
+
+                .calf2 {
+                    transform: var(--transform-calf2);
+                    transform-origin: 41.5% 73%;
+                }
+
+                @keyframes spin {
+                    from {
+                        transform: rotate(0deg) scale(0.94);
+                    }
+
+                    to {
+                        transform: rotate(359deg) scale(0.94);
+                    }
+                }
+
+                @keyframes shake {
+                    0% {
+                        transform: rotate(-1deg);
+                    }
+
+                    50% {
+                        transform: rotate(2deg);
+                    }
+
+                    100% {
+                        transform: rotate(-1deg);
+                    }
+                }
+
+                @keyframes flash {
+                    0% {
+                        opacity: 0.4;
+                    }
+
+                    100% {
+                        opacity: 0;
+                    }
+                }
+            </style>
+
+            <button class="logoutButton" id="logoutBtn">
+                <svg class="doorway anim-svg" viewBox="0 0 100 100">
+                    <path
+                        d="M93.4 86.3H58.6c-1.9 0-3.4-1.5-3.4-3.4V17.1c0-1.9 1.5-3.4 3.4-3.4h34.8c1.9 0 3.4 1.5 3.4 3.4v65.8c0 1.9-1.5 3.4-3.4 3.4z" />
+                    <path class="bang"
+                        d="M40.5 43.7L26.6 31.4l-2.5 6.7zM41.9 50.4l-19.5-4-1.4 6.3zM40 57.4l-17.7 3.9 3.9 5.7z" />
+                </svg>
+                <svg class="figure anim-svg" viewBox="0 0 100 100">
+                    <circle cx="52.1" cy="32.4" r="6.4" />
+                    <path
+                        d="M50.7 62.8c-1.2 2.5-3.6 5-7.2 4-3.2-.9-4.9-3.5-4-7.8.7-3.4 3.1-13.8 4.1-15.8 1.7-3.4 1.6-4.6 7-3.7 4.3.7 4.6 2.5 4.3 5.4-.4 3.7-2.8 15.1-4.2 17.9z" />
+                    <g class="arm1">
+                        <path
+                            d="M55.5 56.5l-6-9.5c-1-1.5-.6-3.5.9-4.4 1.5-1 3.7-1.1 4.6.4l6.1 10c1 1.5.3 3.5-1.1 4.4-1.5.9-3.5.5-4.5-.9z" />
+                        <path class="wrist1"
+                            d="M69.4 59.9L58.1 58c-1.7-.3-2.9-1.9-2.6-3.7.3-1.7 1.9-2.9 3.7-2.6l11.4 1.9c1.7.3 2.9 1.9 2.6 3.7-.4 1.7-2 2.9-3.8 2.6z" />
+                    </g>
+                    <g class="arm2">
+                        <path
+                            d="M34.2 43.6L45 40.3c1.7-.6 3.5.3 4 2 .6 1.7-.3 4-2 4.5l-10.8 2.8c-1.7.6-3.5-.3-4-2-.6-1.6.3-3.4 2-4z" />
+                        <path class="wrist2"
+                            d="M27.1 56.2L32 45.7c.7-1.6 2.6-2.3 4.2-1.6 1.6.7 2.3 2.6 1.6 4.2L33 58.8c-.7 1.6-2.6 2.3-4.2 1.6-1.7-.7-2.4-2.6-1.7-4.2z" />
+                    </g>
+                    <g class="leg1">
+                        <path
+                            d="M52.1 73.2s-7-5.7-7.9-6.5c-.9-.9-1.2-3.5-.1-4.9 1.1-1.4 3.8-1.9 5.2-.9l7.9 7c1.4 1.1 1.7 3.5.7 4.9-1.1 1.4-4.4 1.5-5.8.4z" />
+                        <path class="calf1"
+                            d="M52.6 84.4l-1-12.8c-.1-1.9 1.5-3.6 3.5-3.7 2-.1 3.7 1.4 3.8 3.4l1 12.8c.1 1.9-1.5 3.6-3.5 3.7-2 0-3.7-1.5-3.8-3.4z" />
+                    </g>
+                    <g class="leg2">
+                        <path
+                            d="M37.8 72.7s1.3-10.2 1.6-11.4 2.4-2.8 4.1-2.6c1.7.2 3.6 2.3 3.4 4l-1.8 11.1c-.2 1.7-1.7 3.3-3.4 3.1-1.8-.2-4.1-2.4-3.9-4.2z" />
+                        <path class="calf2"
+                            d="M29.5 82.3l9.6-10.9c1.3-1.4 3.6-1.5 5.1-.1 1.5 1.4.4 4.9-.9 6.3l-8.5 9.6c-1.3 1.4-3.6 1.5-5.1.1-1.4-1.3-1.5-3.5-.2-5z" />
+                    </g>
+                </svg>
+                <svg class="door anim-svg" viewBox="0 0 100 100">
+                    <path
+                        d="M93.4 86.3H58.6c-1.9 0-3.4-1.5-3.4-3.4V17.1c0-1.9 1.5-3.4 3.4-3.4h34.8c1.9 0 3.4 1.5 3.4 3.4v65.8c0 1.9-1.5 3.4-3.4 3.4z" />
+                    <circle cx="66" cy="50" r="3.7" />
+                </svg>
+                <span class="button-text">Log Out</span>
+            </button>
+
+            <script>
+                document.querySelectorAll('.logoutButton').forEach(button => {
+                    button.state = 'default'
+
+                    // Button Constants
+                    const logoutButtonStates = {
+                        'default': {
+                            '--figure-duration': '100',
+                            '--transform-figure': 'none',
+                            '--walking-duration': '100',
+                            '--transform-arm1': 'none',
+                            '--transform-wrist1': 'none',
+                            '--transform-arm2': 'none',
+                            '--transform-wrist2': 'none',
+                            '--transform-leg1': 'none',
+                            '--transform-calf1': 'none',
+                            '--transform-leg2': 'none',
+                            '--transform-calf2': 'none'
+                        },
+                        'hover': {
+                            '--figure-duration': '100',
+                            '--transform-figure': 'translateX(1.5px)',
+                            '--walking-duration': '100',
+                            '--transform-arm1': 'rotate(-5deg)',
+                            '--transform-wrist1': 'rotate(-15deg)',
+                            '--transform-arm2': 'rotate(5deg)',
+                            '--transform-wrist2': 'rotate(6deg)',
+                            '--transform-leg1': 'rotate(-10deg)',
+                            '--transform-calf1': 'rotate(5deg)',
+                            '--transform-leg2': 'rotate(20deg)',
+                            '--transform-calf2': 'rotate(-20deg)'
+                        },
+                        'walking1': {
+                            '--figure-duration': '300',
+                            '--transform-figure': 'translateX(11px)',
+                            '--walking-duration': '300',
+                            '--transform-arm1': 'translateX(-4px) translateY(-2px) rotate(120deg)',
+                            '--transform-wrist1': 'rotate(-5deg)',
+                            '--transform-arm2': 'translateX(4px) rotate(-110deg)',
+                            '--transform-wrist2': 'rotate(-5deg)',
+                            '--transform-leg1': 'translateX(-3px) rotate(80deg)',
+                            '--transform-calf1': 'rotate(-30deg)',
+                            '--transform-leg2': 'translateX(4px) rotate(-60deg)',
+                            '--transform-calf2': 'rotate(20deg)'
+                        },
+                        'walking2': {
+                            '--figure-duration': '400',
+                            '--transform-figure': 'translateX(17px)',
+                            '--walking-duration': '300',
+                            '--transform-arm1': 'rotate(60deg)',
+                            '--transform-wrist1': 'rotate(-15deg)',
+                            '--transform-arm2': 'rotate(-45deg)',
+                            '--transform-wrist2': 'rotate(6deg)',
+                            '--transform-leg1': 'rotate(-5deg)',
+                            '--transform-calf1': 'rotate(10deg)',
+                            '--transform-leg2': 'rotate(10deg)',
+                            '--transform-calf2': 'rotate(-20deg)'
+                        },
+                        'falling1': {
+                            '--figure-duration': '1600',
+                            '--walking-duration': '400',
+                            '--transform-arm1': 'rotate(-60deg)',
+                            '--transform-wrist1': 'none',
+                            '--transform-arm2': 'rotate(30deg)',
+                            '--transform-wrist2': 'rotate(120deg)',
+                            '--transform-leg1': 'rotate(-30deg)',
+                            '--transform-calf1': 'rotate(-20deg)',
+                            '--transform-leg2': 'rotate(20deg)'
+                        },
+                        'falling2': {
+                            '--walking-duration': '300',
+                            '--transform-arm1': 'rotate(-100deg)',
+                            '--transform-arm2': 'rotate(-60deg)',
+                            '--transform-wrist2': 'rotate(60deg)',
+                            '--transform-leg1': 'rotate(80deg)',
+                            '--transform-calf1': 'rotate(20deg)',
+                            '--transform-leg2': 'rotate(-60deg)'
+                        },
+                        'falling3': {
+                            '--walking-duration': '500',
+                            '--transform-arm1': 'rotate(-30deg)',
+                            '--transform-wrist1': 'rotate(40deg)',
+                            '--transform-arm2': 'rotate(50deg)',
+                            '--transform-wrist2': 'none',
+                            '--transform-leg1': 'rotate(-30deg)',
+                            '--transform-leg2': 'rotate(20deg)',
+                            '--transform-calf2': 'none'
+                        }
+                    }
+
+                    // function to transition a button from one state to the next
+                    let updateButtonState = (button, state) => {
+                        if (logoutButtonStates[state]) {
+                            button.state = state
+                            for (let key in logoutButtonStates[state]) {
+                                button.style.setProperty(key, logoutButtonStates[state][key])
+                            }
+                        }
+                    }
+
+                    // mouse hover listeners on button
+                    button.addEventListener('mouseenter', () => {
+                        if (button.state === 'default') {
+                            updateButtonState(button, 'hover')
+                        }
+                    })
+                    button.addEventListener('mouseleave', () => {
+                        if (button.state === 'hover') {
+                            updateButtonState(button, 'default')
+                        }
+                    })
+
+                    // click listener on button
+                    button.addEventListener('click', () => {
+                        if (button.state === 'default' || button.state === 'hover') {
+                            button.classList.add('clicked')
+                            updateButtonState(button, 'walking1')
+                            setTimeout(() => {
+                                button.classList.add('door-slammed')
+                                updateButtonState(button, 'walking2')
+                                setTimeout(() => {
+                                    button.classList.add('falling')
+                                    updateButtonState(button, 'falling1')
+                                    setTimeout(() => {
+                                        updateButtonState(button, 'falling2')
+                                        setTimeout(() => {
+                                            updateButtonState(button, 'falling3')
+                                            setTimeout(() => {
+                                                button.classList.remove('clicked')
+                                                button.classList.remove('door-slammed')
+                                                button.classList.remove('falling')
+                                                updateButtonState(button, 'default')
+                                                // Redirect after animation
+                                                window.location.href = "/logout";
+                                            }, 1000)
+                                        }, logoutButtonStates['falling2']['--walking-duration'])
+                                    }, logoutButtonStates['falling1']['--walking-duration'])
+                                }, logoutButtonStates['walking2']['--figure-duration'])
+                            }, logoutButtonStates['walking1']['--figure-duration'])
+                        }
+                    })
+                })
+            </script>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div style="font-weight: 600; color: var(--text-muted);">
+                {{ datetime_now }}
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                <!-- Notification Bell -->
+                <button class="notification-btn" onclick="toggleNotifications()">
+                    <i class="fa-solid fa-bell" style="color: #3b82f6;"></i>
+                    {% if notifications|length > 0 %}
+                    <span class="badge">{{ notifications|length }}</span>
+                    {% endif %}
+                </button>
+
+                <!-- User Profile -->
+                <div class="user-profile">
+                    <div class="user-info" style="text-align: right;">
+                        <h4>{{ profile.name }}</h4>
+                        <span class="user-tier" style="color: {{ profile.tier_color }}">{{ profile.tier }} Member</span>
+                    </div>
+                    <div class="avatar" onclick="openAvatarModal()" style="cursor: pointer; position: relative;"
+                        title="Change Avatar">
+                        {{ current_avatar }}
+                        <div
+                            style="position: absolute; bottom: 0; right: 0; width: 12px; height: 12px; background: var(--primary); border-radius: 50%; border: 2px solid white; display: flex; align-items: center; justify-content: center;">
+                            <i class="fa-solid fa-pencil" style="font-size: 6px; color: white;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Tab 1: Overview -->
+        <div id="overview" class="tab-content active">
+            <h2 class="page-title">Dashboard Overview</h2>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <!-- Wallet Card (New) -->
+                <div class="stat-card" style="border-left: 5px solid var(--primary);">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #2dd4bf);"><i
+                            class="fa-solid fa-wallet"></i></div>
+                    <div class="stat-info">
+                        <h3 id="walletBalance">Rs {{ "{:.2f}".format(profile.wallet_balance) }}</h3>
+                        <p>Wallet Balance</p>
+                        <button onclick="openWalletModal()"
+                            style="margin-top: 0.5rem; padding: 4px 12px; font-size: 0.8rem; background: #eff6ff; color: #3b82f6; border: none; border-radius: 20px; cursor: pointer; font-weight: 600;">+
+                            Add Money</button>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-purple"><i class="fa-solid fa-box-open"></i></div>
+                    <div class="stat-info">
+                        <h3>{{ profile.total_orders }}</h3>
+                        <p>Total Orders</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-pink"><i class="fa-solid fa-wallet"></i></div>
+                    <div class="stat-info">
+                        <h3>Rs {{ profile.total_spent }}</h3>
+                        <p>Total Spent</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-orange"><i class="fa-solid fa-star"></i></div>
+                    <div class="stat-info">
+                        <h3>{{ profile.points }}</h3>
+                        <p>Loyalty Points</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-green"><i class="fa-solid fa-heart"></i></div>
+                    <div class="stat-info">
+                        <h3>{{ wishlist_count }}</h3>
+                        <p>Wishlist Items</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations Section (New) -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1.5rem;">Recommended for You</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem;">
+                    {% if recommendations %}
+                    {% for item in recommendations %}
+                    <div
+                        style="background: #f9fafb; border-radius: 12px; overflow: hidden; border: 1px solid #f3f4f6; transition: transform 0.2s;">
+                        <img src="{{ item.image }}" alt="{{ item.name }}"
+                            style="width: 100%; height: 140px; object-fit: cover;">
+                        <div style="padding: 1rem;">
+                            <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem; height: 40px; overflow: hidden;">{{
+                                item.name }}</h4>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-weight: 700; color: var(--text-main);">Rs {{ item.price }}</span>
+                                <button onclick="addToCart('{{ item.id }}')"
+                                    style="width: 30px; height: 30px; border-radius: 50%; background: var(--primary); color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p style="color: var(--text-muted);">Start shopping to see personal recommendations!</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Activity / Quick Actions -->
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+                <div class="card">
+                    <h3 style="margin-bottom: 1.5rem;">Recent Activity</h3>
+                    {% if orders %}
+                    {% for order in orders[:3] %}
+                    <div
+                        style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #f3f4f6;">
+                        <div
+                            style="width: 40px; height: 40px; background: #e0e7ff; color: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fa-solid fa-bag-shopping"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <h4 style="font-size: 0.95rem;">Order #{{ order.id }} - {{ order.status }}</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-muted);">{{ order['items']|length }} items
+                                â€¢
+                                Rs {{ order.total }}</p>
+                        </div>
+                        <a href="#" onclick="switchTab('orders', document.querySelectorAll('.nav-link')[1])"
+                            style="font-size: 0.8rem; color: var(--primary); text-decoration: none;">View</a>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p style="color: var(--text-muted);">No recent activity.</p>
+                    {% endif %}
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 1.5rem;">Quick Actions</h3>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <a href="/shop"
+                            style="padding: 1rem; background: #f3f4f6; border-radius: 12px; text-decoration: none; color: var(--text-main); display: flex; align-items: center; gap: 1rem; transition: background 0.2s;">
+                            <i class="fa-solid fa-magnifying-glass" style="color: var(--primary);"></i> Browse Shop
+                        </a>
+                        <a href="/print-service"
+                            style="padding: 1rem; background: #f3f4f6; border-radius: 12px; text-decoration: none; color: var(--text-main); display: flex; align-items: center; gap: 1rem; transition: background 0.2s;">
+                            <i class="fa-solid fa-print" style="color: var(--secondary);"></i> Print Service
+                        </a>
+                        <a href="/cart"
+                            style="padding: 1rem; background: #f3f4f6; border-radius: 12px; text-decoration: none; color: var(--text-main); display: flex; align-items: center; gap: 1rem; transition: background 0.2s;">
+                            <i class="fa-solid fa-cart-shopping" style="color: var(--success);"></i> View Cart
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Orders -->
+        <div id="orders" class="tab-content">
+            <h2 class="page-title">My Orders</h2>
+            {% if orders %}
+            {% for order in orders %}
+            <div class="card" style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
+                    <div>
+                        <h3>Order #{{ order.id }}</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">Placed on {{ order.date }}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <span
+                            style="display: inline-block; padding: 0.5rem 1rem; background: #e0e7ff; color: var(--primary); border-radius: 20px; font-weight: 600; font-size: 0.85rem;">
+                            {{ order.status }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Visual Tracker -->
+                <div class="order-timeline">
+                    <div class="timeline-line"></div>
+                    <div class="timeline-progress"
+                        style="width: {{ '100%' if order.status == 'Delivered' else '66%' if order.status == 'Ready for Collection' else '33%' if order.status == 'Preparing' else '5%' }};">
+                    </div>
+
+                    <div class="timeline-step completed">
+                        <div class="step-icon"><i class="fa-solid fa-check"></i></div>
+                        <p style="font-size: 0.8rem;">Placed</p>
+                    </div>
+                    <div
+                        class="timeline-step {{ 'completed' if order.status in ['Preparing', 'Ready for Collection', 'Delivered'] else '' }}">
+                        <div class="step-icon"><i class="fa-solid fa-box-open"></i></div>
+                        <p style="font-size: 0.8rem;">Packing</p>
+                    </div>
+                    <div
+                        class="timeline-step {{ 'completed' if order.status in ['Ready for Collection', 'Delivered'] else '' }}">
+                        <div class="step-icon"><i class="fa-solid fa-person-walking"></i></div>
+                        <p style="font-size: 0.8rem;">Ready</p>
+                    </div>
+                    <div class="timeline-step {{ 'completed' if order.status == 'Delivered' else '' }}">
+                        <div class="step-icon"><i class="fa-solid fa-flag-checkered"></i></div>
+                        <p style="font-size: 0.8rem;">Complete</p>
+                    </div>
+                </div>
+
+                <!-- Items -->
+                <div style="background: #f9fafb; padding: 1rem; border-radius: 12px; margin-top: 1rem;">
+                    {% for item in order['items'] %}
+                    <div
+                        style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                        <span>{{ item.quantity }}x {{ item.name }}</span>
+                        <span>Rs {{ item.price }}</span>
+                    </div>
+                    {% endfor %}
+                    <div
+                        style="border-top: 1px solid #e5e7eb; margin-top: 0.5rem; padding-top: 0.5rem; display: flex; justify-content: space-between; font-weight: 700;">
+                        <span>Total</span>
+                        <span>Rs {{ order.total }}</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                    <a href="/order-receipt/{{ order.id }}"
+                        style="padding: 0.6rem 1.2rem; font-size: 0.9rem; width: auto; background: var(--text-main); color: white; text-decoration: none; border-radius: 12px; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fa-solid fa-file-invoice"></i> View Receipt
+                    </a>
+                    <a href="/feedback/{{ order.id }}"
+                        style="padding: 0.6rem 1.2rem; font-size: 0.9rem; width: auto; background: white; border: 1px solid #e5e7eb; color: var(--text-main); border-radius: 12px; text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fa-solid fa-star"></i> Review
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div style="text-align: center; padding: 4rem;">
+                <i class="fa-solid fa-basket-shopping"
+                    style="font-size: 3rem; color: #e5e7eb; margin-bottom: 1rem;"></i>
+                <p>No orders placed yet.</p>
+                <a href="/shop" style="color: var(--primary); text-decoration: none; font-weight: 600;">Start Shopping
+                    &rarr;</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Tab 3: Loyalty -->
+        <div id="loyalty" class="tab-content">
+            <h2 class="page-title">Loyalty & Rewards</h2>
+            <div class="loyalty-card">
+                <div class="loyalty-level">
+                    <div>
+                        <span
+                            style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem; opacity: 0.8;">Current
+                            Tier</span>
+                        <h2 style="font-size: 2rem;">{{ profile.tier }}</h2>
+                    </div>
+                    <i class="fa-solid fa-crown" style="font-size: 3rem; opacity: 0.5;"></i>
+                </div>
+
+                <div class="points-display">{{ profile.points }} <span
+                        style="font-size: 1rem; font-weight: 400; opacity: 0.8;">PTS</span></div>
+
+                <div class="progress-container">
+                    <!-- Example calc: (current / next_goal) * 100 -->
+                    <div class="progress-bar" style="width: {{ (profile.points / next_tier_points) * 100 }}%;"></div>
+                </div>
+                <p style="font-size: 0.9rem; opacity: 0.9;">
+                    Review: +10 pts | Rs 10 Spent: +1 pt
+                </p>
+                <p style="margin-top: 0.5rem; font-size: 0.85rem;">
+                    {{ next_tier_points - profile.points }} more points to reach next tier!
+                </p>
+            </div>
+
+            <h3 style="margin-bottom: 1.5rem;">Membership Tiers</h3>
+            <div class="tiers-grid">
+                <div class="tier-card {{ 'active' if profile.tier == 'Bronze' else '' }}">
+                    <i class="fa-solid fa-medal" style="color: #cd7f32; font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <h4>Bronze</h4>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">0+ Points</p>
+                    <hr style="margin: 1rem 0; border: 0; border-top: 1px solid #f3f4f6;">
+                    <small>Welcome Bonus</small>
+                </div>
+                <div class="tier-card {{ 'active' if profile.tier == 'Silver' else '' }}">
+                    <i class="fa-solid fa-medal" style="color: #c0c0c0; font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <h4>Silver</h4>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">500+ Points</p>
+                    <hr style="margin: 1rem 0; border: 0; border-top: 1px solid #f3f4f6;">
+                    <small>5% Discount</small>
+                </div>
+                <div class="tier-card {{ 'active' if profile.tier == 'Gold' else '' }}">
+                    <i class="fa-solid fa-medal" style="color: #ffd700; font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <h4>Gold</h4>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">1500+ Points</p>
+                    <hr style="margin: 1rem 0; border: 0; border-top: 1px solid #f3f4f6;">
+                    <small>10% Off + Free Prints</small>
+                </div>
+                <div class="tier-card {{ 'active' if profile.tier == 'Platinum' else '' }}">
+                    <i class="fa-solid fa-gem" style="color: #e5e4e2; font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <h4>Platinum</h4>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">3000+ Points</p>
+                    <hr style="margin: 1rem 0; border: 0; border-top: 1px solid #f3f4f6;">
+                    <small>15% Off + VIP Support</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: Analytics -->
+        <div id="analytics" class="tab-content">
+            <h2 class="page-title">Spending Analytics</h2>
+
+            <!-- Summary Cards Row -->
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <!-- Reusing stats-grid class for consistent layout -->
+                <div class="stat-card">
+                    <div class="stat-icon bg-purple"><i class="fa-solid fa-chart-line"></i></div>
+                    <div class="stat-info">
+                        <h3>Rs {{ profile.total_spent }}</h3>
+                        <p>Total Lifetime Spend</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-green"><i class="fa-solid fa-receipt"></i></div>
+                    <div class="stat-info">
+                        <h3 id="avgOrderValue">Calculating...</h3>
+                        <p>Average Order Value</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-orange"><i class="fa-solid fa-trophy"></i></div>
+                    <div class="stat-info">
+                        <h3 id="topCategory">Calculating...</h3>
+                        <p>Top Category</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem;">Daily Spending Trend</h3>
+                <div style="height: 300px; width: 100%;">
+                    <canvas id="spendingTrendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Secondary Charts Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                <!-- Category Chart -->
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem;">Spending by Category</h3>
+                    <div style="height: 250px; display: flex; align-items: center; justify-content: center;">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Status Chart -->
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem;">Order Status Distribution</h3>
+                    <div style="height: 250px; display: flex; align-items: center; justify-content: center;">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 5: Wishlist -->
+        <div id="wishlist" class="tab-content">
+            <h2 class="page-title">My Wishlist</h2>
+            <div class="wishlist-grid" id="wishlistGrid">
+                <!-- Example Items injected via JS or backend logic -->
+                {% if wishlist_items %}
+                {% for item in wishlist_items %}
+                <div class="wishlist-item">
+                    <button class="remove-wishlist" onclick="removeFromWishlist('{{ item.id }}')">&times;</button>
+                    <img src="{{ item.image }}" class="wishlist-img" alt="{{ item.name }}">
+                    <div class="wishlist-content">
+                        <h4>{{ item.name }}</h4>
+                        <p style="color: var(--primary); font-weight: 700; margin: 0.5rem 0;">Rs {{ item.price }}</p>
+                        <button onclick="addToCart('{{ item.id }}')" style="font-size: 0.9rem; padding: 0.8rem;">Add to
+                            Cart</button>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted);">Your
+                    wishlist is empty.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tab 6: Referral -->
+        <div id="referral" class="tab-content">
+            <h2 class="page-title">Referral Program</h2>
+
+            <!-- Hero Card -->
+            <div class="loyalty-card bg-green" style="text-align: center; padding: 3rem 2rem;">
+                <i class="fa-solid fa-gift" style="font-size: 3.5rem; margin-bottom: 1rem;"></i>
+                <h2 style="font-size: 2.2rem; margin-bottom: 0.8rem;">Invite Friends & Earn</h2>
+                <p style="margin-bottom: 2rem; opacity: 0.9; font-size: 1.05rem;">Share your unique code. You get
+                    <strong>100 points</strong>, they get <strong>50 points</strong>!
+                </p>
+
+                <div
+                    style="background: rgba(255,255,255,0.2); padding: 1.5rem; border-radius: 16px; display: inline-flex; align-items: center; gap: 1rem; border: 2px dashed rgba(255,255,255,0.5);">
+                    <span style="font-family: monospace; font-size: 1.8rem; font-weight: 700; letter-spacing: 2px;"
+                        id="referralCode">{{ profile.referral_code or 'N/A' }}</span>
+                    <button onclick="copyReferral()"
+                        style="width: auto; padding: 0.5rem 1rem; font-size: 0.9rem; background: white; color: var(--success); border-radius: 10px;"
+                        id="copyRefBtn">
+                        <i class="fa-regular fa-copy"></i> Copy
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+                <div class="card" style="text-align: center; padding: 1.5rem;">
+                    <i class="fa-solid fa-users" style="font-size: 1.8rem; color: #6366f1; margin-bottom: 0.5rem;"></i>
+                    <h2 style="font-size: 2rem; color: #1f2937;">{{ profile.referral_count }}</h2>
+                    <p style="color: var(--text-muted); font-size: 0.85rem;">Friends Referred</p>
+                </div>
+                <div class="card" style="text-align: center; padding: 1.5rem;">
+                    <i class="fa-solid fa-coins" style="font-size: 1.8rem; color: #f59e0b; margin-bottom: 0.5rem;"></i>
+                    <h2 style="font-size: 2rem; color: #1f2937;">{{ profile.referral_count * 100 }}</h2>
+                    <p style="color: var(--text-muted); font-size: 0.85rem;">Points Earned from Referrals</p>
+                </div>
+                <div class="card" style="text-align: center; padding: 1.5rem;">
+                    <i class="fa-solid fa-trophy" style="font-size: 1.8rem; color: #10b981; margin-bottom: 0.5rem;"></i>
+                    <h2 style="font-size: 2rem; color: #1f2937;">{{ profile.tier }}</h2>
+                    <p style="color: var(--text-muted); font-size: 0.85rem;">Current Tier</p>
+                </div>
+            </div>
+
+            {% if profile.referred_by %}
+            <div class="card" style="margin-top: 1.5rem; background: #f0fdf4; border: 1px solid #bbf7d0;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <i class="fa-solid fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i>
+                    <div>
+                        <strong style="color: #166534;">You were referred!</strong>
+                        <p style="font-size: 0.85rem; color: #15803d; margin-top: 2px;">Referred by code: <strong>{{
+                                profile.referred_by }}</strong> — You received 50 bonus points!</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- How It Works -->
+            <div class="card" style="margin-top: 1.5rem;">
+                <h3 style="margin-bottom: 1rem;"><i class="fa-solid fa-circle-info" style="color: #6366f1;"></i> How It
+                    Works</h3>
+                <div style="display: grid; gap: 1rem;">
+                    <div
+                        style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f8fafc; border-radius: 12px;">
+                        <div
+                            style="width: 40px; height: 40px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; flex-shrink: 0;">
+                            1</div>
+                        <div>
+                            <strong>Share your code</strong>
+                            <p style="font-size: 0.85rem; color: var(--text-muted);">Send your referral code to friends
+                                via any messaging app.</p>
+                        </div>
+                    </div>
+                    <div
+                        style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f8fafc; border-radius: 12px;">
+                        <div
+                            style="width: 40px; height: 40px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; flex-shrink: 0;">
+                            2</div>
+                        <div>
+                            <strong>Friend registers</strong>
+                            <p style="font-size: 0.85rem; color: var(--text-muted);">They enter your code in the
+                                "Referral Code" field during sign up.</p>
+                        </div>
+                    </div>
+                    <div
+                        style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f8fafc; border-radius: 12px;">
+                        <div
+                            style="width: 40px; height: 40px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; flex-shrink: 0;">
+                            3</div>
+                        <div>
+                            <strong>Both get rewarded!</strong>
+                            <p style="font-size: 0.85rem; color: var(--text-muted);">You earn <strong>100
+                                    points</strong> and your friend gets <strong>50 points</strong> instantly!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Share Buttons -->
+            <div class="card" style="margin-top: 1.5rem;">
+                <h3 style="margin-bottom: 1rem;"><i class="fa-solid fa-share-nodes" style="color: #6366f1;"></i> Share
+                    Your Code</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                    <button onclick="shareViaWhatsApp()"
+                        style="width: auto; padding: 10px 20px; background: #25d366; border-radius: 10px; font-size: 0.9rem;">
+                        <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                    </button>
+                    <button onclick="shareViaEmail()"
+                        style="width: auto; padding: 10px 20px; background: #6366f1; border-radius: 10px; font-size: 0.9rem;">
+                        <i class="fa-solid fa-envelope"></i> Email
+                    </button>
+                    <button onclick="copyReferral()"
+                        style="width: auto; padding: 10px 20px; background: #64748b; border-radius: 10px; font-size: 0.9rem;">
+                        <i class="fa-solid fa-copy"></i> Copy Code
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 7: Support -->
+        <div id="support" class="tab-content">
+            <h2 class="page-title">Support Center</h2>
+            <button onclick="document.getElementById('ticketModal').style.display='flex'"
+                style="width: auto; margin-bottom: 2rem;"><i class="fa-solid fa-plus"></i> Create New Ticket</button>
+
+            <div class="card">
+                <h3>My Tickets</h3>
+                <div style="margin-top: 1rem; max-height: 400px; overflow-y: auto;">
+                    {% if support_tickets %}
+                    {% for ticket in support_tickets %}
+                    <div
+                        style="padding: 1rem; border: 1px solid #e5e7eb; border-radius: 12px; margin-bottom: 1rem; border-left: 4px solid var(--{{ 'success' if ticket.status == 'Resolved' else 'secondary' }});">
+                        <div style="display: flex; justify-content: space-between;">
+                            <div>
+                                <h4 style="margin-bottom:0.2rem; font-size:1rem;">{{ ticket.subject }}</h4>
+                                <span style="font-size:0.8rem; color:var(--text-muted);">#{{ ticket.id }} â€¢ {{
+                                    ticket.priority }}</span>
+                            </div>
+                            <span
+                                style="font-size: 0.8rem; background: {{ '#dcfce7' if ticket.status == 'Resolved' else '#e0e7ff' }}; color: {{ '#166534' if ticket.status == 'Resolved' else '#3730a3' }}; padding: 0.2rem 0.6rem; border-radius: 20px; height: fit-content;">{{
+                                ticket.status }}</span>
+                        </div>
+                        <p style="font-size: 0.9rem; color: var(--text-main); margin-top: 0.5rem;">{{ ticket.message }}
+                        </p>
+
+                        {% if ticket.responses|length > 0 %}
+                        <div
+                            style="background: #f9fafb; padding: 0.8rem; border-radius: 8px; margin-top: 0.8rem; font-size: 0.9rem;">
+                            <strong style="color:var(--primary);">Admin Reply:</strong>
+                            <p style="margin-top: 0.2rem;">{{ ticket.responses[-1].message }}</p>
+                            <small style="color: var(--text-muted); display:block; margin-top:0.4rem;">{{
+                                ticket.responses[-1].time }}</small>
+                        </div>
+                        {% endif %}
+
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; text-align: right;">
+                            {{ ticket.created_at }}</p>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <i class="fa-solid fa-ticket" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>No support tickets yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Ticket Modal -->
+    <div id="ticketModal" class="modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+        <div class="modal-content"
+            style="background:white; padding:2rem; border-radius:16px; width:90%; max-width:500px;">
+            <h3 style="margin-bottom:1.5rem;">Create Support Ticket</h3>
+            <div style="display:grid; gap:1rem;">
+                <select id="ticket-reason" style="padding:10px; border-radius:8px; border:1px solid #ddd;">
+                    <option value="">Select Reason...</option>
+                    <option value="Order Issue">Order Not Received</option>
+                    <option value="Payment">Payment Issue</option>
+                    <option value="Product">Damaged Product</option>
+                    <option value="Technical">App/Website Glitch</option>
+                    <option value="Other">Other Inquiry</option>
+                </select>
+                <input type="text" id="ticket-subject" placeholder="Subject"
+                    style="padding:10px; border-radius:8px; border:1px solid #ddd;">
+                <textarea id="ticket-msg" rows="4" placeholder="Describe your issue..."
+                    style="padding:10px; border-radius:8px; border:1px solid #ddd; font-family:inherit;"></textarea>
+                <div style="display:flex; justify-content:flex-end; gap:1rem; margin-top:1rem;">
+                    <button onclick="document.getElementById('ticketModal').style.display='none'"
+                        style="background:transparent; color:#666; border:1px solid #ddd; padding:8px 16px; border-radius:8px;">Cancel</button>
+                    <button onclick="submitTicket()"
+                        style="background:var(--primary); color:white; border:none; padding:8px 20px; border-radius:8px;">Submit
+                        Ticket</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Avatar Modal -->
+    <div id="avatarModal" class="modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+        <div class="modal-content"
+            style="background:white; padding:2rem; border-radius:16px; width:90%; max-width:400px; text-align: center;">
+            <h3 style="margin-bottom:0.5rem;">Choose Your Avatar</h3>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Select a persona that matches your vibe!</p>
+
+            <div class="avatar-grid" id="avatarGrid">
+                {% for avatar in preset_avatars %}
+                <div class="avatar-option {{ 'selected' if current_avatar == avatar.emoji else '' }}"
+                    onclick="selectAvatar('{{ avatar.emoji }}', this)">
+                    <span class="avatar-emoji">{{ avatar.emoji }}</span>
+                    <span style="font-size: 0.8rem; font-weight: 600;">{{ avatar.name }}</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div style="display:flex; justify-content:center; gap:1rem; margin-top:2rem;">
+                <button onclick="document.getElementById('avatarModal').style.display='none'"
+                    style="background:transparent; color:#666; border:1px solid #ddd; padding:8px 16px; border-radius:8px;">Cancel</button>
+                <button onclick="saveAvatar()"
+                    style="background:var(--primary); color:white; border:none; padding:8px 24px; border-radius:8px;">Save
+                    Profile</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet Modal -->
+    <div id="walletModal" class="modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+        <div class="modal-content"
+            style="background:white; padding:2rem; border-radius:16px; width:90%; max-width:400px;">
+            <h3 style="margin-bottom:0.5rem;">UniStore Wallet</h3>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Add money for faster, 1-click checkout.</p>
+
+            <div
+                style="background: #f3f4f6; padding: 1.5rem; border-radius: 12px; text-align: center; margin-bottom: 1.5rem;">
+                <p style="font-size: 0.9rem; color: var(--text-muted);">Current Balance</p>
+                <h2 style="font-size: 2.5rem; color: var(--text-main);" id="modalWalletBalance">Rs {{
+                    "{:.2f}".format(profile.wallet_balance) }}</h2>
+            </div>
+
+            <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Amount to Add (Rs)</label>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 1rem;">
+                <button onclick="setAmount(100)"
+                    style="padding: 8px; border: 1px solid #ddd; background: white; color: black; border-radius: 8px; cursor: pointer;">Rs
+                    100</button>
+                <button onclick="setAmount(500)"
+                    style="padding: 8px; border: 1px solid #ddd; background: white; color: black; border-radius: 8px; cursor: pointer;">Rs
+                    500</button>
+                <button onclick="setAmount(1000)"
+                    style="padding: 8px; border: 1px solid #ddd; background: white; color: black; border-radius: 8px; cursor: pointer;">Rs
+                    1000</button>
+            </div>
+            <input type="number" id="topupAmount" placeholder="Enter custom amount"
+                style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; margin-bottom: 1.5rem; color: black;">
+
+            <div style="display:flex; justify-content:flex-end; gap:1rem;">
+                <button onclick="document.getElementById('walletModal').style.display='none'"
+                    style="background:transparent; color:#666; border:1px solid #ddd; padding:8px 16px; border-radius:8px;">Cancel</button>
+                <button onclick="addMoney()"
+                    style="background:linear-gradient(135deg, #3b82f6, #2dd4bf); color:white; border:none; padding:8px 24px; border-radius:8px; font-weight: 600;">Add
+                    Money</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Switching Logic
+        function switchTab(tabId, element) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show target tab
+            document.getElementById(tabId).classList.add('active');
+
+            // Update sidebar active state
+            document.querySelectorAll('.nav-link').forEach(nav => {
+                nav.classList.remove('active');
+            });
+            if (element) element.classList.add('active');
+        }
+
+        // Notification Panel
+        function toggleNotifications() {
+            document.getElementById('notificationPanel').classList.toggle('open');
+        }
+
+        // Invoice PDF Generation (Mock)
+        function downloadInvoice(orderId) {
+            const doc = new jspdf.jsPDF();
+            doc.text(`Invoice for Order #${orderId}`, 10, 10);
+            doc.text("Thank you for shopping with UniStore!", 10, 20);
+            doc.save(`invoice_${orderId}.pdf`);
+        }
+
+        // Chart.js Init and Data Processing
+        document.addEventListener('DOMContentLoaded', function () {
+            // 1. Parse Data passed from Backend
+            const rawOrders = {{ orders | tojson | safe
+        }};
+        const rawPrints = {{ print_jobs | tojson | safe }};
+
+        const orders = Array.isArray(rawOrders) ? rawOrders : [];
+        const prints = Array.isArray(rawPrints) ? rawPrints : [];
+
+        if (orders.length === 0 && prints.length === 0) {
+            document.getElementById('avgOrderValue').innerText = "Rs 0";
+            document.getElementById('topCategory').innerText = "N/A";
+            return; // Stop if no data
+        }
+
+        // 2. Calculate Metrics
+        let totalSpent = 0;
+        const categoryMap = {};
+        const statusMap = {};
+        const dayMap = {};
+
+        // Helper to process date
+        const processDate = (dateStr, amount) => {
+            let dateObj = new Date(dateStr);
+            if (isNaN(dateObj)) dateObj = new Date();
+            const dayLabel = dateObj.toLocaleDateString('default', { month: 'short', day: 'numeric' });
+            dayMap[dayLabel] = (dayMap[dayLabel] || 0) + amount;
+        };
+
+        // A. Process Orders
+        orders.forEach(order => {
+            const amount = parseFloat(order.total) || 0;
+            totalSpent += amount;
+
+            // Status
+            const status = order.status || 'Unknown';
+            statusMap[status] = (statusMap[status] || 0) + 1;
+
+            // Monthly Trend
+            processDate(order.date, amount);
+
+            // Categories
+            const items = order.items || [];
+            if (items.length === 0) {
+                categoryMap['Others'] = (categoryMap['Others'] || 0) + amount;
+            } else {
+                items.forEach(item => {
+                    let cat = 'Others';
+                    const name = (item.name || '').toLowerCase();
+                    if (name.includes('print') || name.includes('copy') || name.includes('xerox')) cat = 'Print Services';
+                    else if (name.includes('book') || name.includes('pen') || name.includes('pencil') || name.includes('paper')) cat = 'Stationery';
+                    else if (name.includes('cable') || name.includes('mouse') || name.includes('usb') || name.includes('drive')) cat = 'Electronics';
+                    else if (name.includes('snack') || name.includes('drink') || name.includes('food')) cat = 'Food & Bev';
+
+                    const itemTotal = (parseFloat(item.price) || 0) * (item.quantity || 1);
+                    categoryMap[cat] = (categoryMap[cat] || 0) + itemTotal;
+                });
+            }
+        });
+
+        // B. Process Print Jobs
+        prints.forEach(job => {
+            const cost = parseFloat(job.cost) || 0;
+            totalSpent += cost;
+
+            // Consider Print Jobs as 'Completed' or based on their status if specific logic needed
+            // For simplified analytics, we might not mix print status with order status visually unless requested.
+            // But let's add their cost to Monthly and Category.
+
+            // Date handling for prints (assuming job.timestamp or similar, or just use current if missing)
+            // Staff dashboard showed timestamp, let's try to use it
+            let dateStr = job.date || new Date().toISOString();
+            processDate(dateStr, cost);
+
+            // Category
+            categoryMap['Print Services'] = (categoryMap['Print Services'] || 0) + cost;
+        });
+
+        // Update Total Spend in UI if not using the backend profile.total_spent
+        // Note: create a logic to update the DOM element if we want real-time JS calc to override backend
+        // But relying on backend profile.total_spent is safer for consistency. 
+        // However, Avg Order Value needs to be calculated here.
+
+        // Update Avg Order Value UI (Total Spent / (Orders + Print Jobs count? Or just Orders?))
+        // Usually AOV refers to Shopping Orders. Let's keep it to Orders for now.
+        const avgVal = orders.length > 0 ? (orders.reduce((acc, o) => acc + (parseFloat(o.total) || 0), 0) / orders.length).toFixed(0) : 0;
+        document.getElementById('avgOrderValue').innerText = `Rs ${avgVal}`;
+
+        // Determine Top Category
+        let topCat = 'N/A';
+        let maxCatVal = 0;
+        for (const [cat, val] of Object.entries(categoryMap)) {
+            if (val > maxCatVal) {
+                maxCatVal = val;
+                topCat = cat;
+            }
+        }
+        document.getElementById('topCategory').innerText = topCat;
+
+        // 3. Render Charts
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        };
+
+        // A. Daily Trend Chart
+        const trendCtx = document.getElementById('spendingTrendChart');
+        if (trendCtx) {
+            const sortedDays = Object.keys(dayMap).sort((a, b) => new Date(a) - new Date(b));
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: sortedDays,
+                    datasets: [{
+                        label: 'Daily Spending (Rs)',
+                        data: sortedDays.map(d => dayMap[d]),
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#6366f1'
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // B. Category Chart
+        const catCtx = document.getElementById('categoryChart');
+        if (catCtx) {
+            new Chart(catCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(categoryMap),
+                    datasets: [{
+                        data: Object.values(categoryMap),
+                        backgroundColor: ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: commonOptions
+            });
+        }
+
+        // C. Status Chart (Orders only)
+        const statusCtx = document.getElementById('statusChart');
+        if (statusCtx) {
+            const statusColors = {
+                'Delivered': '#10b981',
+                'Cancelled': '#ef4444',
+                'Paid': '#3b82f6',
+                'Pending': '#f59e0b'
+            };
+
+            new Chart(statusCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(statusMap),
+                    datasets: [{
+                        label: 'Order Count',
+                        data: Object.values(statusMap),
+                        backgroundColor: Object.keys(statusMap).map(s => statusColors[s] || '#94a3b8'),
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+        });
+
+        // Referral Copy & Share
+        function copyReferral() {
+            const code = document.getElementById('referralCode').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = document.getElementById('copyRefBtn');
+                if (btn) {
+                    const original = btn.innerHTML;
+                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+                    btn.style.background = '#10b981';
+                    btn.style.color = 'white';
+                    setTimeout(() => {
+                        btn.innerHTML = original;
+                        btn.style.background = 'white';
+                        btn.style.color = 'var(--success)';
+                    }, 2000);
+                }
+            }).catch(() => {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = code;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('Referral code copied: ' + code);
+            });
+        }
+
+        function shareViaWhatsApp() {
+            const code = document.getElementById('referralCode').innerText;
+            const message = `Hey! Join UniStore and use my referral code *${code}* to get 50 bonus points on signup! 🎁`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+        }
+
+        function shareViaEmail() {
+            const code = document.getElementById('referralCode').innerText;
+            const subject = 'Join UniStore - Get 50 Bonus Points!';
+            const body = `Hey!\n\nI'm using UniStore for campus shopping and it's great! Use my referral code ${code} when you sign up to get 50 bonus points instantly.\n\nSign up here and enter my code during registration.\n\nSee you there!`;
+            window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+        }
+
+        // Wishlist placeholders
+        function removeFromWishlist(id) {
+            // Call API
+            alert('Removed item ' + id);
+        }
+
+        function addToCart(id) {
+            // Call API
+            window.location.href = '/cart';
+        }
+
+        // Support Logic
+        async function submitTicket() {
+            const reason = document.getElementById('ticket-reason').value;
+            const subject = document.getElementById('ticket-subject').value;
+            const msg = document.getElementById('ticket-msg').value;
+
+            if (!reason || !subject || !msg) {
+                alert("Please fill all fields.");
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/support/create-ticket', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ priority: reason, subject: subject, message: msg })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert("Ticket created successfully!");
+                    location.reload();
+                } else {
+                    alert("Error: " + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert("An error occurred. Please try again.");
+            }
+        }
+        // --- New Feature Scripts ---
+
+        // Avatar
+        let selectedAvatarEmoji = '{{ current_avatar }}';
+
+        function openAvatarModal() {
+            document.getElementById('avatarModal').style.display = 'flex';
+        }
+
+        function selectAvatar(emoji, element) {
+            selectedAvatarEmoji = emoji;
+            document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        async function saveAvatar() {
+            try {
+                const res = await fetch('/api/user/update-avatar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ avatar: selectedAvatarEmoji })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    location.reload(); // Reload to see new avatar everywhere
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Failed to update avatar");
+            }
+        }
+
+        // Wallet
+        function openWalletModal() {
+            document.getElementById('walletModal').style.display = 'flex';
+        }
+
+        function setAmount(val) {
+            document.getElementById('topupAmount').value = val;
+        }
+
+        async function addMoney() {
+            const amount = parseFloat(document.getElementById('topupAmount').value);
+            if (!amount || amount <= 0) {
+                alert("Please enter a valid amount");
+                return;
+            }
+
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+
+            try {
+                // 1. Create Order
+                const res = await fetch('/api/user/wallet/create-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount: amount })
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || "Order creation failed");
+                }
+
+                // 2. Open Razorpay
+                const options = {
+                    "key": data.key_id,
+                    "amount": data.amount,
+                    "currency": data.currency,
+                    "name": "UniStore Wallet",
+                    "description": "Wallet Top-up",
+                    "order_id": data.order_id,
+                    "handler": async function (response) {
+                        // 3. Verify Payment
+                        btn.innerText = "Verifying...";
+                        try {
+                            const verifyRes = await fetch('/api/user/wallet/verify-payment', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    amount: amount
+                                })
+                            });
+                            const verifyData = await verifyRes.json();
+                            if (verifyData.success) {
+                                alert(`Successfully added Rs ${amount} to wallet!`);
+                                location.reload();
+                            } else {
+                                alert("Verification failed: " + verifyData.error);
+                                btn.innerText = originalText;
+                                btn.disabled = false;
+                            }
+                        } catch (e) {
+                            console.error(e);
+                            alert("Verification error");
+                            btn.innerText = originalText;
+                            btn.disabled = false;
+                        }
+                    },
+                    "prefill": {
+                        "email": "{{ user }}"
+                    },
+                    "theme": {
+                        "color": "#3b82f6"
+                    }
+                };
+
+                const rzp1 = new Razorpay(options);
+                rzp1.on('payment.failed', function (response) {
+                    alert("Payment Failed: " + response.error.description);
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                });
+                rzp1.open();
+
+            } catch (e) {
+                console.error(e);
+                alert("Error: " + e.message);
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
+
+</body>
+
+</html>

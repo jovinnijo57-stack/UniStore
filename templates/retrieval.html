@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collect Your Order | UniStore</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .timer-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 8px solid #f3f4f6;
+            border-top: 8px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 2rem auto;
+            transition: all 0.3s ease;
+        }
+
+        .urgent {
+            border-top-color: #ef4444;
+            color: #ef4444;
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+
+<body style="background: #f8fafc; display: block;">
+    <header
+        style="background: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;">
+        <a href="{{ url_for('user_dashboard') }}" class="logo"
+            style="margin-bottom: 0; text-decoration: none; font-size: 1.5rem;">
+            <i class="fas fa-shopping-bag"></i> UniStore
+        </a>
+        <a href="{{ url_for('user_dashboard') }}"
+            style="color: var(--primary); font-weight: 800; text-decoration: none;">DASHBOARD</a>
+    </header>
+
+    <div class="auth-container" style="min-height: calc(100vh - 70px);">
+        <div class="auth-card" style="max-width: 550px;">
+            <i class="fas fa-store" style="font-size: 3rem; color: var(--primary); margin-bottom: 1.5rem;"></i>
+            <h2>Order Ready for Collection</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1rem;">Order ID: <strong>{{ order.id }}</strong></p>
+            <p>Please proceed to the store counter to collect your items.</p>
+
+            <div id="countdown" class="timer-circle">60</div>
+            <p id="timer-label" style="font-weight: 600; color: var(--text-muted);">SECONDS REMAINING</p>
+
+            <div id="msg-box"
+                style="margin-top: 2rem; padding: 1.5rem; border-radius: 16px; background: #f3f4f6; display: none;">
+                <p id="main-msg" style="font-weight: 700; color: #ef4444;"></p>
+                <p style="font-size: 0.9rem; margin-top: 0.5rem;">The collection window has been reset. Please hurry!
+                </p>
+            </div>
+
+            <a href="{{ url_for('user_dashboard') }}"
+                style="margin-top: 2rem; display: block; padding: 16px; border-radius: 16px; background: var(--bg-gradient); color: white; text-decoration: none; font-weight: 600; text-align: center;">
+                Go to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const orderId = "{{ order.id }}";
+        let timeLeft = 60;
+        let isActive = false;
+        let timerId = null;
+
+        async function updateStatus() {
+            try {
+                const res = await fetch(`/api/order/status/${orderId}`);
+                const data = await res.json();
+
+                const timerDisplay = document.getElementById('countdown');
+                const label = document.getElementById('timer-label');
+                const msgBox = document.getElementById('msg-box');
+                const mainMsg = document.getElementById('main-msg');
+
+                if (data.status === 'Scheduled') {
+                    timerDisplay.innerText = "⏳";
+                    label.innerText = "WINDOW STARTS AT " + data.pickup_time;
+                    msgBox.style.display = 'none'; // Hide countdown msgs during wait
+                } else if (data.status === 'Ready for Collection') {
+                    if (!isActive) {
+                        isActive = true;
+                        timeLeft = 60;
+                        startTimer();
+                        label.innerText = "SECONDS REMAINING";
+                    }
+                }
+
+                if (data.notification && data.status === 'Ready for Collection') {
+                    msgBox.style.display = 'block';
+                    mainMsg.innerText = data.notification;
+                }
+
+                if (data.status === 'Cancelled') {
+                    clearInterval(timerId);
+                    timerDisplay.innerText = "❌";
+                    label.innerText = "ORDER CANCELLED";
+                    msgBox.style.display = 'block';
+                    mainMsg.innerText = "Maximum attempts reached.";
+                }
+
+                if (!data.is_ready && isActive && data.status !== 'Ready for Collection') {
+                    isActive = false;
+                    clearInterval(timerId);
+                    timerDisplay.innerText = "!";
+                    label.innerText = "WINDOW CLOSED";
+                }
+
+            } catch (err) { console.error(err); }
+        }
+
+        function startTimer() {
+            const timerDisplay = document.getElementById('countdown');
+            timerDisplay.classList.remove('urgent');
+
+            timerId = setInterval(async () => {
+                timeLeft--;
+                timerDisplay.innerText = timeLeft;
+
+                if (timeLeft <= 5) timerDisplay.classList.add('urgent');
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerId);
+                    isActive = false;
+                    // Tell server it timed out
+                    await fetch('/api/order/timeout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: orderId })
+                    });
+                }
+            }, 1000);
+        }
+
+        // Poll every 2 seconds
+        setInterval(updateStatus, 2000);
+        updateStatus();
+    </script>
+</body>
+
+</html>

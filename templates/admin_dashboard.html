@@ -1,0 +1,2029 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Admin | UniStore Suite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --accent: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --sidebar-width: 280px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+            transition: var(--transition);
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+        }
+
+        .nav-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            margin-bottom: 2rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: var(--transition);
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            text-align: left;
+        }
+
+        .nav-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .action-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .action-btn:hover {
+            background: var(--bg-main);
+            transform: translateY(-2px);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        /* Cards & Components */
+        .card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .title-group h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .title-group p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-main);
+            color: var(--text-main);
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        /* Page Sections */
+        .page-section {
+            display: none;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 80px;
+                padding: 1rem 0.5rem;
+            }
+
+            .logo span,
+            .nav-item span,
+            .nav-label {
+                display: none;
+            }
+
+            .sidebar .logo {
+                justify-content: center;
+                margin-bottom: 1.5rem;
+            }
+
+            .nav-item {
+                justify-content: center;
+                padding: 0.8rem;
+            }
+
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+
+
+
+        .nav-item-logout {
+            margin-top: auto;
+            color: var(--danger);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-item-logout:hover {
+            background: rgba(239, 68, 68, 0.1);
+            transform: translateX(5px);
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        }
+    </style>
+</head>
+
+<body data-theme="light">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <i class="fas fa-shopping-bag"></i>
+            <span>ShopMaster</span>
+        </div>
+
+        <div class="nav-label">Core</div>
+        <div class="nav-section">
+            <button onclick="switchTab('overview', this)" class="nav-item active"><i class="fas fa-th-large"></i>
+                <span>Overview</span></button>
+            <button onclick="switchTab('orders', this)" class="nav-item"><i class="fas fa-box-open"></i>
+                <span>Orders</span></button>
+            <button onclick="switchTab('inventory', this)" class="nav-item"><i class="fas fa-warehouse"></i>
+                <span>Inventory</span></button>
+            <button onclick="switchTab('customers', this)" class="nav-item"><i class="fas fa-users"></i>
+                <span>Customers</span></button>
+        </div>
+
+        <div class="nav-label">Marketing</div>
+        <div class="nav-section">
+            <button onclick="switchTab('coupons', this)" class="nav-item"><i class="fas fa-ticket-alt"></i>
+                <span>Coupons</span></button>
+            <button onclick="switchTab('reviews', this)" class="nav-item"><i class="fas fa-star"></i>
+                <span>Reviews</span></button>
+        </div>
+
+        <div class="nav-label">Support</div>
+        <div class="nav-section">
+            <button onclick="switchTab('support', this)" class="nav-item"><i class="fas fa-headset"></i>
+                <span>Tickets</span></button>
+        </div>
+
+        <div class="nav-label">Management</div>
+        <div class="nav-section">
+            <button onclick="switchTab('shifts', this)" class="nav-item"><i class="fas fa-user-clock"></i>
+                <span>Staff Shifts</span></button>
+            <button onclick="switchTab('reports', this)" class="nav-item"><i class="fas fa-file-invoice-dollar"></i>
+                <span>Financials</span></button>
+            <button onclick="switchTab('logs', this)" class="nav-item"><i class="fas fa-shield-alt"></i>
+                <span>Audit Logs</span></button>
+        </div>
+
+        <div class="nav-label">System Options</div>
+        <div class="nav-section">
+            <button onclick="toggleMaintenance()" class="nav-item" id="maintenance-toggle-btn"
+                style="{% if store_config.get('maintenance_mode') %}color: #ef4444;{% endif %}">
+                <i class="fas fa-tools" id="maintenance-icon"></i>
+                <span id="maintenance-text">Toggle Maintenance</span>
+            </button>
+        </div>
+
+        <!-- Animated Logout Button -->
+        <style>
+            .logoutButton {
+                --figure-duration: 100ms;
+                --transform-figure: none;
+                --walking-duration: 100ms;
+                --transform-arm1: none;
+                --transform-wrist1: none;
+                --transform-arm2: none;
+                --transform-wrist2: none;
+                --transform-leg1: none;
+                --transform-calf1: none;
+                --transform-leg2: none;
+                --transform-calf2: none;
+                background: none;
+                border: 0;
+                color: var(--text-muted);
+                cursor: pointer;
+                display: flex;
+                /* Changed to flex to align with nav items */
+                align-items: center;
+                gap: 0.8rem;
+                font-family: inherit;
+                font-size: 14px;
+                font-weight: 500;
+                height: 40px;
+                outline: none;
+                padding: 0 0 0 1rem;
+                /* Aligned padding */
+                perspective: 100px;
+                position: relative;
+                text-align: left;
+                width: 100%;
+                -webkit-tap-highlight-color: transparent;
+                margin-top: auto;
+                /* Push to bottom */
+            }
+
+            .logoutButton:hover .door {
+                transform: rotateY(20deg);
+            }
+
+            .logoutButton:active::before {
+                transform: scale(0.96);
+            }
+
+            .logoutButton:active .door {
+                transform: rotateY(28deg);
+            }
+
+            .logoutButton.clicked::before {
+                transform: none;
+            }
+
+            .logoutButton.clicked .door {
+                transform: rotateY(35deg);
+            }
+
+            .logoutButton.door-slammed .door {
+                transform: none;
+                transition: transform 100ms ease-in 250ms;
+            }
+
+            .logoutButton.falling {
+                animation: shake 200ms linear;
+            }
+
+            .logoutButton.falling .bang {
+                animation: flash 300ms linear;
+            }
+
+            .logoutButton.falling .figure {
+                animation: spin 1000ms infinite linear;
+                bottom: -1080px;
+                opacity: 0;
+                right: 1px;
+                transition: transform calc(var(--figure-duration) * 1ms) linear, bottom calc(var(--figure-duration) * 1ms) cubic-bezier(0.7, 0.1, 1, 1) 100ms, opacity calc(var(--figure-duration) * 0.25ms) linear calc(var(--figure-duration) * 0.75ms);
+                z-index: 1000;
+            }
+
+            .button-text {
+                color: var(--text-muted);
+                font-weight: 500;
+                position: relative;
+                z-index: 10;
+                /* margin-left: 10px; */
+                /* Removed margin as gap is used */
+            }
+
+            .logoutButton:hover .button-text {
+                color: var(--primary);
+            }
+
+            .anim-svg {
+                display: block;
+                position: absolute;
+            }
+
+            .figure {
+                bottom: 5px;
+                fill: #e5e7eb;
+                /* match bg color to hide initially */
+                right: 18px;
+                transform: var(--transform-figure);
+                transition: transform calc(var(--figure-duration) * 1ms) cubic-bezier(0.2, 0.1, 0.8, 0.9);
+                width: 30px;
+                z-index: 4;
+            }
+
+            /* When animating, figure becomes visible */
+            .logoutButton.clicked .figure {
+                fill: #4371f7;
+            }
+
+            .door,
+            .doorway {
+                bottom: 4px;
+                fill: var(--text-muted);
+                /* Main color */
+                right: 12px;
+                width: 32px;
+            }
+
+            .logoutButton:hover .door,
+            .logoutButton:hover .doorway {
+                fill: var(--primary);
+            }
+
+            .door {
+                transform: rotateY(20deg);
+                transform-origin: 100% 50%;
+                transform-style: preserve-3d;
+                transition: transform 200ms ease;
+                z-index: 5;
+            }
+
+            .door path {
+                fill: #4371f7;
+                stroke: #4371f7;
+                stroke-width: 4;
+            }
+
+            .doorway {
+                z-index: 3;
+            }
+
+            .bang {
+                opacity: 0;
+            }
+
+            .arm1,
+            .wrist1,
+            .arm2,
+            .wrist2,
+            .leg1,
+            .calf1,
+            .leg2,
+            .calf2 {
+                transition: transform calc(var(--walking-duration) * 1ms) ease-in-out;
+            }
+
+            .arm1 {
+                transform: var(--transform-arm1);
+                transform-origin: 52% 45%;
+            }
+
+            .wrist1 {
+                transform: var(--transform-wrist1);
+                transform-origin: 59% 55%;
+            }
+
+            .arm2 {
+                transform: var(--transform-arm2);
+                transform-origin: 47% 43%;
+            }
+
+            .wrist2 {
+                transform: var(--transform-wrist2);
+                transform-origin: 35% 47%;
+            }
+
+            .leg1 {
+                transform: var(--transform-leg1);
+                transform-origin: 47% 64.5%;
+            }
+
+            .calf1 {
+                transform: var(--transform-calf1);
+                transform-origin: 55.5% 71.5%;
+            }
+
+            .leg2 {
+                transform: var(--transform-leg2);
+                transform-origin: 43% 63%;
+            }
+
+            .calf2 {
+                transform: var(--transform-calf2);
+                transform-origin: 41.5% 73%;
+            }
+
+            @keyframes spin {
+                from {
+                    transform: rotate(0deg) scale(0.94);
+                }
+
+                to {
+                    transform: rotate(359deg) scale(0.94);
+                }
+            }
+
+            @keyframes shake {
+                0% {
+                    transform: rotate(-1deg);
+                }
+
+                50% {
+                    transform: rotate(2deg);
+                }
+
+                100% {
+                    transform: rotate(-1deg);
+                }
+            }
+
+            @keyframes flash {
+                0% {
+                    opacity: 0.4;
+                }
+
+                100% {
+                    opacity: 0;
+                }
+            }
+
+            /* Hide the SVGs initially or position them to look like an icon */
+            .anim-icon-container {
+                position: relative;
+                width: 32px;
+                height: 32px;
+                overflow: visible;
+                /* Allow animation to pop out */
+            }
+        </style>
+
+        <button class="logoutButton" id="adminLogoutBtn">
+            <div class="anim-icon-container">
+                <svg class="doorway anim-svg" viewBox="0 0 100 100">
+                    <path
+                        d="M93.4 86.3H58.6c-1.9 0-3.4-1.5-3.4-3.4V17.1c0-1.9 1.5-3.4 3.4-3.4h34.8c1.9 0 3.4 1.5 3.4 3.4v65.8c0 1.9-1.5 3.4-3.4 3.4z" />
+                    <path class="bang"
+                        d="M40.5 43.7L26.6 31.4l-2.5 6.7zM41.9 50.4l-19.5-4-1.4 6.3zM40 57.4l-17.7 3.9 3.9 5.7z" />
+                </svg>
+                <svg class="figure anim-svg" viewBox="0 0 100 100">
+                    <circle cx="52.1" cy="32.4" r="6.4" />
+                    <path
+                        d="M50.7 62.8c-1.2 2.5-3.6 5-7.2 4-3.2-.9-4.9-3.5-4-7.8.7-3.4 3.1-13.8 4.1-15.8 1.7-3.4 1.6-4.6 7-3.7 4.3.7 4.6 2.5 4.3 5.4-.4 3.7-2.8 15.1-4.2 17.9z" />
+                    <g class="arm1">
+                        <path
+                            d="M55.5 56.5l-6-9.5c-1-1.5-.6-3.5.9-4.4 1.5-1 3.7-1.1 4.6.4l6.1 10c1 1.5.3 3.5-1.1 4.4-1.5.9-3.5.5-4.5-.9z" />
+                        <path class="wrist1"
+                            d="M69.4 59.9L58.1 58c-1.7-.3-2.9-1.9-2.6-3.7.3-1.7 1.9-2.9 3.7-2.6l11.4 1.9c1.7.3 2.9 1.9 2.6 3.7-.4 1.7-2 2.9-3.8 2.6z" />
+                    </g>
+                    <g class="arm2">
+                        <path
+                            d="M34.2 43.6L45 40.3c1.7-.6 3.5.3 4 2 .6 1.7-.3 4-2 4.5l-10.8 2.8c-1.7.6-3.5-.3-4-2-.6-1.6.3-3.4 2-4z" />
+                        <path class="wrist2"
+                            d="M27.1 56.2L32 45.7c.7-1.6 2.6-2.3 4.2-1.6 1.6.7 2.3 2.6 1.6 4.2L33 58.8c-.7 1.6-2.6 2.3-4.2 1.6-1.7-.7-2.4-2.6-1.7-4.2z" />
+                    </g>
+                    <g class="leg1">
+                        <path
+                            d="M52.1 73.2s-7-5.7-7.9-6.5c-.9-.9-1.2-3.5-.1-4.9 1.1-1.4 3.8-1.9 5.2-.9l7.9 7c1.4 1.1 1.7 3.5.7 4.9-1.1 1.4-4.4 1.5-5.8.4z" />
+                        <path class="calf1"
+                            d="M52.6 84.4l-1-12.8c-.1-1.9 1.5-3.6 3.5-3.7 2-.1 3.7 1.4 3.8 3.4l1 12.8c.1 1.9-1.5 3.6-3.5 3.7-2 0-3.7-1.5-3.8-3.4z" />
+                    </g>
+                    <g class="leg2">
+                        <path
+                            d="M37.8 72.7s1.3-10.2 1.6-11.4 2.4-2.8 4.1-2.6c1.7.2 3.6 2.3 3.4 4l-1.8 11.1c-.2 1.7-1.7 3.3-3.4 3.1-1.8-.2-4.1-2.4-3.9-4.2z" />
+                        <path class="calf2"
+                            d="M29.5 82.3l9.6-10.9c1.3-1.4 3.6-1.5 5.1-.1 1.5 1.4.4 4.9-.9 6.3l-8.5 9.6c-1.3 1.4-3.6 1.5-5.1.1-1.4-1.3-1.5-3.5-.2-5z" />
+                    </g>
+                </svg>
+                <svg class="door anim-svg" viewBox="0 0 100 100">
+                    <path
+                        d="M93.4 86.3H58.6c-1.9 0-3.4-1.5-3.4-3.4V17.1c0-1.9 1.5-3.4 3.4-3.4h34.8c1.9 0 3.4 1.5 3.4 3.4v65.8c0 1.9-1.5 3.4-3.4 3.4z" />
+                    <circle cx="66" cy="50" r="3.7" />
+                </svg>
+            </div>
+            <span class="button-text">Log Out</span>
+        </button>
+
+        <script>
+            document.querySelectorAll('.logoutButton').forEach(button => {
+                button.state = 'default'
+
+                // Button Constants
+                const logoutButtonStates = {
+                    'default': {
+                        '--figure-duration': '100',
+                        '--transform-figure': 'none',
+                        '--walking-duration': '100',
+                        '--transform-arm1': 'none',
+                        '--transform-wrist1': 'none',
+                        '--transform-arm2': 'none',
+                        '--transform-wrist2': 'none',
+                        '--transform-leg1': 'none',
+                        '--transform-calf1': 'none',
+                        '--transform-leg2': 'none',
+                        '--transform-calf2': 'none'
+                    },
+                    'hover': {
+                        '--figure-duration': '100',
+                        '--transform-figure': 'translateX(1.5px)',
+                        '--walking-duration': '100',
+                        '--transform-arm1': 'rotate(-5deg)',
+                        '--transform-wrist1': 'rotate(-15deg)',
+                        '--transform-arm2': 'rotate(5deg)',
+                        '--transform-wrist2': 'rotate(6deg)',
+                        '--transform-leg1': 'rotate(-10deg)',
+                        '--transform-calf1': 'rotate(5deg)',
+                        '--transform-leg2': 'rotate(20deg)',
+                        '--transform-calf2': 'rotate(-20deg)'
+                    },
+                    'walking1': {
+                        '--figure-duration': '300',
+                        '--transform-figure': 'translateX(11px)',
+                        '--walking-duration': '300',
+                        '--transform-arm1': 'translateX(-4px) translateY(-2px) rotate(120deg)',
+                        '--transform-wrist1': 'rotate(-5deg)',
+                        '--transform-arm2': 'translateX(4px) rotate(-110deg)',
+                        '--transform-wrist2': 'rotate(-5deg)',
+                        '--transform-leg1': 'translateX(-3px) rotate(80deg)',
+                        '--transform-calf1': 'rotate(-30deg)',
+                        '--transform-leg2': 'translateX(4px) rotate(-60deg)',
+                        '--transform-calf2': 'rotate(20deg)'
+                    },
+                    'walking2': {
+                        '--figure-duration': '400',
+                        '--transform-figure': 'translateX(17px)',
+                        '--walking-duration': '300',
+                        '--transform-arm1': 'rotate(60deg)',
+                        '--transform-wrist1': 'rotate(-15deg)',
+                        '--transform-arm2': 'rotate(-45deg)',
+                        '--transform-wrist2': 'rotate(6deg)',
+                        '--transform-leg1': 'rotate(-5deg)',
+                        '--transform-calf1': 'rotate(10deg)',
+                        '--transform-leg2': 'rotate(10deg)',
+                        '--transform-calf2': 'rotate(-20deg)'
+                    },
+                    'falling1': {
+                        '--figure-duration': '1600',
+                        '--walking-duration': '400',
+                        '--transform-arm1': 'rotate(-60deg)',
+                        '--transform-wrist1': 'none',
+                        '--transform-arm2': 'rotate(30deg)',
+                        '--transform-wrist2': 'rotate(120deg)',
+                        '--transform-leg1': 'rotate(-30deg)',
+                        '--transform-calf1': 'rotate(-20deg)',
+                        '--transform-leg2': 'rotate(20deg)'
+                    },
+                    'falling2': {
+                        '--walking-duration': '300',
+                        '--transform-arm1': 'rotate(-100deg)',
+                        '--transform-arm2': 'rotate(-60deg)',
+                        '--transform-wrist2': 'rotate(60deg)',
+                        '--transform-leg1': 'rotate(80deg)',
+                        '--transform-calf1': 'rotate(20deg)',
+                        '--transform-leg2': 'rotate(-60deg)'
+                    },
+                    'falling3': {
+                        '--walking-duration': '500',
+                        '--transform-arm1': 'rotate(-30deg)',
+                        '--transform-wrist1': 'rotate(40deg)',
+                        '--transform-arm2': 'rotate(50deg)',
+                        '--transform-wrist2': 'none',
+                        '--transform-leg1': 'rotate(-30deg)',
+                        '--transform-leg2': 'rotate(20deg)',
+                        '--transform-calf2': 'none'
+                    }
+                }
+
+                // function to transition a button from one state to the next
+                let updateButtonState = (button, state) => {
+                    if (logoutButtonStates[state]) {
+                        button.state = state
+                        for (let key in logoutButtonStates[state]) {
+                            button.style.setProperty(key, logoutButtonStates[state][key])
+                        }
+                    }
+                }
+
+                // mouse hover listeners on button
+                button.addEventListener('mouseenter', () => {
+                    if (button.state === 'default') {
+                        updateButtonState(button, 'hover')
+                    }
+                })
+                button.addEventListener('mouseleave', () => {
+                    if (button.state === 'hover') {
+                        updateButtonState(button, 'default')
+                    }
+                })
+
+                // click listener on button
+                button.addEventListener('click', () => {
+                    if (button.state === 'default' || button.state === 'hover') {
+                        button.classList.add('clicked')
+                        updateButtonState(button, 'walking1')
+                        setTimeout(() => {
+                            button.classList.add('door-slammed')
+                            updateButtonState(button, 'walking2')
+                            setTimeout(() => {
+                                button.classList.add('falling')
+                                updateButtonState(button, 'falling1')
+                                setTimeout(() => {
+                                    updateButtonState(button, 'falling2')
+                                    setTimeout(() => {
+                                        updateButtonState(button, 'falling3')
+                                        setTimeout(() => {
+                                            button.classList.remove('clicked')
+                                            button.classList.remove('door-slammed')
+                                            button.classList.remove('falling')
+                                            updateButtonState(button, 'default')
+                                            // Redirect after animation
+                                            window.location.href = "/logout";
+                                        }, 1000)
+                                    }, logoutButtonStates['falling2']['--walking-duration'])
+                                }, logoutButtonStates['falling1']['--walking-duration'])
+                            }, logoutButtonStates['walking2']['--figure-duration'])
+                        }, logoutButtonStates['walking1']['--figure-duration'])
+                    }
+                })
+            })
+        </script>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <div class="header-info">
+                <h1 id="page-title">Executive Overview</h1>
+                <p id="page-subtitle" class="text-muted">{{ datetime_now if datetime_now else 'Welcome back, Admin' }}
+                </p>
+            </div>
+            <div class="header-actions">
+                <button class="action-btn" onclick="toggleTheme()" title="Toggle Dark Mode"><i
+                        class="fas fa-moon"></i></button>
+                <button class="action-btn" onclick="exportData()" title="Export JSON Report"><i
+                        class="fas fa-file-export"></i></button>
+                <div class="profile-info"
+                    style="margin-left: 1rem; border-left: 1px solid var(--border); padding-left: 1rem;">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=6366f1&color=fff" class="profile-img"
+                        style="border-radius: 50%; width: 40px; height: 40px;">
+                </div>
+            </div>
+        </header>
+
+        <!-- SECTIONS -->
+
+        <!-- 1. OVERVIEW -->
+        <section id="overview" class="page-section active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div>
+                        <div class="stat-label">Gross Revenue</div>
+                        <div class="stat-value">₹{{ "{:,.2f}".format(total_revenue) }}</div>
+                        <span class="badge badge-success">+12% vs last month</span>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;"><i
+                            class="fas fa-wallet"></i></div>
+                </div>
+                <div class="stat-card">
+                    <div>
+                        <div class="stat-label">Total Orders</div>
+                        <div class="stat-value">{{ total_orders }}</div>
+                        <span class="badge badge-warning">5 Pending</span>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;"><i
+                            class="fas fa-shopping-cart"></i></div>
+                </div>
+                <div class="stat-card">
+                    <div>
+                        <div class="stat-label">Customer Base</div>
+                        <div class="stat-value">{{ total_customers }}</div>
+                        <span class="badge badge-success">New users +4</span>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;"><i
+                            class="fas fa-user-friends"></i></div>
+                </div>
+                <div class="stat-card">
+                    <div>
+                        <div class="stat-label">Low Stock Items</div>
+                        <div class="stat-value" id="low-stock-count">0</div>
+                        <span class="badge badge-danger">Immediate Action</span>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;"><i
+                            class="fas fa-exclamation-triangle"></i></div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                <div class="card" style="max-width: 500px;">
+                    <div class="card-header">
+                        <h2 class="card-title">Revenue Trajectory</h2>
+                    </div>
+                    <div style="height: 180px;">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Stock Alerts</h2>
+                    </div>
+                    <div id="low-stock-list">
+                        <!-- Filled by JS -->
+                    </div>
+                    <button class="btn btn-primary" style="width:100%; margin-top:1rem;"
+                        onclick="switchTab('inventory')">Manage Inventory</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. INVENTORY (CRUD) -->
+        <section id="inventory" class="page-section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="title-group">
+                        <h2>Master Inventory</h2>
+                        <p>Manage products, stock levels, and pricing.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openProductModal()"><i class="fas fa-plus"></i> Add
+                        Product</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-table-body">
+                            {% for p in products %}
+                            <tr>
+                                <td>
+                                    <div style="display:flex; align-items:center; gap:10px;">
+                                        <img src="{{ p.image }}" width="35" height="35"
+                                            style="border-radius:8px; object-fit:cover;">
+                                        <strong>{{ p.name }}</strong>
+                                    </div>
+                                </td>
+                                <td><span class="badge"
+                                        style="background: rgba(99, 102, 241, 0.1); color: var(--primary);">{{
+                                        p.category }}</span></td>
+                                <td>₹{{ p.price }}</td>
+                                <td>
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span>{{ p.stock }}</span>
+                                        {% if p.stock < 10 %} <i class="fas fa-exclamation-circle"
+                                            style="color:var(--danger)"></i>
+                                            {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <button class="action-btn" onclick='editProduct({{ p|tojson|safe }})'><i
+                                            class="fas fa-edit"></i></button>
+                                    <button class="action-btn" onclick="deleteProduct({{ p.id }})"
+                                        style="color:var(--danger)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. ORDERS -->
+        <section id="orders" class="page-section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="title-group">
+                        <h2>Live Orders</h2>
+                        <p>Track fulfillment and delivery status.</p>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" placeholder="Search Order ID..." class="form-control" style="width:200px;">
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for o in orders %}
+                            <tr>
+                                <td><strong>#{{ o.id }}</strong></td>
+                                <td>{{ o.user_email or o.user }}</td>
+                                <td>₹{{ o.total }}</td>
+                                <td>
+                                    <span
+                                        class="badge {% if o.status == 'Delivered' %}badge-success{% elif o.status == 'Cancelled' %}badge-danger{% else %}badge-warning{% endif %}">
+                                        {{ o.status }}
+                                    </span>
+                                </td>
+                                <td>{{ o.date }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. COUPONS -->
+        <section id="coupons" class="page-section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="title-group">
+                        <h2>Promo Management</h2>
+                        <p>Active coupons and discount campaigns.</p>
+                    </div>
+                    <!-- Assuming createCouponModal exists or just placeholder for now -->
+                    <button class="btn btn-primary" onclick="openCouponModal()">Create Coupon</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Type</th>
+                                <th>Value</th>
+                                <th>Min Spend</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in coupons %}
+                            <tr>
+                                <td style="font-weight:bold; color:var(--primary);">{{ c.code }}</td>
+                                <td>{{ c.discount_type|title }}</td>
+                                <td>{{ c.value }}{{ "%" if c.discount_type == 'percentage' else ' INR' }}</td>
+                                <td>₹{{ c.min_spend }}</td>
+                                <td>
+                                    <span class="badge {% if c.active %}badge-success{% else %}badge-danger{% endif %}">
+                                        {{ 'Active' if c.active else 'Inactive' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="action-btn" onclick='editCoupon({{ c|tojson|safe }})'><i
+                                            class="fas fa-edit"></i></button>
+                                    <button class="action-btn" onclick="deleteCoupon('{{ c.code }}')"
+                                        style="color:var(--danger)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">No active coupons found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- REVIEWS SECTION -->
+        <section id="reviews" class="page-section">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Product Reviews</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>User</th>
+                                <th>Rating</th>
+                                <th>Comment</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in reviews %}
+                            <tr>
+                                <td>{{ r.product_name }}</td>
+                                <td>{{ r.user_email }}</td>
+                                <td>
+                                    {% for i in range(r.rating) %}<i class="fas fa-star"
+                                        style="color:#fbbf24; font-size:0.8rem;"></i>{% endfor %}
+                                </td>
+                                <td>{{ r.comment }}</td>
+                                <td>{{ r.created_at }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5">No reviews yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SUPPORT SECTION -->
+        <section id="support" class="page-section">
+            <div class="card">
+                <div class="card-header">
+                    <h2>User Support Tickets</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Subject</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in support_tickets %}
+                            <tr>
+                                <td>#{{ t.id }}</td>
+                                <td>{{ t.user }}</td>
+                                <td>{{ t.subject }}</td>
+                                <td>
+                                    <span
+                                        class="badge {{ 'badge-success' if t.status=='Responded' else 'badge-warning' }}">
+                                        {{ t.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary" style="padding:5px 10px; font-size:0.8rem;"
+                                        onclick='openReplyModal({{ t|tojson|safe }})'>
+                                        {{ 'View/Reply' if t.status != 'Responded' else 'View Thread' }}
+                                    </button>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5">No active tickets.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. ANALYTICS -->
+        <section id="analytics" class="page-section">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem;">
+                <div class="card">
+                    <h2>Category Distribution</h2><canvas id="categoryChart"></canvas>
+                </div>
+                <div class="card">
+                    <h2>Performance Metrics</h2>
+                    <div style="margin-top:2rem">
+                        <p>Average Order Value: <strong>₹{{ (total_revenue / total_orders)|round(2) if total_orders > 0
+                                else '0' }}</strong></p>
+                        <p>Customer Retention: <strong>68%</strong></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. CUSTOMERS -->
+        <section id="customers" class="page-section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="title-group">
+                        <h2>Customer Insights</h2>
+                        <p>Top active customers.</p>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>College</th>
+                                <th>Orders</th>
+                                <th>Spent</th>
+                                <th>Last Order</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in customers %}
+                            {% set cancelled_count = 0 %}
+                            {% for o in all_orders if (o.user_email == c.email or o.user == c.email) and o.status ==
+                            'Cancelled' %}
+                            {% set cancelled_count = cancelled_count + 1 %}
+                            {% endfor %}
+                            {% set risk = 'Low' %}
+                            {% if cancelled_count >= 3 %}{% set risk = 'High' %}
+                            {% elif cancelled_count >= 1 %}{% set risk = 'Medium' %}
+                            {% endif %}
+                            <tr>
+                                <td>
+                                    <div style="font-weight:600">{{ c.name }}</div>
+                                    <div style="font-size:0.8rem; color:var(--text-muted)">{{ c.email }}</div>
+                                </td>
+                                <td>{{ c.college }}</td>
+                                <td>{{ c.total_orders }}</td>
+                                <td>₹{{ c.total_spent }}</td>
+                                <td>
+                                    <span
+                                        class="badge {% if risk == 'High' %}badge-danger{% elif risk == 'Medium' %}badge-warning{% else %}badge-success{% endif %}">
+                                        {{ risk }} Risk
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-ghost"
+                                        onclick="openUserModal('{{ c.email }}')">Details</button>
+                                    <button
+                                        class="btn btn-sm {% if c.banned %}btn-primary{% else %}btn-danger{% endif %}"
+                                        style="padding: 5px 10px;" onclick="toggleBan('{{ c.email }}')">
+                                        {{ 'Unban' if c.banned else 'Ban' }}
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. STAFF SHIFTS -->
+        <section id="shifts" class="page-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div>
+                        <div class="stat-label">Active Shifts</div>
+                        <div class="stat-value" id="activeShiftCount">0</div>
+                        <span class="badge badge-success">Currently Working</span>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;"><i
+                            class="fas fa-user-clock"></i></div>
+                </div>
+                <div class="stat-card">
+                    <div>
+                        <div class="stat-label">Total Shift Records</div>
+                        <div class="stat-value" id="totalShiftRecords">0</div>
+                        <span class="badge badge-warning">All Time</span>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;"><i
+                            class="fas fa-history"></i></div>
+                </div>
+            </div>
+
+            <!-- Active Shifts -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-broadcast-tower" style="color: #10b981;"></i> Currently
+                        Active Staff</h2>
+                </div>
+                <div id="activeShiftsContainer" style="padding: 1rem;">
+                    <p style="color: var(--text-muted); text-align: center; padding: 2rem;">No staff currently clocked
+                        in.</p>
+                </div>
+            </div>
+
+            <!-- Shift History -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-calendar-alt" style="color: var(--primary);"></i> Shift
+                        History</h2>
+                </div>
+                <div class="table-container">
+                    <table id="shiftHistoryTable">
+                        <thead>
+                            <tr>
+                                <th>Staff</th>
+                                <th>Date</th>
+                                <th>Clock In</th>
+                                <th>Clock Out</th>
+                                <th>Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody id="shiftHistoryBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">No
+                                    shift records yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 9. FINANCIALS -->
+        <section id="reports" class="page-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div>
+                        <p class="text-muted">Total Revenue</p>
+                        <h3>₹{{ total_revenue }}</h3>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(99, 102, 241, 0.1); color: var(--primary);">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div>
+                        <p class="text-muted">Total Cost</p>
+                        <h3>₹{{ total_cost|round(2) }}</h3>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div>
+                        <p class="text-muted">Net Profit</p>
+                        <h3 style="color:var(--accent);">₹{{ total_profit|round(2) }}</h3>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--accent);">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="title-group">
+                        <h2>Financial Operations</h2>
+                        <p>Export data and analyze staff performance.</p>
+                    </div>
+                    <a href="/api/admin/export-sales" class="btn btn-primary"><i class="fas fa-download"></i> Export
+                        CSV</a>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem;">
+                    <div>
+                        <h3>Profit Margins (Product Wise)</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Margin (%)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for p in products %}
+                                    {% if not p.is_service %}
+                                    <tr>
+                                        <td>{{ p.name }}</td>
+                                        <td>{{ (((p.price - p.cost_price)/p.price)*100)|round(1) }}%</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div>
+                        <h3>Staff Performance</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Staff Member</th>
+                                        <th>Fulfilled</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Staff Alpha</td>
+                                        <td>42 Orders</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Staff Beta</td>
+                                        <td>28 Orders</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10. AUDIT LOGS -->
+        <section id="logs" class="page-section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="title-group">
+                        <h2>Security & Audit Logs</h2>
+                        <p>Detailed log of administrative and staff actions.</p>
+                    </div>
+                </div>
+                <div class="table-container" style="max-height: 600px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Action</th>
+                                <th>User</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in audit_logs %}
+                            <tr>
+                                <td style="font-size:0.85rem; color:var(--text-muted);">{{ log.timestamp }}</td>
+                                <td><span class="badge badge-warning">{{ log.action }}</span></td>
+                                <td style="font-weight:600;">{{ log.user }}</td>
+                                <td style="font-size:0.9rem;">{{ log.details }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">No audit logs available.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modals -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Add New Product</h2>
+            <form id="productForm" style="margin-top:1.5rem;">
+                <input type="hidden" id="p_id">
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="p_name" class="form-control" required>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                    <div class="form-group">
+                        <label>Sell Price (₹)</label>
+                        <input type="number" id="p_price" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Cost Price (₹)</label>
+                        <input type="number" id="p_cost" class="form-control" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Stock</label>
+                    <input type="number" id="p_stock" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="p_category" class="form-control">
+                        <option>Stationery</option>
+                        <option>Electronics</option>
+                        <option>Apparel</option>
+                        <option>Services</option>
+                        <option>Organization</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="p_desc" class="form-control" rows="3"
+                        placeholder="Describe the product..."></textarea>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:2rem;">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reply Modal -->
+    <div id="replyModal" class="modal">
+        <div class="modal-content">
+            <h2>Reply to Ticket #<span id="reply-ticket-id"></span></h2>
+            <div id="ticket-history"
+                style="background:#f8fafc; padding:1rem; border-radius:12px; margin:1rem 0; max-height:200px; overflow-y:auto; font-size:0.9rem;">
+            </div>
+            <textarea id="reply-text" class="form-control" rows="4" placeholder="Type your response..."></textarea>
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:1rem;">
+                <button class="btn btn-ghost"
+                    onclick="document.getElementById('replyModal').style.display='none'">Close</button>
+                <button class="btn btn-primary" onclick="sendReply()">Send Reply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Details Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <h2>User Details</h2>
+            <div id="user-details-content"></div>
+            <div style="margin-top:2rem; text-align:right;">
+                <button class="btn btn-ghost"
+                    onclick="document.getElementById('userModal').style.display='none'">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coupon Modal -->
+    <div id="couponModal" class="modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <h2 id="coupon-modal-title">Create New Coupon</h2>
+            <form id="couponForm" style="margin-top:1.5rem;">
+                <input type="hidden" id="coupon_edit_mode" value="false">
+                <div class="form-group">
+                    <label>Coupon Code</label>
+                    <input type="text" id="c_code" class="form-control" required placeholder="e.g. WELCOME10"
+                        style="text-transform:uppercase;">
+                </div>
+                <div class="form-group">
+                    <label>Discount Type</label>
+                    <select id="c_type" class="form-control">
+                        <option value="percentage">Percentage (%)</option>
+                        <option value="fixed">Fixed Amount (₹)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Value</label>
+                    <input type="number" id="c_value" class="form-control" required placeholder="e.g. 10">
+                </div>
+                <div class="form-group">
+                    <label>Min Spend (₹)</label>
+                    <input type="number" id="c_min_spend" class="form-control" value="0">
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:2rem;">
+                    <button type="button" class="btn btn-ghost"
+                        onclick="document.getElementById('couponModal').style.display='none'">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="coupon-submit-btn">Create Coupon</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Data Injection for JS -->
+    <script>
+        // Safely partial data injection using tojson
+        // Safely partial data injection using tojson
+        const productsData = {{ products | tojson | safe }};
+        const salesChartData = {{ sales_data | tojson | safe }};
+        const salesChartLabels = {{ sales_labels | tojson | safe }};
+        const ordersData = {{ all_orders | tojson | safe }};
+        const customersData = {{ customers | tojson | safe }};
+    </script>
+
+    <script>
+        // Tab Management
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if (el) el.classList.add('active');
+            else {
+                // Find button for this tab
+                // logic to find button by onclick content
+            }
+
+            const title = tabId.charAt(0).toUpperCase() + tabId.slice(1);
+            document.getElementById('page-title').innerText = title === 'Overview' ? 'Executive Overview' : title;
+        }
+
+        // Theme Toggle
+        function toggleTheme() {
+            const body = document.body;
+            const current = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+            const icon = document.querySelector('.header-actions .action-btn i');
+            // rudimentary icon toggle
+        }
+
+        // Charts
+        window.onload = () => {
+            initCharts();
+            checkLowStock();
+        };
+
+        function initCharts() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: salesChartLabels,
+                    datasets: [{
+                        label: 'Revenue Growth',
+                        data: salesChartData,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } } }
+            });
+        }
+
+        function checkLowStock() {
+            const lowStockProducts = productsData.filter(p => p.stock < 10);
+            document.getElementById('low-stock-count').innerText = lowStockProducts.length;
+
+            const list = document.getElementById('low-stock-list');
+            if (lowStockProducts.length === 0) {
+                list.innerHTML = '<p class="text-muted">All stock levels healthy.</p>';
+                return;
+            }
+
+            list.innerHTML = lowStockProducts.map(p => `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid var(--border)">
+                    <div>
+                        <div style="font-weight:600">${p.name}</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted)">Current Stock: ${p.stock}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Product CRUD UI
+        function openProductModal() {
+            document.getElementById('modal-title').innerText = "Add New Product";
+            document.getElementById('productForm').reset();
+            document.getElementById('p_id').value = "";
+            document.getElementById('productModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+        }
+
+        function editProduct(p) {
+            document.getElementById('modal-title').innerText = "Edit Product";
+            document.getElementById('p_id').value = p.id;
+            document.getElementById('p_name').value = p.name;
+            document.getElementById('p_price').value = p.price;
+            document.getElementById('p_cost').value = p.cost_price || "";
+            document.getElementById('p_stock').value = p.stock;
+            document.getElementById('p_category').value = p.category;
+            document.getElementById('p_desc').value = p.description || "";
+            document.getElementById('productModal').style.display = 'flex';
+        }
+
+        function deleteProduct(id) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                fetch('/api/staff/delete-item', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id })
+                }).then(r => r.json()).then(data => location.reload());
+            }
+        }
+
+        document.getElementById('productForm').onsubmit = (e) => {
+            e.preventDefault();
+            const id = document.getElementById('p_id').value;
+            const endpoint = id ? '/api/staff/update-item' : '/api/staff/add-item';
+
+            const payload = {
+                name: document.getElementById('p_name').value,
+                price: document.getElementById('p_price').value,
+                cost_price: document.getElementById('p_cost').value,
+                stock: document.getElementById('p_stock').value,
+                category: document.getElementById('p_category').value,
+                description: document.getElementById('p_desc').value
+            };
+            if (id) payload.id = id;
+
+            fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(r => r.json()).then(data => {
+                if (data.message === 'success') location.reload();
+            });
+        };
+
+        function exportData() {
+            const data = { products: productsData };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'shopmaster_report.json';
+            a.click();
+        }
+
+        // Store Toggle
+        async function toggleStore() {
+            if (!confirm("Are you sure you want to change store status?")) return;
+            try {
+                const res = await fetch('/api/staff/toggle-store', { method: 'POST' });
+                const data = await res.json();
+                if (data.message === 'success') location.reload();
+                else alert("Error: " + data.message);
+            } catch (e) { console.error(e); }
+        }
+
+        // Support
+        let currentTicketId = null;
+        function openReplyModal(ticket) {
+            currentTicketId = ticket.id;
+            document.getElementById('reply-ticket-id').innerText = ticket.id;
+
+            const history = document.getElementById('ticket-history');
+            history.innerHTML = `
+                <div style="margin-bottom:10px;">
+                    <strong>${ticket.user}:</strong> ${ticket.message}
+                </div>
+                ${ticket.responses.map(r => `
+                    <div style="margin-top:10px; padding-top:10px; border-top:1px solid #e2e8f0;">
+                        <strong>${r.user}:</strong> ${r.message}
+                        <div style="font-size:0.75rem; color:#94a3b8;">${r.time}</div>
+                    </div>
+                `).join('')}
+            `;
+
+            document.getElementById('replyModal').style.display = 'flex';
+        }
+
+        async function sendReply() {
+            const response = document.getElementById('reply-text').value;
+            if (!response) return alert("Write a response");
+
+            const res = await fetch('/api/admin/reply-ticket', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ticket_id: currentTicketId, response: response })
+            });
+            const data = await res.json();
+            if (data.success) location.reload();
+            else alert("Error: " + data.message);
+        }
+
+
+        async function toggleBan(email) {
+            const action = prompt("Type 'CONFIRM' to change suspension status for " + email);
+            if (action !== 'CONFIRM') return;
+
+            const res = await fetch('/api/admin/toggle-ban', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email })
+            });
+            const data = await res.json();
+            if (data.success) location.reload();
+        }
+
+        function openUserModal(email) {
+            // Find user in customers data
+            const user = customersData.find(c => c.email === email);
+            const userOrders = ordersData.filter(o => {
+                const oEmail = o.user_email || o.user;
+                return oEmail === email;
+            });
+
+            if (!user) return;
+
+            let html = `
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:2rem; background:#f8fafc; padding:1.5rem; border-radius:12px;">
+                    <div>
+                        <small style="color:var(--text-muted)">Name</small>
+                        <div style="font-weight:600; font-size:1.1rem;">${user.name} ${user.banned ? '<span class="badge badge-danger">BANNED</span>' : ''}</div>
+                    </div>
+                    <div>
+                         <small style="color:var(--text-muted)">Email</small>
+                        <div style="font-weight:600">${user.email}</div>
+                    </div>
+                    <div>
+                         <small style="color:var(--text-muted)">Total Spent</small>
+                        <div style="font-weight:600; color:var(--accent);">₹${user.total_spent}</div>
+                    </div>
+                    <div>
+                         <small style="color:var(--text-muted)">Risk Profile</small>
+                        <div style="font-weight:600">${userOrders.filter(o => o.status === 'Cancelled').length} Cancellations</div>
+                    </div>
+                </div>
+                
+                <h3>Order History</h3>
+                <div style="max-height:300px; overflow-y:auto; margin-top:1rem;">
+            `;
+
+            if (userOrders.length === 0) {
+                html += `<p style="color:var(--text-muted)">No orders found.</p>`;
+            } else {
+                html += `<table style="font-size:0.9rem; width:100%;">
+                    <thead><tr><th style="padding:8px;">ID</th><th style="padding:8px;">Date</th><th style="padding:8px;">Status</th><th style="padding:8px;">Total</th></tr></thead>
+                    <tbody>
+                `;
+                // Sort by date desc
+                userOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                userOrders.forEach(o => {
+                    const badgeClass = o.status === 'Delivered' ? 'badge-success' : (o.status === 'Cancelled' ? 'badge-danger' : 'badge-warning');
+                    html += `<tr>
+                        <td style="padding:8px;">#${o.id}</td>
+                        <td style="padding:8px;">${o.date}</td>
+                        <td style="padding:8px;"><span class="badge ${badgeClass}">${o.status}</span></td>
+                        <td style="padding:8px;">₹${o.total}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+            }
+
+            html += `</div>`;
+
+            document.getElementById('user-details-content').innerHTML = html;
+            document.getElementById('userModal').style.display = 'flex';
+        }
+
+        // Coupon Logic
+        function openCouponModal() {
+            document.getElementById('coupon-modal-title').innerText = "Create New Coupon";
+            document.getElementById('coupon-submit-btn').innerText = "Create Coupon";
+            document.getElementById('coupon_edit_mode').value = "false";
+            document.getElementById('c_code').readOnly = false;
+            document.getElementById('couponForm').reset();
+            document.getElementById('couponModal').style.display = 'flex';
+        }
+
+        function editCoupon(c) {
+            document.getElementById('coupon-modal-title').innerText = "Edit Coupon";
+            document.getElementById('coupon-submit-btn').innerText = "Update Coupon";
+            document.getElementById('coupon_edit_mode').value = "true";
+
+            document.getElementById('c_code').value = c.code;
+            document.getElementById('c_code').readOnly = true;
+            document.getElementById('c_type').value = c.discount_type;
+            document.getElementById('c_value').value = c.value;
+            document.getElementById('c_min_spend').value = c.min_spend;
+
+            document.getElementById('couponModal').style.display = 'flex';
+        }
+
+        function deleteCoupon(code) {
+            if (confirm('Delete coupon ' + code + '?')) {
+                fetch('/api/admin/delete-coupon', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: code })
+                }).then(r => r.json()).then(data => {
+                    if (data.success) location.reload();
+                    else alert("Failed to delete coupon");
+                });
+            }
+        }
+
+        document.getElementById('couponForm').onsubmit = (e) => {
+            e.preventDefault();
+            const isEdit = document.getElementById('coupon_edit_mode').value === "true";
+            const endpoint = isEdit ? '/api/admin/update-coupon' : '/api/staff/create-coupon';
+
+            const payload = {
+                code: document.getElementById('c_code').value.toUpperCase(),
+                type: document.getElementById('c_type').value,
+                value: document.getElementById('c_value').value,
+                min_spend: document.getElementById('c_min_spend').value
+            };
+
+            fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(r => r.json()).then(data => {
+                if (data.message === 'success' || data.success) location.reload();
+                else alert("Error: " + (data.message || "Failed"));
+            });
+        };
+
+        // ===========================
+        // STAFF SHIFTS (Admin View)
+        // ===========================
+        async function loadAdminShifts() {
+            try {
+                const res = await fetch('/api/admin/shifts');
+                const data = await res.json();
+                if (!data.success) return;
+
+                const shifts = data.shifts;
+                let activeCount = 0;
+                let totalRecords = 0;
+                let allHistory = [];
+
+                // Process active shifts
+                const activeContainer = document.getElementById('activeShiftsContainer');
+                let activeHtml = '';
+
+                shifts.forEach(s => {
+                    if (s.clocked_in) {
+                        activeCount++;
+                        const clockIn = s.clock_in_time ? s.clock_in_time.split(' ')[1] : '??';
+                        activeHtml += `
+                            <div style="display: flex; align-items: center; gap: 1rem; padding: 12px 16px; background: #ecfdf5; border: 1px solid #bbf7d0; border-radius: 12px; margin-bottom: 8px;">
+                                <div style="width: 10px; height: 10px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite;"></div>
+                                <div style="flex: 1;">
+                                    <strong style="color: #065f46;">${s.staff}</strong>
+                                    <div style="font-size: 0.8rem; color: #047857;">Clocked in at ${clockIn}</div>
+                                </div>
+                                <span class="badge badge-success" style="padding: 6px 14px;">Active</span>
+                            </div>`;
+                    }
+
+                    if (s.history) {
+                        s.history.forEach(h => {
+                            totalRecords++;
+                            allHistory.push({ ...h, staff: s.staff });
+                        });
+                    }
+                });
+
+                document.getElementById('activeShiftCount').textContent = activeCount;
+                document.getElementById('totalShiftRecords').textContent = totalRecords;
+
+                if (activeHtml) {
+                    activeContainer.innerHTML = activeHtml;
+                } else {
+                    activeContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 2rem;">No staff currently clocked in.</p>';
+                }
+
+                // Render shift history
+                const tbody = document.getElementById('shiftHistoryBody');
+                if (allHistory.length > 0) {
+                    allHistory.sort((a, b) => new Date(b.clock_out) - new Date(a.clock_out));
+                    tbody.innerHTML = allHistory.map(h => `
+                        <tr>
+                            <td><strong>${h.staff}</strong></td>
+                            <td>${h.date}</td>
+                            <td style="color: #10b981; font-weight: 600;">${h.clock_in.split(' ')[1]}</td>
+                            <td style="color: #ef4444; font-weight: 600;">${h.clock_out.split(' ')[1]}</td>
+                            <td><span class="badge badge-warning" style="padding: 4px 10px;">${h.duration}</span></td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">No shift records yet.</td></tr>';
+                }
+            } catch (e) { console.log('Shifts load error:', e); }
+        }
+
+        // Load shifts on page load and refresh every 30s
+        loadAdminShifts();
+        // ===========================
+        // MAINTENANCE TOGGLE
+        // ===========================
+        async function toggleMaintenance() {
+            if (confirm("Are you sure you want to toggle maintenance mode? Users and Staff will not be able to access their dashboards.")) {
+                try {
+                    const res = await fetch('/api/admin/toggle-maintenance', { method: 'POST' });
+                    const data = await res.json();
+                    if (data.message === 'success') {
+                        alert("Maintenance mode is now: " + (data.maintenance_mode ? "ON" : "OFF"));
+                        const btn = document.getElementById('maintenance-toggle-btn');
+                        if (data.maintenance_mode) {
+                            btn.style.color = '#ef4444'; // Danger color when active
+                        } else {
+                            btn.style.color = 'var(--text-muted)';
+                        }
+                    } else {
+                        alert("Failed: " + data.message);
+                    }
+                } catch (e) {
+                    console.error('Toggle Error:', e);
+                    alert("Error toggling maintenance mode.");
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

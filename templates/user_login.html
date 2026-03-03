@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | UniStore</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <a href="/" class="logo" style="text-decoration: none;">
+                <i class="fas fa-shopping-bag"></i> UniStore
+            </a>
+            <h2>Welcome Back</h2>
+
+            <div class="input-group">
+                <label class="input-label">EMAIL ADDRESS</label>
+                <input type="email" id="email" placeholder="name@company.com" required>
+            </div>
+            <div class="input-group">
+                <label class="input-label">PASSWORD</label>
+                <div style="position: relative;">
+                    <input type="password" id="password" placeholder="••••••••" required
+                        style="width: 100%; padding-right: 40px;">
+                    <i class="fas fa-eye" id="togglePassword"
+                        style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-muted);"></i>
+                </div>
+            </div>
+
+            <div style="text-align: right; margin-bottom: 1.5rem;">
+                <a href="/forgot-password"
+                    style="color: var(--primary); font-size: 0.85rem; text-decoration: none;">Forgot Password?</a>
+            </div>
+
+            <button onclick="login()" id="login-btn">Sign In</button>
+
+            <p id="result"
+                style="margin-top: 2rem; display: none; padding: 1rem; border-radius: 12px; font-weight: 600;"></p>
+
+            <div style="margin-top: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+                Need an account? <a href="/register"
+                    style="color: var(--primary); font-weight: 600; text-decoration: none;">Join Now</a>
+            </div>
+            <div style="margin-top: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+                Staff portal? <a href="{{ url_for('staff_page') }}"
+                    style="color: var(--secondary); font-weight: 600; text-decoration: none;">Staff Login</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Password Toggle
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+        togglePassword.addEventListener('click', function (e) {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        function login() {
+            const btn = document.getElementById('login-btn');
+            const result = document.getElementById('result');
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+
+            // Client-side validation
+            if (!email || !password) {
+                result.innerText = "Please fill in all fields";
+                result.style.display = "block";
+                result.style.background = "#fef2f2";
+                result.style.color = "#ef4444";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Verifying...";
+
+            fetch("/user/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        result.innerText = "Login successful! Redirecting...";
+                        result.style.display = "block";
+                        result.style.background = "#f0fdf4";
+                        result.style.color = "#10b981";
+                        // Use provided redirect URL or default
+                        const redirectUrl = data.redirect || "/user/dashboard";
+
+                        // Agam's Fix: Clear client-side storage to remove any stale state
+                        localStorage.clear();
+                        sessionStorage.clear();
+
+                        // Redirect immediately with cache buster to force fresh load
+                        setTimeout(() => window.location.replace(redirectUrl + "?t=" + new Date().getTime()), 500);
+                    } else {
+                        result.innerText = data.message || "Login failed";
+                        result.style.display = "block";
+                        result.style.background = "#fef2f2";
+                        result.style.color = "#ef4444";
+                        btn.disabled = false;
+                        btn.innerText = "Sign In";
+                    }
+                })
+                .catch(err => {
+                    console.error("Login error:", err);
+                    result.innerText = "Connection Error. " + err;
+                    result.style.display = "block";
+                    result.style.background = "#fef2f2";
+                    result.style.color = "#ef4444";
+                    btn.disabled = false;
+                    btn.innerText = "Sign In";
+                });
+        }
+
+        // Allow Enter key to submit
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('email').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') login();
+            });
+            document.getElementById('password').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') login();
+            });
+        });
+    </script>
+</body>
+
+</html>

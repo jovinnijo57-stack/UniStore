@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Login | UniStore</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body style="--bg-gradient: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);">
+    <div class="auth-container">
+        <div class="auth-card">
+            <a href="{{ url_for('login_page') }}" class="logo" style="text-decoration: none; color: #4338ca;">
+                <i class="fas fa-user-shield"></i> UniStore
+            </a>
+            <h2 style="margin-top: 1rem;">Internal Portal</h2>
+
+            <div class="input-group">
+                <label class="input-label">STAFF ID / EMAIL</label>
+                <input type="email" id="email" placeholder="......." required>
+            </div>
+            <div class="input-group">
+                <label class="input-label">SECURITY KEY</label>
+                <input type="password" id="password" placeholder="........" required>
+            </div>
+
+            <button onclick="login()" id="login-btn" style="background: #4338ca;">Verify Credentials</button>
+
+            <p id="result"
+                style="margin-top: 2rem; display: none; padding: 1rem; border-radius: 12px; font-weight: 600;"></p>
+
+            <div style="margin-top: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+                Customer looking to shop? <a href="{{ url_for('login_page') }}"
+                    style="color: var(--primary); font-weight: 600; text-decoration: none;">Customer Login</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function login() {
+            const btn = document.getElementById('login-btn');
+            const result = document.getElementById('result');
+
+            btn.disabled = true;
+            btn.innerText = "Authenticating...";
+
+            fetch("/staff/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: document.getElementById("email").value,
+                    password: document.getElementById("password").value
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.message === "success") {
+                        location.href = data.redirect || "/staff/dashboard";
+                    } else {
+                        result.innerText = data.message;
+                        result.style.display = "block";
+                        result.style.background = "#fef2f2";
+                        result.style.color = "#ef4444";
+                        btn.disabled = false;
+                        btn.innerText = "Verify Credentials";
+                    }
+                })
+                .catch(err => {
+                    result.innerText = "Connection Error";
+                    result.style.display = "block";
+                    btn.disabled = false;
+                });
+        }
+    </script>
+</body>
+
+</html>

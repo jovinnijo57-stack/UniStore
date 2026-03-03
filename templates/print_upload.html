@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print Service | UniStore</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body style="background: #f8fafc; display: block;">
+    <header
+        style="background: white; padding: 1.5rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <a href="/" class="logo" style="margin-bottom: 0; text-decoration: none;">
+            <i class="fas fa-shopping-bag"></i> UniStore
+        </a>
+        <a href="/user/dashboard" style="color: var(--primary); text-decoration: none; font-weight: 600;">&larr; Back to
+            Dashboard</a>
+    </header>
+
+    <div class="auth-container" style="background: none; min-height: auto; padding-top: 50px;">
+        <div class="auth-card" style="max-width: 600px;">
+            <i class="fas fa-print" style="font-size: 3rem; color: var(--primary); margin-bottom: 1.5rem;"></i>
+            <h1 style="margin-bottom: 1rem;">Printing Service</h1>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Upload your files for professional
+                printing.<br><strong>Rate: Rs 1 per page</strong></p>
+
+            <form id="print-form">
+                <div class="input-group">
+                    <label class="input-label">CHOOSE FILE (PDF or Image)</label>
+                    <input type="file" id="file-input" required style="padding: 10px;">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">NUMBER OF PAGES</label>
+                    <input type="number" id="pages-input" value="1" min="1" required oninput="calcCost()">
+                </div>
+
+                <div style="background: #f3f4f6; padding: 1.5rem; border-radius: 16px; margin-bottom: 2rem;">
+                    <p style="font-size: 1.1rem; font-weight: 600;">Total Estimate: <span id="total-cost"
+                            style="color: var(--primary);">Rs 1</span></p>
+                </div>
+
+                <button type="submit" id="upload-btn">Upload & Submit Request</button>
+            </form>
+
+            <p id="result"
+                style="margin-top: 2rem; display: none; padding: 1rem; border-radius: 12px; font-weight: 600;"></p>
+        </div>
+    </div>
+
+    <script>
+        function calcCost() {
+            const pages = document.getElementById('pages-input').value;
+            document.getElementById('total-cost').innerText = "Rs " + (pages * 1);
+        }
+
+        document.getElementById('print-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('upload-btn');
+            const result = document.getElementById('result');
+            const fileInput = document.getElementById('file-input');
+            const pagesInput = document.getElementById('pages-input');
+
+            if (!fileInput.files[0]) return;
+
+            btn.disabled = true;
+            btn.innerText = "Uploading...";
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('pages', pagesInput.value);
+
+            try {
+                const res = await fetch('/api/upload-print', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data.message === 'success') {
+                    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+                    cart.push({
+                        id: 'PRINT-' + data.job_id,
+                        name: 'Print: ' + fileInput.files[0].name,
+                        price: data.cost,
+                        quantity: 1,
+                        image: 'https://cdn-icons-png.flaticon.com/512/3022/3022216.png'
+                    });
+                    localStorage.setItem('cart', JSON.stringify(cart));
+
+                    result.innerText = `Added to Cart! (Rs ${data.cost})`;
+                    result.style.display = 'block';
+                    result.style.background = '#f0fdf4';
+                    result.style.color = '#10b981';
+                    btn.innerText = "Redirecting...";
+                    setTimeout(() => location.href = "/shop", 1500);
+                } else {
+                    result.innerText = "Upload failed.";
+                    result.style.display = 'block';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.error(err);
+                btn.disabled = false;
+            }
+        };
+    </script>
+</body>
+
+</html>

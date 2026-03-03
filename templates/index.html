@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniStore | Premium Collection</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <header
+        style="position: absolute; top: 0; width: 100%; padding: 2rem 5%; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
+        <div class="logo" style="color: white; margin-bottom: 0;">
+            <i class="fas fa-shopping-bag"></i> UniStore
+        </div>
+        <nav style="display: flex; gap: 2rem;">
+            <a href="/shop" style="color: white; text-decoration: none; font-weight: 600;">Shop</a>
+            <a href="/login" style="color: white; text-decoration: none; font-weight: 600;">Login</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero-gradient">
+            <div class="fade-in">
+                <h1 style="font-size: 5rem; font-weight: 800; line-height: 1.1; margin-bottom: 2rem;">
+                    Discover <span style="color: #fbbf24;">Pure</span><br>Elegance.
+                </h1>
+                <p style="font-size: 1.5rem; max-width: 600px; margin: 0 auto 3rem; opacity: 0.9;">
+                    Step into a world of curated luxury and modern essentials. Your journey to a perfect style starts
+                    here.
+                </p>
+                <div style="display: flex; gap: 1.5rem; justify-content: center;">
+                    <button onclick="location.href='/shop'"
+                        style="width: auto; padding: 1.2rem 3rem; border-radius: 50px; background: white; color: var(--primary);">
+                        Shop (Login Required)
+                    </button>
+                    <button onclick="location.href='/register'"
+                        style="width: auto; padding: 1.2rem 3rem; border-radius: 50px; background: rgba(255,255,255,0.1); border: 2px solid white;">
+                        Join Now
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section style="padding: 100px 5%; max-width: 1200px; margin: 0 auto;">
+            <div style="text-align: center; margin-bottom: 4rem;">
+                <h2 style="font-size: 2.5rem;">Why Shop With Us?</h2>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem;">
+                <div class="product-card" style="padding: 3rem; text-align: center;">
+                    <i class="fas fa-truck-fast"
+                        style="font-size: 3rem; color: var(--primary); margin-bottom: 1.5rem;"></i>
+                    <h3>Free Shipping</h3>
+                    <p style="color: var(--text-muted);">Global delivery on all orders over $150. Fast, secure, and
+                        tracked.</p>
+                </div>
+                <div class="product-card" style="padding: 3rem; text-align: center;">
+                    <i class="fas fa-rotate-left"
+                        style="font-size: 3rem; color: var(--secondary); margin-bottom: 1.5rem;"></i>
+                    <h3>Easy Returns</h3>
+                    <p style="color: var(--text-muted);">Not satisfied? Return within 30 days for a zero-hassle full
+                        refund.</p>
+                </div>
+                <div class="product-card" style="padding: 3rem; text-align: center;">
+                    <i class="fas fa-shield-halved"
+                        style="font-size: 3rem; color: var(--success); margin-bottom: 1.5rem;"></i>
+                    <h3>Secure Checkout</h3>
+                    <p style="color: var(--text-muted);">Bank-grade industry standard security for every transaction.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer style="background: #111827; color: white; padding: 4rem 5%; text-align: center;">
+        <div class="logo" style="color: white; margin-bottom: 2rem;">
+            <i class="fas fa-shopping-bag"></i> UniStore
+        </div>
+        <p style="opacity: 0.6;">&copy; 2026 UniStore Premium. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>

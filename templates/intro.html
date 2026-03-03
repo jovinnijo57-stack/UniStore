@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to UniStore</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Abstract Background Shapes */
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+            animation: floatShape 20s infinite linear;
+            z-index: 0;
+        }
+
+        .shape:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: -50px;
+            left: -100px;
+            animation-duration: 25s;
+        }
+
+        .shape:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            bottom: -100px;
+            right: -50px;
+            animation-duration: 30s;
+            animation-direction: reverse;
+        }
+
+        .shape:nth-child(3) {
+            width: 150px;
+            height: 150px;
+            top: 20%;
+            right: 20%;
+            animation-duration: 15s;
+        }
+
+        @keyframes floatShape {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(20px, 20px) rotate(360deg);
+            }
+        }
+
+        .intro-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-wrapper {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        /* Icon Animation: Bounce In + Float */
+        .logo-icon {
+            font-size: 5rem;
+            color: #6366f1;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0;
+            transform: translateY(-100px) scale(0.5);
+            filter: drop-shadow(0 10px 20px rgba(99, 102, 241, 0.3));
+            animation: bounceIn 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards,
+                floatIcon 3s ease-in-out infinite 1.2s;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-100px) scale(0.5);
+            }
+
+            60% {
+                opacity: 1;
+                transform: translateY(20px) scale(1.1);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes floatIcon {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Text Animation: Staggered Letter Reveal */
+        .logo-text {
+            display: flex;
+            font-size: 4rem;
+            font-weight: 800;
+            color: #1e293b;
+            letter-spacing: -2px;
+            overflow: hidden;
+        }
+
+        .letter {
+            display: inline-block;
+            transform: translateY(100%);
+            opacity: 0;
+            animation: revealLetter 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .letter.gradient {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes revealLetter {
+            0% {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Tagline Fade In */
+        .tagline {
+            margin-top: 0.5rem;
+            font-size: 1.1rem;
+            color: #64748b;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeUp 0.8s ease-out forwards 1.5s;
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Loading Bar */
+        .loader-container {
+            margin-top: 3rem;
+            width: 200px;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards 1s;
+        }
+
+        .loader-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            border-radius: 4px;
+            animation: loadProgress 2s ease-in-out forwards 1s;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes loadProgress {
+            0% {
+                width: 0%;
+            }
+
+            100% {
+                width: 100%;
+            }
+        }
+
+        /* Exit Animation Class */
+        body.exit .intro-container {
+            transition: 0.5s cubic-bezier(0.7, 0, 0.3, 1);
+            transform: scale(1.1);
+            opacity: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Background Shapes -->
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+
+    <div class="intro-container">
+        <div class="logo-wrapper">
+            <i class="fas fa-graduation-cap logo-icon"></i>
+        </div>
+
+        <div class="logo-text" id="logoText">
+            <!-- Letters injected via JS -->
+        </div>
+
+        <div class="tagline"> Shop. Click. Collect.</div>
+
+        <div class="loader-container">
+            <div class="loader-bar"></div>
+        </div>
+    </div>
+
+    <script>
+        // Split text animation
+        const text = "UniStore";
+        const container = document.getElementById('logoText');
+
+        text.split('').forEach((char, index) => {
+            const span = document.createElement('span');
+            span.textContent = char;
+            span.className = 'letter';
+            if (index < 3) span.classList.add('gradient'); // Gradient for 'Uni'
+            span.style.animationDelay = `${0.5 + (index * 0.05)}s`; // Stagger delay
+            container.appendChild(span);
+        });
+
+        // Redirect sequence
+        setTimeout(() => {
+            document.body.classList.add('exit'); // Trigger exit animation
+            setTimeout(() => {
+                window.location.href = "/login";
+            }, 500); // Wait for exit animation
+        }, 3200); // Total duration
+    </script>
+
+</body>
+
+</html>

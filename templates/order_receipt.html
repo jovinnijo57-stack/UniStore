@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Receipt #{{ order.id }} | UniStore</title>
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap"
+        rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --bg-light: #f9fafb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            padding: 40px 20px;
+            color: var(--text-main);
+        }
+
+        .receipt-card {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        /* Branding Header */
+        .receipt-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 40px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 28px;
+            margin-bottom: 4px;
+        }
+
+        .brand p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .receipt-status {
+            text-align: right;
+        }
+
+        .status-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            backdrop-filter: blur(4px);
+        }
+
+        /* Receipt Info */
+        .receipt-body {
+            padding: 40px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .info-item span {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* Table */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+        }
+
+        .items-table th {
+            text-align: left;
+            padding: 12px 0;
+            border-bottom: 2px solid var(--border);
+            color: var(--text-muted);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .items-table td {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .item-details h4 {
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .item-details p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .item-qty {
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .item-price {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        /* Summary */
+        .receipt-summary {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .summary-box {
+            width: 250px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .summary-row.total {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px solid var(--border);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .summary-row label {
+            color: var(--text-muted);
+        }
+
+        /* Footer */
+        .receipt-footer {
+            background-color: var(--bg-light);
+            padding: 30px 40px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+
+        .receipt-footer p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .footer-actions {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-print {
+            background-color: white;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+
+        .btn-print:hover {
+            background-color: #f1f5f9;
+        }
+
+        .btn-home {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-home:hover {
+            background-color: var(--primary-dark);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .receipt-card {
+                box-shadow: none;
+                border: none;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .footer-actions {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="receipt-card">
+        <!-- Header -->
+        <header class="receipt-header">
+            <div class="brand">
+                <h1>UniStore</h1>
+                <p>Official Shopping Receipt</p>
+            </div>
+            <div class="receipt-status">
+                <span class="status-badge">{{ order.status }}</span>
+            </div>
+        </header>
+
+        <!-- Body -->
+        <div class="receipt-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Order Number</label>
+                    <span>#{{ order.id }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Transaction Date</label>
+                    <span>{{ order.date }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Customer Email</label>
+                    <span>{{ order.user_email or order.user }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Payment Method</label>
+                    <span>{{ order.method }}</span>
+                </div>
+            </div>
+
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60%;">Description</th>
+                        <th style="width: 15%; text-align: center;">Qty</th>
+                        <th style="width: 25%; text-align: right;">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order['items'] %}
+                    <tr>
+                        <td>
+                            <div class="item-details">
+                                <h4>{{ item.name }}</h4>
+                                <p>{{ item.category or 'Product' }}</p>
+                            </div>
+                        </td>
+                        <td class="item-qty">{{ item.quantity }}</td>
+                        <td class="item-price">₹{{ (item.price * item.quantity)|round(2) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="receipt-summary">
+                <div class="summary-box">
+                    <div class="summary-row">
+                        <label>Subtotal</label>
+                        <span>₹{{ order.total|round(2) }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <label>Discount</label>
+                        <span>-₹0.00</span>
+                    </div>
+                    <div class="summary-row total">
+                        <label>Total Paid</label>
+                        <span>₹{{ order.total|round(2) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="receipt-footer">
+            <p>Thank you for choosing UniStore. We hope to see you again soon!</p>
+            <div class="footer-actions">
+                <button onclick="window.print()" class="btn btn-print">
+                    <i class="fas fa-print"></i> Print Receipt
+                </button>
+                <a href="/user/dashboard" class="btn btn-home">
+                    <i class="fas fa-home"></i> Back to Dashboard
+                </a>
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>

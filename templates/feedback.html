@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Feedback | UniStore</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body style="background: #f8fafc; display: block;">
+    <div class="auth-container" style="background: var(--bg-gradient);">
+        <div class="auth-card" style="max-width: 500px;">
+            <i class="fas fa-comment-dots" style="font-size: 3rem; color: var(--primary); margin-bottom: 1.5rem;"></i>
+            <h2>Share Your Feedback</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Order #{{ order_id }}</p>
+
+            <div style="text-align: left; margin-bottom: 2rem;">
+                <label class="input-label">RATING (1-5)</label>
+                <div
+                    style="display: flex; gap: 1rem; margin-bottom: 2rem; justify-content: center; font-size: 2rem; color: #e5e7eb;">
+                    <i class="fas fa-star star" onclick="setRating(1)" style="cursor: pointer;"></i>
+                    <i class="fas fa-star star" onclick="setRating(2)" style="cursor: pointer;"></i>
+                    <i class="fas fa-star star" onclick="setRating(3)" style="cursor: pointer;"></i>
+                    <i class="fas fa-star star" onclick="setRating(4)" style="cursor: pointer;"></i>
+                    <i class="fas fa-star star" onclick="setRating(5)" style="cursor: pointer;"></i>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">YOUR COMMENT</label>
+                    <textarea id="comment"
+                        style="width: 100%; padding: 1rem; border-radius: 12px; border: 2px solid #e5e7eb; height: 100px; font-family: inherit;"></textarea>
+                </div>
+            </div>
+
+            <button onclick="submitFeedback()" id="submit-btn">Submit Feedback</button>
+            <p id="status-msg"
+                style="margin-top: 1.5rem; display: none; padding: 1rem; border-radius: 12px; font-weight: 600;"></p>
+        </div>
+    </div>
+
+    <script>
+        let currentRating = 0;
+
+        function setRating(r) {
+            currentRating = r;
+            document.querySelectorAll('.star').forEach((s, i) => {
+                s.style.color = i < r ? '#f59e0b' : '#e5e7eb';
+            });
+        }
+
+        async function submitFeedback() {
+            if (currentRating === 0) {
+                alert("Please select a rating!");
+                return;
+            }
+
+            const btn = document.getElementById('submit-btn');
+            const msg = document.getElementById('status-msg');
+            const comment = document.getElementById('comment').value;
+
+            btn.disabled = true;
+            btn.innerText = "Submitting...";
+
+            const res = await fetch('/api/submit-feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    order_id: '{{ order_id }}',
+                    rating: currentRating,
+                    comment: comment
+                })
+            });
+            const data = await res.json();
+
+            if (data.message === 'success') {
+                msg.innerText = "Thank you! Returning to Dashboard...";
+                msg.style.display = "block";
+                msg.style.background = "#f0fdf4";
+                msg.style.color = "#10b981";
+                setTimeout(() => location.href = "{{ url_for('user_dashboard') }}", 2000);
+            }
+        }
+    </script>
+</body>
+
+</html>

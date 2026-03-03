@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart | UniStore</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .cart-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 3rem;
+            max-width: 1300px;
+            margin: 50px auto;
+            padding: 0 5%;
+        }
+
+        @media (max-width: 1000px) {
+            .cart-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            padding: 2rem 0;
+            border-bottom: 1px solid #e5e7eb;
+            gap: 2rem;
+        }
+    </style>
+</head>
+
+<body style="background: #f8fafc; display: block;">
+    <header
+        style="padding: 2rem 5%; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;">
+        <a href="/shop" class="logo" style="margin-bottom: 0; text-decoration: none;">
+            <i class="fas fa-shopping-bag"></i> UniStore
+        </a>
+        <a href="/shop" style="color: var(--primary); text-decoration: none; font-weight: 600;">&larr; Back to Shop</a>
+    </header>
+
+    <div class="cart-wrapper" id="cart-content">
+        <!-- Loaded by JS -->
+    </div>
+
+    <script>
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        function render() {
+            const container = document.getElementById('cart-content');
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 100px 0;">
+                        <i class="fas fa-shopping-basket" style="font-size: 5rem; color: #e5e7eb; margin-bottom: 2rem;"></i>
+                        <h2>Your cart is empty</h2>
+                        <button onclick="location.href='/shop'" style="width: auto; padding: 1rem 3rem; border-radius: 50px; margin-top: 2rem;">Start Shopping</button>
+                    </div>
+                `;
+                return;
+            }
+
+            const subtotal = cart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
+            const shipping = 0.00;
+            const total = subtotal + shipping;
+
+            container.innerHTML = `
+                <div>
+                    <h1 style="margin-bottom: 2rem;">Shopping Cart (${cart.length} items)</h1>
+                    <div style="background: white; padding: 0 2rem; border-radius: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        ${cart.map(i => `
+                            <div class="item-row">
+                                <img src="${i.image}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 12px;">
+                                <div style="flex: 1;">
+                                    <h3 style="font-size: 1.1rem;">${i.name}</h3>
+                                    <p style="color: var(--primary); font-weight: 600; margin-top: 0.5rem;">Rs ${i.price.toFixed(2)}</p>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 1rem; background: #f3f4f6; padding: 8px 15px; border-radius: 50px;">
+                                    <i class="fas fa-minus" style="cursor: pointer;" onclick="changeQty('${i.id}', -1)"></i>
+                                    <span style="font-weight: 800; min-width: 25px; text-align: center;">${i.quantity}</span>
+                                    <i class="fas fa-plus" style="cursor: pointer;" onclick="changeQty('${i.id}', 1)"></i>
+                                </div>
+                                <i class="fas fa-trash-alt" style="color: #ef4444; cursor: pointer; font-size: 1.2rem;" onclick="remove('${i.id}')"></i>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div>
+                    <div style="background: white; padding: 3rem; border-radius: 24px; box-shadow: 0 10px 15px rgba(0,0,0,0.05); position: sticky; top: 120px;">
+                        <h2 style="margin-bottom: 2rem; text-align: left;">Order Summary</h2>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
+                            <span style="color: var(--text-muted);">Subtotal</span>
+                            <span style="font-weight: 600;">Rs ${subtotal.toFixed(2)}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
+                            <span style="color: var(--text-muted);">Shipping</span>
+                            <span style="font-weight: 600;">${shipping === 0 ? 'FREE' : 'Rs ' + shipping.toFixed(2)}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #f3f4f6;">
+                            <span style="font-size: 1.3rem; font-weight: 800;">Total</span>
+                            <span style="font-size: 1.3rem; font-weight: 800; color: var(--primary);">Rs ${total.toFixed(2)}</span>
+                        </div>
+                        <button onclick="checkout()" style="margin-top: 2.5rem; padding: 1.2rem; border-radius: 50px;">
+                            Checkout Securely
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function changeQty(id, delta) {
+            const item = cart.find(i => String(i.id) === String(id));
+            if (item) {
+                if (delta > 0 && item.stock && item.quantity >= item.stock) {
+                    alert(`Only ${item.stock} items available in stock!`);
+                    return;
+                }
+                item.quantity = Number(item.quantity) + delta;
+                if (item.quantity <= 0) remove(id);
+                else {
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    render();
+                }
+            }
+        }
+
+        function remove(id) {
+            cart = cart.filter(i => String(i.id) !== String(id));
+            localStorage.setItem('cart', JSON.stringify(cart));
+            render();
+        }
+
+        function checkout() {
+            if (cart.length === 0) return;
+            location.href = "/payment";
+        }
+
+        render();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,30 @@
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: tmode7197@gmail.com
+Verify result: {'success': True, 'user': {'id': 38, 'name': 'textmode', 'email': 'tmode7197@gmail.com', 'password': 'scrypt:32768:8:1$gl0RnH4smciSbuw9$d23ef4003b23300f5282b5d9c2896a1ad3c3399321b5ed8d721013b57700383b20969d6c7a7ee22a4a3b699295d5fe7d1b1c5461cbf1642a467c2dda2d1d1faa', 'created_at': '2026-03-03 05:43:18', 'college': 'Engineering'}}
+Session set for: tmode7197@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: tmode7197@gmail.com
+Verify result: {'success': True, 'user': {'id': 38, 'name': 'textmode', 'email': 'tmode7197@gmail.com', 'password': 'scrypt:32768:8:1$gl0RnH4smciSbuw9$d23ef4003b23300f5282b5d9c2896a1ad3c3399321b5ed8d721013b57700383b20969d6c7a7ee22a4a3b699295d5fe7d1b1c5461cbf1642a467c2dda2d1d1faa', 'created_at': '2026-03-03 05:43:18', 'college': 'Engineering'}}
+Session set for: tmode7197@gmail.com
+Login attempt for: jeswinnijo6@gmail.com
+Verify result: {'success': True, 'user': {'id': 39, 'name': 'JESWIN', 'email': 'jeswinnijo6@gmail.com', 'password': 'scrypt:32768:8:1$MR09NpcHT5xHzjrH$e958a4e96875fa35abfd9449bc2ba8ad7045893300c67b33fcdc51bd6afe05b78317277e43a4d94048192f505ce19ba8201264655c14a3b4a1c195263124c6ef', 'created_at': '2026-03-03 06:53:23', 'college': 'Engineering'}}
+Session set for: jeswinnijo6@gmail.com

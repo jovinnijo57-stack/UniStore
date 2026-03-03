@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Portal | UniStore Pro</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Professional Tools Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #4f46e5;
+            --accent: #f43f5e;
+            --bg-glass: rgba(255, 255, 255, 0.9);
+        }
+
+        .staff-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f1f5f9;
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 80px;
+            z-index: 99;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            width: auto;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            width: auto;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-bottom: 2rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background: #ef4444;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            border-color: #ef4444;
+        }
+    </style>
+</head>
+
+<body style="background: #f8fafc; display: block;">
+    <header
+        style="background: #1e1b4b; padding: 1rem 5%; color: white; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000;">
+        <div class="logo" style="color: white; margin-bottom: 0; font-size: 1.5rem;">
+            <i class="fas fa-layer-group"></i> UniStore <span style="font-weight: 300; opacity: 0.7;">STAFF</span>
+        </div>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <span style="font-size: 0.8rem; opacity: 0.7;"><i class="fas fa-clock"></i> Auto-Sync Active</span>
+
+            <!-- Animated Logout Button -->
+            <style>
+                .logoutButton {
+                    --figure-duration: 100ms;
+                    --transform-figure: none;
+                    --walking-duration: 100ms;
+                    --transform-arm1: none;
+                    --transform-wrist1: none;
+                    --transform-arm2: none;
+                    --transform-wrist2: none;
+                    --transform-leg1: none;
+                    --transform-calf1: none;
+                    --transform-leg2: none;
+                    --transform-calf2: none;
+                    background: none;
+                    border: 0;
+                    color: white;
+                    /* Adjusted for Staff Header */
+                    cursor: pointer;
+                    display: inline-flex;
+                    /* Inline for header */
+                    align-items: center;
+                    gap: 0.5rem;
+                    font-family: inherit;
+                    font-size: 14px;
+                    font-weight: 500;
+                    height: 40px;
+                    outline: none;
+                    padding: 0 10px;
+                    /* Reduced padding */
+                    perspective: 100px;
+                    position: relative;
+                    text-align: left;
+                    width: 130px;
+                    /* Fixed width */
+                    -webkit-tap-highlight-color: transparent;
+                }
+
+                .logoutButton::before {
+                    background-color: rgba(255, 255, 255, 0.1);
+                    /* Glass effect */
+                    border-radius: 50px;
+                    /* Rounded pill */
+                    content: "";
+                    display: block;
+                    height: 100%;
+                    left: 0;
+                    position: absolute;
+                    top: 0;
+                    transform: none;
+                    transition: transform 50ms ease;
+                    width: 100%;
+                    z-index: 2;
+                }
+
+                .logoutButton:hover .door {
+                    transform: rotateY(20deg);
+                }
+
+                .logoutButton:active::before {
+                    transform: scale(0.96);
+                }
+
+                .logoutButton:active .door {
+                    transform: rotateY(28deg);
+                }
+
+                .logoutButton.clicked::before {
+                    transform: none;
+                }
+
+                .logoutButton.clicked .door {
+                    transform: rotateY(35deg);
+                }
+
+                .logoutButton.door-slammed .door {
+                    transform: none;
+                    transition: transform 100ms ease-in 250ms;
+                }
+
+                .logoutButton.falling {
+                    animation: shake 200ms linear;
+                }
+
+                .logoutButton.falling .bang {
+                    animation: flash 300ms linear;
+                }
+
+                .logoutButton.falling .figure {
+                    animation: spin 1000ms infinite linear;
+                    bottom: -1080px;
+                    opacity: 0;
+                    right: 1px;
+                    transition: transform calc(var(--figure-duration) * 1ms) linear, bottom calc(var(--figure-duration) * 1ms) cubic-bezier(0.7, 0.1, 1, 1) 100ms, opacity calc(var(--figure-duration) * 0.25ms) linear calc(var(--figure-duration) * 0.75ms);
+                    z-index: 1000;
+                }
+
+                .button-text {
+                    color: white;
+                    font-weight: 500;
+                    position: relative;
+                    z-index: 10;
+                    margin-left: 20px;
+                }
+
+                .anim-svg {
+                    display: block;
+                    position: absolute;
+                }
+
+                .figure {
+                    bottom: 5px;
+                    fill: #f4f7ff;
+                    /* match bg color to hide initially */
+                    right: 18px;
+                    transform: var(--transform-figure);
+                    transition: transform calc(var(--figure-duration) * 1ms) cubic-bezier(0.2, 0.1, 0.8, 0.9);
+                    width: 30px;
+                    z-index: 4;
+                }
+
+                /* When animating show figure */
+                .logoutButton.clicked .figure {
+                    fill: #4371f7;
+                }
+
+                .door,
+                .doorway {
+                    bottom: 4px;
+                    fill: white;
+                    right: 12px;
+                    width: 32px;
+                }
+
+                .door {
+                    transform: rotateY(20deg);
+                    transform-origin: 100% 50%;
+                    transform-style: preserve-3d;
+                    transition: transform 200ms ease;
+                    z-index: 5;
+                }
+
+                .door path {
+                    fill: #4371f7;
+                    stroke: #4371f7;
+                    stroke-width: 4;
+                }
+
+                .doorway {
+                    z-index: 3;
+                }
+
+                .bang {
+                    opacity: 0;
+                }
+
+                .arm1,
+                .wrist1,
+                .arm2,
+                .wrist2,
+                .leg1,
+                .calf1,
+                .leg2,
+                .calf2 {
+                    transition: transform calc(var(--walking-duration) * 1ms) ease-in-out;
+                }
+
+                .arm1 {
+                    transform: var(--transform-arm1);
+                    transform-origin: 52% 45%;
+                }
+
+                .wrist1 {
+                    transform: var(--transform-wrist1);
+                    transform-origin: 59% 55%;
+                }
+
+                .arm2 {
+                    transform: var(--transform-arm2);
+                    transform-origin: 47% 43%;
+                }
+
+                .wrist2 {
+                    transform: var(--transform-wrist2);
+                    transform-origin: 35% 47%;
+                }
+
+                .leg1 {
+                    transform: var(--transform-leg1);
+                    transform-origin: 47% 64.5%;
+                }
+
+                .calf1 {
+                    transform: var(--transform-calf1);
+                    transform-origin: 55.5% 71.5%;
+                }
+
+                .leg2 {
+                    transform: var(--transform-leg2);
+                    transform-origin: 43% 63%;
+                }
+
+                .calf2 {
+                    transform: var(--transform-calf2);
+                    transform-origin: 41.5% 73%;
+                }
+
+                @keyframes spin {
+                    from {
+                        transform: rotate(0deg) scale(0.94);
+                    }
+
+                    to {
+                        transform: rotate(359deg) scale(0.94);
+                    }
+                }
+
+                @keyframes shake {
+                    0% {
+                        transform: rotate(-1deg);
+                    }
+
+                    50% {
+                        transform: rotate(2deg);
+                    }
+
+                    100% {
+                        transform: rotate(-1deg);
+                    }
+                }
+
+                @keyframes flash {
+                    0% {
+                        opacity: 0.4;
+                    }
+
+                    100% {
+                        opacity: 0;
+                    }
+                }
+
+                .anim-icon-container-staff {
+                    position: relative;
+                    width: 32px;
+                    height: 32px;
+                    overflow: visible;
+                }
+            </style>
+
+            <button class="logoutButton" id="staffLogoutBtn">
+                <div class="anim-icon-container-staff">
+                    <svg class="doorway anim-svg" viewBox="0 0 100 100">
+                        <path
+                            d="M93.4 86.3H58.6c-1.9 0-3.4-1.5-3.4-3.4V17.1c0-1.9 1.5-3.4 3.4-3.4h34.8c1.9 0 3.4 1.5 3.4 3.4v65.8c0 1.9-1.5 3.4-3.4 3.4z" />
+                        <path class="bang"
+                            d="M40.5 43.7L26.6 31.4l-2.5 6.7zM41.9 50.4l-19.5-4-1.4 6.3zM40 57.4l-17.7 3.9 3.9 5.7z" />
+                    </svg>
+                    <svg class="figure anim-svg" viewBox="0 0 100 100">
+                        <circle cx="52.1" cy="32.4" r="6.4" />
+                        <path
+                            d="M50.7 62.8c-1.2 2.5-3.6 5-7.2 4-3.2-.9-4.9-3.5-4-7.8.7-3.4 3.1-13.8 4.1-15.8 1.7-3.4 1.6-4.6 7-3.7 4.3.7 4.6 2.5 4.3 5.4-.4 3.7-2.8 15.1-4.2 17.9z" />
+                        <g class="arm1">
+                            <path
+                                d="M55.5 56.5l-6-9.5c-1-1.5-.6-3.5.9-4.4 1.5-1 3.7-1.1 4.6.4l6.1 10c1 1.5.3 3.5-1.1 4.4-1.5.9-3.5.5-4.5-.9z" />
+                            <path class="wrist1"
+                                d="M69.4 59.9L58.1 58c-1.7-.3-2.9-1.9-2.6-3.7.3-1.7 1.9-2.9 3.7-2.6l11.4 1.9c1.7.3 2.9 1.9 2.6 3.7-.4 1.7-2 2.9-3.8 2.6z" />
+                        </g>
+                        <g class="arm2">
+                            <path
+                                d="M34.2 43.6L45 40.3c1.7-.6 3.5.3 4 2 .6 1.7-.3 4-2 4.5l-10.8 2.8c-1.7.6-3.5-.3-4-2-.6-1.6.3-3.4 2-4z" />
+                            <path class="wrist2"
+                                d="M27.1 56.2L32 45.7c.7-1.6 2.6-2.3 4.2-1.6 1.6.7 2.3 2.6 1.6 4.2L33 58.8c-.7 1.6-2.6 2.3-4.2 1.6-1.7-.7-2.4-2.6-1.7-4.2z" />
+                        </g>
+                        <g class="leg1">
+                            <path
+                                d="M52.1 73.2s-7-5.7-7.9-6.5c-.9-.9-1.2-3.5-.1-4.9 1.1-1.4 3.8-1.9 5.2-.9l7.9 7c1.4 1.1 1.7 3.5.7 4.9-1.1 1.4-4.4 1.5-5.8.4z" />
+                            <path class="calf1"
+                                d="M52.6 84.4l-1-12.8c-.1-1.9 1.5-3.6 3.5-3.7 2-.1 3.7 1.4 3.8 3.4l1 12.8c.1 1.9-1.5 3.6-3.5 3.7-2 0-3.7-1.5-3.8-3.4z" />
+                        </g>
+                        <g class="leg2">
+                            <path
+                                d="M37.8 72.7s1.3-10.2 1.6-11.4 2.4-2.8 4.1-2.6c1.7.2 3.6 2.3 3.4 4l-1.8 11.1c-.2 1.7-1.7 3.3-3.4 3.1-1.8-.2-4.1-2.4-3.9-4.2z" />
+                            <path class="calf2"
+                                d="M29.5 82.3l9.6-10.9c1.3-1.4 3.6-1.5 5.1-.1 1.5 1.4.4 4.9-.9 6.3l-8.5 9.6c-1.3 1.4-3.6 1.5-5.1.1-1.4-1.3-1.5-3.5-.2-5z" />
+                        </g>
+                    </svg>
+                    <svg class="door anim-svg" viewBox="0 0 100 100">
+                        <path
+                            d="M93.4 86.3H58.6c-1.9 0-3.4-1.5-3.4-3.4V17.1c0-1.9 1.5-3.4 3.4-3.4h34.8c1.9 0 3.4 1.5 3.4 3.4v65.8c0 1.9-1.5 3.4-3.4 3.4z" />
+                        <circle cx="66" cy="50" r="3.7" />
+                    </svg>
+                </div>
+                <span class="button-text">Log Out</span>
+            </button>
+
+            <script>
+                document.querySelectorAll('.logoutButton').forEach(button => {
+                    button.state = 'default'
+
+                    // Button Constants
+                    const logoutButtonStates = {
+                        'default': {
+                            '--figure-duration': '100',
+                            '--transform-figure': 'none',
+                            '--walking-duration': '100',
+                            '--transform-arm1': 'none',
+                            '--transform-wrist1': 'none',
+                            '--transform-arm2': 'none',
+                            '--transform-wrist2': 'none',
+                            '--transform-leg1': 'none',
+                            '--transform-calf1': 'none',
+                            '--transform-leg2': 'none',
+                            '--transform-calf2': 'none'
+                        },
+                        'hover': {
+                            '--figure-duration': '100',
+                            '--transform-figure': 'translateX(1.5px)',
+                            '--walking-duration': '100',
+                            '--transform-arm1': 'rotate(-5deg)',
+                            '--transform-wrist1': 'rotate(-15deg)',
+                            '--transform-arm2': 'rotate(5deg)',
+                            '--transform-wrist2': 'rotate(6deg)',
+                            '--transform-leg1': 'rotate(-10deg)',
+                            '--transform-calf1': 'rotate(5deg)',
+                            '--transform-leg2': 'rotate(20deg)',
+                            '--transform-calf2': 'rotate(-20deg)'
+                        },
+                        'walking1': {
+                            '--figure-duration': '300',
+                            '--transform-figure': 'translateX(11px)',
+                            '--walking-duration': '300',
+                            '--transform-arm1': 'translateX(-4px) translateY(-2px) rotate(120deg)',
+                            '--transform-wrist1': 'rotate(-5deg)',
+                            '--transform-arm2': 'translateX(4px) rotate(-110deg)',
+                            '--transform-wrist2': 'rotate(-5deg)',
+                            '--transform-leg1': 'translateX(-3px) rotate(80deg)',
+                            '--transform-calf1': 'rotate(-30deg)',
+                            '--transform-leg2': 'translateX(4px) rotate(-60deg)',
+                            '--transform-calf2': 'rotate(20deg)'
+                        },
+                        'walking2': {
+                            '--figure-duration': '400',
+                            '--transform-figure': 'translateX(17px)',
+                            '--walking-duration': '300',
+                            '--transform-arm1': 'rotate(60deg)',
+                            '--transform-wrist1': 'rotate(-15deg)',
+                            '--transform-arm2': 'rotate(-45deg)',
+                            '--transform-wrist2': 'rotate(6deg)',
+                            '--transform-leg1': 'rotate(-5deg)',
+                            '--transform-calf1': 'rotate(10deg)',
+                            '--transform-leg2': 'rotate(10deg)',
+                            '--transform-calf2': 'rotate(-20deg)'
+                        },
+                        'falling1': {
+                            '--figure-duration': '1600',
+                            '--walking-duration': '400',
+                            '--transform-arm1': 'rotate(-60deg)',
+                            '--transform-wrist1': 'none',
+                            '--transform-arm2': 'rotate(30deg)',
+                            '--transform-wrist2': 'rotate(120deg)',
+                            '--transform-leg1': 'rotate(-30deg)',
+                            '--transform-calf1': 'rotate(-20deg)',
+                            '--transform-leg2': 'rotate(20deg)'
+                        },
+                        'falling2': {
+                            '--walking-duration': '300',
+                            '--transform-arm1': 'rotate(-100deg)',
+                            '--transform-arm2': 'rotate(-60deg)',
+                            '--transform-wrist2': 'rotate(60deg)',
+                            '--transform-leg1': 'rotate(80deg)',
+                            '--transform-calf1': 'rotate(20deg)',
+                            '--transform-leg2': 'rotate(-60deg)'
+                        },
+                        'falling3': {
+                            '--walking-duration': '500',
+                            '--transform-arm1': 'rotate(-30deg)',
+                            '--transform-wrist1': 'rotate(40deg)',
+                            '--transform-arm2': 'rotate(50deg)',
+                            '--transform-wrist2': 'none',
+                            '--transform-leg1': 'rotate(-30deg)',
+                            '--transform-leg2': 'rotate(20deg)',
+                            '--transform-calf2': 'none'
+                        }
+                    }
+
+                    // function to transition a button from one state to the next
+                    let updateButtonState = (button, state) => {
+                        if (logoutButtonStates[state]) {
+                            button.state = state
+                            for (let key in logoutButtonStates[state]) {
+                                button.style.setProperty(key, logoutButtonStates[state][key])
+                            }
+                        }
+                    }
+
+                    // mouse hover listeners on button
+                    button.addEventListener('mouseenter', () => {
+                        if (button.state === 'default') {
+                            updateButtonState(button, 'hover')
+                        }
+                    })
+                    button.addEventListener('mouseleave', () => {
+                        if (button.state === 'hover') {
+                            updateButtonState(button, 'default')
+                        }
+                    })
+
+                    // click listener on button
+                    button.addEventListener('click', () => {
+                        if (button.state === 'default' || button.state === 'hover') {
+                            button.classList.add('clicked')
+                            updateButtonState(button, 'walking1')
+                            setTimeout(() => {
+                                button.classList.add('door-slammed')
+                                updateButtonState(button, 'walking2')
+                                setTimeout(() => {
+                                    button.classList.add('falling')
+                                    updateButtonState(button, 'falling1')
+                                    setTimeout(() => {
+                                        updateButtonState(button, 'falling2')
+                                        setTimeout(() => {
+                                            updateButtonState(button, 'falling3')
+                                            setTimeout(() => {
+                                                button.classList.remove('clicked')
+                                                button.classList.remove('door-slammed')
+                                                button.classList.remove('falling')
+                                                updateButtonState(button, 'default')
+                                                // Redirect after animation
+                                                window.location.href = "/logout";
+                                            }, 1000)
+                                        }, logoutButtonStates['falling2']['--walking-duration'])
+                                    }, logoutButtonStates['falling1']['--walking-duration'])
+                                }, logoutButtonStates['walking2']['--figure-duration'])
+                            }, logoutButtonStates['walking1']['--figure-duration'])
+                        }
+                    })
+                })
+            </script>
+        </div>
+    </header>
+
+    <div style="max-width: 1400px; margin: 2rem auto; padding: 0 5%;">
+
+        <!-- Tab Navigation -->
+        <div class="tab-nav" style="flex-wrap: wrap;">
+            <button class="tab-btn active" onclick="switchTab('dashboard', this)"><i class="fas fa-chart-line"></i>
+                Dashboard</button>
+            <button class="tab-btn" onclick="switchTab('printing', this)"><i class="fas fa-print"></i> Print
+                Jobs</button>
+            <button class="tab-btn" onclick="switchTab('orders', this)"><i class="fas fa-shopping-basket"></i>
+                Orders</button>
+            <button class="tab-btn" onclick="switchTab('inventory', this)"><i class="fas fa-boxes"></i>
+                Inventory</button>
+            <button class="tab-btn" onclick="switchTab('tasks', this)"><i class="fas fa-tasks"></i> Tasks</button>
+            <button class="tab-btn" onclick="switchTab('shifts', this)"><i class="fas fa-user-clock"></i>
+                Shifts</button>
+            <button class="tab-btn" onclick="switchTab('config', this)"><i class="fas fa-cog"></i> Settings</button>
+        </div>
+
+        <!-- Dashboard / Analytics Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+                <div class="staff-card" style="border-left: 5px solid #10b981;">
+                    <small style="color: var(--text-muted); font-weight: 700;">TOTAL REVENUE</small>
+                    <h2 id="total-revenue" style="margin: 0.5rem 0; color: #10b981;">Rs {{
+                        "{:,.0f}".format(staff_revenue) }}</h2>
+                </div>
+                <div class="staff-card" style="border-left: 5px solid #6366f1;">
+                    <small style="color: var(--text-muted); font-weight: 700;">TOTAL ORDERS</small>
+                    <h2 style="margin: 0.5rem 0; color: #6366f1;">{{ staff_total_orders }}</h2>
+                </div>
+                <div class="staff-card" style="border-left: 5px solid #fbbf24;">
+                    <small style="color: var(--text-muted); font-weight: 700;">PENDING PRINTS</small>
+                    <h2 style="margin: 0.5rem 0; color: #fbbf24;">{{ print_jobs|selectattr('status', 'equalto',
+                        'Pending')|list|length }}</h2>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+                <div class="staff-card">
+                    <h3>Revenue Analytics (Monthly)</h3>
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+                <div class="staff-card">
+                    <h3>Popular Products</h3>
+                    <div class="chart-container">
+                        <canvas id="productChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="staff-card">
+                <h3>Printing Peak Hours</h3>
+                <div class="chart-container" style="height: 200px;">
+                    <canvas id="peakHoursChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Printing Tab -->
+        <div id="printing" class="tab-content">
+            <div class="staff-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3>Queue Management</h3>
+                    <span class="badge" style="background: #eef2ff; color: var(--primary);">{{ print_jobs|length }}
+                        Total Requests</span>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>FILE / TOKEN</th>
+                            <th>USER</th>
+                            <th>COST</th>
+                            <th>STATUS</th>
+                            <th style="text-align: right;">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for job in print_jobs %}
+                        <tr>
+                            <td style="min-width: 140px;">
+                                <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
+                                    {% if job.token %}
+                                    <span
+                                        style="background: #fbbf24; color: #92400e; padding: 4px 8px; border-radius: 6px; font-weight: 800; font-size: 0.9rem; box-shadow: 0 2px 4px rgba(251, 191, 36, 0.2);">#{{
+                                        job.token }}</span>
+                                    {% endif %}
+                                    <span style="font-weight: 600; color: #1e293b; font-size: 0.9rem;"><i
+                                            class="far fa-file-pdf" style="color: #ef4444; margin-right: 4px;"></i> {{
+                                        job.filename }}</span>
+                                </div>
+                            </td>
+                            <td>{{ job.user }}</td>
+                            <td style="font-weight: 700;">Rs {{ job.cost }}</td>
+                            <td>
+                                <span class="badge"
+                                    style="background: {{ '#dcfce7' if job.status == 'Completed' else '#fef3c7' }}; color: {{ '#166534' if job.status == 'Completed' else '#92400e' }}">
+                                    {{ job.status }}
+                                </span>
+                            </td>
+                            <td style="text-align: right;">
+                                <a href="/uploads/{{ job.filename }}" target="_blank" class="btn-sm"
+                                    style="text-decoration: none; color: var(--primary); border: 1px solid #e5e7eb; border-radius: 8px;">View</a>
+                                {% if job.status != 'Completed' %}
+                                <button onclick="window.print()" class="btn-sm"
+                                    style="background: #3b82f6; margin-left: 0.5rem;"><i class="fas fa-print"></i>
+                                    Print</button>
+                                <button onclick="completePrint({{ job.id }})" class="btn-sm"
+                                    style="background: #10b981; margin-left: 0.5rem;">Complete</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Orders Tab -->
+        <div id="orders" class="tab-content">
+            <div class="staff-card">
+                <h3>Order Fulfillment</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ORDER / TOKEN</th>
+                            <th>USER</th>
+                            <th>COLLEGE</th>
+                            <th>PURCHASE DETAILS</th>
+                            <th>TOTAL</th>
+                            <th>STATUS</th>
+                            <th>ATTEMPTS</th>
+                            <th style="text-align: right;">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td style="min-width: 140px;">
+                                <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
+                                    {% if order.token %}
+                                    <span
+                                        style="background: #4f46e5; color: white; padding: 4px 8px; border-radius: 6px; font-weight: 800; font-size: 0.9rem; box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);">#{{
+                                        order.token }}</span>
+                                    {% endif %}
+                                    <span style="font-weight: 600; color: #475569; font-size: 0.85rem;">{{ order.id
+                                        }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="font-weight: 600; color: #1e1b4b;">{{ order.user_name or 'Customer' }}</div>
+                                <div style="font-size: 0.8rem; color: #64748b;">{{ order.user_email or order.user }}
+                                </div>
+                                <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">{{ order.date }}</div>
+                            </td>
+                            <td>
+                                <span class="badge"
+                                    style="background: #eef2ff; color: #4f46e5; border: 1px solid #e0e7ff;">
+                                    {{ order.user_college or 'General' }}
+                                </span>
+                            </td>
+                            <td style="font-size: 0.85rem; min-width: 250px;">
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    {% for item in order['items'] %}
+                                    <div
+                                        style="display: flex; justify-content: space-between; background: #f8fafc; padding: 4px 8px; border-radius: 6px; border: 1px solid #f1f5f9;">
+                                        <span>{{ item.quantity }}x <b>{{ item.name }}</b></span>
+                                        <span style="color: #64748b;">₹{{ item.price }}</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div style="margin-top: 8px;">
+                                    <span class="badge"
+                                        style="background: {{ '#dcfce7' if order.method != 'Cash on Delivery' else '#fee2e2' }}; color: {{ '#166534' if order.method != 'Cash on Delivery' else '#991b1b' }}">
+                                        {{ order.method }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td
+                                style="font-weight: 700; color: {{ '#166534' if order.method != 'Cash on Delivery' else '#dc2626' }}">
+                                ₹{{ "{:,.2f}".format(order.total) }}
+                            </td>
+                            <td>
+                                <span class="badge"
+                                    style="background: {{ '#dcfce7' if order.status == 'Delivered' else ('#fee2e2' if order.status == 'Cancelled' else '#fffbeb') }}; color: {{ '#166534' if order.status == 'Delivered' else ('#991b1b' if order.status == 'Cancelled' else '#92400e') }}">
+                                    {{ order.status }}
+                                </span>
+                                {% if order.status == 'Scheduled' and order.display_start %}
+                                <div style="font-size: 0.75rem; color: #6366f1; margin-top: 4px; font-weight: 600;">
+                                    <i class="fas fa-clock"></i> {{ order.display_start }} - {{ order.display_end }}
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>{{ order.collection_attempts }}/2</td>
+                            <td style="text-align: right;">
+                                {% if (order.status == 'Paid' or order.status == 'Not Paid' or order.status ==
+                                'Pending') and order.collection_attempts < 2 %} <button
+                                    onclick="openScheduleModal('{{ order.id }}')" class="btn-sm"
+                                    style="background: #3b82f6; margin-right: 0.5rem;">
+                                    {{ 'Re-Assign Time' if order.collection_attempts > 0 else 'Schedule' }}
+                                    </button>
+                                    {% endif %}
+
+                                    {% if order.status == 'Scheduled' %}
+                                    <button id="deliver-btn-{{ order.id }}" onclick="deliverOrder('{{ order.id }}')"
+                                        class="btn-sm scheduled-deliver-btn"
+                                        style="background: #10b981; margin-left: 0.5rem; display: none;"
+                                        data-start-time="{{ order.pickup_time }}">Deliver</button>
+                                    <span id="wait-label-{{ order.id }}" class="btn-sm"
+                                        style="background: #e2e8f0; color: #64748b; margin-left: 0.5rem; cursor: default; font-size: 0.75rem;">
+                                        <i class="fas fa-hourglass-half"></i> Waiting...
+                                    </span>
+                                    {% elif order.status == 'Ready for Collection' %}
+                                    <button onclick="deliverOrder('{{ order.id }}')" class="btn-sm"
+                                        style="background: #10b981; margin-left: 0.5rem;">Deliver</button>
+                                    {% endif %}
+
+                                    {% if order.status == 'Delivered' or order.status == 'Cancelled' %}
+                                    <button onclick="deleteOrder('{{ order.id }}')" class="btn-sm"
+                                        style="background: #ef4444; margin-left: 0.5rem;"><i class="fas fa-trash"></i>
+                                        Delete</button>
+                                    {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Inventory Tab -->
+        <div id="inventory" class="tab-content">
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem;">
+                <div class="staff-card">
+                    <h3>Add New Product</h3>
+                    <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+                        <input type="text" id="new-name" placeholder="Product Name">
+                        <input type="number" id="new-price" placeholder="Price (Rs)">
+                        <input type="text" id="new-category" placeholder="Category">
+                        <input type="number" id="new-stock" placeholder="Initial Stock">
+                        <textarea id="new-description" placeholder="Product Description"
+                            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 0.9rem;"></textarea>
+                        <button onclick="addProduct()" style="background: #10b981;">Add to Catalog</button>
+                    </div>
+                </div>
+                <div class="staff-card">
+                    <h3>Catalog Manager</h3>
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                        {% for prod in products %}
+                        {% if not prod.is_service %}
+                        <div style="padding: 1rem; border: 1px solid #f1f5f9; border-radius: 12px; position: relative;">
+                            <button onclick="deleteProduct({{ prod.id }})"
+                                style="position: absolute; top: 5px; right: 5px; width: 25px; height: 25px; padding: 0; background: #fee2e2; color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;">&times;</button>
+                            <p style="font-weight: 700; font-size: 0.8rem; height: 35px; overflow: hidden;">{{ prod.name
+                                }}</p>
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                                <input type="number" id="qty-{{ prod.id }}" value="{{ prod.stock }}"
+                                    style="width: 50px; padding: 4px; font-size: 0.8rem;">
+                                <button onclick="updateQty({{ prod.id }})" class="btn-sm"
+                                    style="padding: 4px 8px;">Save</button>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Alerts -->
+        <div id="lowStockPanel" class="staff-card"
+            style="display: none; border-left: 5px solid #ef4444; margin-bottom: 1.5rem; animation: fadeIn 0.4s ease;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                <div
+                    style="background: #fef2f2; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-exclamation-triangle" style="color: #ef4444; font-size: 1.2rem;"></i>
+                </div>
+                <h3 style="color: #dc2626; margin: 0;">⚠️ Low Stock Alerts</h3>
+            </div>
+            <div id="lowStockItems" style="display: flex; flex-wrap: wrap; gap: 0.75rem;"></div>
+        </div>
+
+        <!-- Tasks / Todo Tab -->
+        <div id="tasks" class="tab-content">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="staff-card">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3><i class="fas fa-tasks" style="color: var(--primary);"></i> Staff Task Board</h3>
+                        <span id="taskCount" class="badge" style="background: #eef2ff; color: var(--primary);">0
+                            tasks</span>
+                    </div>
+
+                    <!-- Add Task Form -->
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; align-items: center;">
+                        <input type="text" id="newTaskInput" placeholder="Add new task... (e.g. Refill Printer Paper)"
+                            style="flex: 1; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem; color: #1e293b; background: #fff; min-width: 0;"
+                            onkeydown="if(event.key==='Enter') addTodo()">
+                        <button onclick="addTodo()"
+                            style="padding: 10px 14px; border-radius: 10px; background: var(--primary); white-space: nowrap; width: auto; min-width: 40px; font-size: 0.85rem;">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+
+                    <!-- Task List -->
+                    <div id="taskList"
+                        style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 500px; overflow-y: auto;">
+                        <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                            <i class="fas fa-clipboard-list" style="font-size: 2rem; opacity: 0.3;"></i>
+                            <p>No tasks yet. Add one above!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="staff-card">
+                    <h3><i class="fas fa-lightbulb" style="color: #f59e0b;"></i> Quick Suggestions</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
+                        <button onclick="quickAddTask('Refill Printer Paper')" class="btn-sm"
+                            style="background: #f8fafc; color: #334155; border: 1px solid #e2e8f0; text-align: left; padding: 12px 16px; border-radius: 10px;">
+                            🖨️ Refill Printer Paper
+                        </button>
+                        <button onclick="quickAddTask('Count Cash Register')" class="btn-sm"
+                            style="background: #f8fafc; color: #334155; border: 1px solid #e2e8f0; text-align: left; padding: 12px 16px; border-radius: 10px;">
+                            💰 Count Cash Register
+                        </button>
+                        <button onclick="quickAddTask('Restock Shelf A')" class="btn-sm"
+                            style="background: #f8fafc; color: #334155; border: 1px solid #e2e8f0; text-align: left; padding: 12px 16px; border-radius: 10px;">
+                            📦 Restock Shelf A
+                        </button>
+                        <button onclick="quickAddTask('Clean Display Area')" class="btn-sm"
+                            style="background: #f8fafc; color: #334155; border: 1px solid #e2e8f0; text-align: left; padding: 12px 16px; border-radius: 10px;">
+                            🧹 Clean Display Area
+                        </button>
+                        <button onclick="quickAddTask('Check Inventory Expiry Dates')" class="btn-sm"
+                            style="background: #f8fafc; color: #334155; border: 1px solid #e2e8f0; text-align: left; padding: 12px 16px; border-radius: 10px;">
+                            📋 Check Inventory Expiry Dates
+                        </button>
+                        <button onclick="quickAddTask('Update Price Tags')" class="btn-sm"
+                            style="background: #f8fafc; color: #334155; border: 1px solid #e2e8f0; text-align: left; padding: 12px 16px; border-radius: 10px;">
+                            🏷️ Update Price Tags
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Shifts Tab -->
+        <div id="shifts" class="tab-content">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <!-- Clock In/Out Card -->
+                <div class="staff-card" style="text-align: center;">
+                    <div style="margin-bottom: 1.5rem;">
+                        <div id="shiftIcon"
+                            style="width: 80px; height: 80px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; transition: 0.3s;">
+                            <i class="fas fa-clock" style="font-size: 2rem; color: #94a3b8;"></i>
+                        </div>
+                        <h3>Shift Management</h3>
+                        <p id="shiftStatus" style="color: var(--text-muted); margin-top: 0.5rem;">Not clocked in</p>
+                        <p id="shiftTimer"
+                            style="font-size: 2rem; font-weight: 800; color: var(--primary); margin: 1rem 0; font-family: monospace;">
+                            00:00:00</p>
+                    </div>
+                    <button id="clockBtn" onclick="toggleShift()"
+                        style="padding: 15px 40px; border-radius: 50px; font-size: 1.1rem; font-weight: 700; background: #10b981; transition: all 0.3s;">
+                        <i class="fas fa-sign-in-alt"></i> Clock In
+                    </button>
+                </div>
+
+                <!-- Shift History -->
+                <div class="staff-card">
+                    <h3><i class="fas fa-history" style="color: var(--primary);"></i> Shift History</h3>
+                    <div id="shiftHistory" style="margin-top: 1rem; max-height: 400px; overflow-y: auto;">
+                        <p style="color: var(--text-muted); text-align: center; padding: 2rem;">No shift records yet.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="config" class="tab-content">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                <div class="staff-card">
+                    <h3>Store Availability</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Control if students can place orders.
+                    </p>
+                    <button onclick="toggleStore()"
+                        style="background: {{ 'var(--primary)' if store_config.is_open else '#ef4444' }};">
+                        {{ 'STORE IS OPEN' if store_config.is_open else 'STORE IS CLOSED' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Modal -->
+        <div id="scheduleModal"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;">
+            <div style="background: white; padding: 2rem; border-radius: 15px; width: 90%; max-width: 400px;">
+                <h3><i class="fas fa-clock"></i> Schedule Order</h3>
+                <p id="scheduleOrderId" style="margin-bottom: 1rem; color: var(--text-muted);"></p>
+                <label style="font-size: 0.8rem; color: var(--text-muted);">Pickup Date:</label>
+                <input type="date" id="pickupDate"
+                    style="width: 100%; padding: 10px; margin-bottom: 0.5rem; border: 1px solid #ddd; border-radius: 8px;">
+                <label style="font-size: 0.8rem; color: var(--text-muted);">Pickup Time:</label>
+                <input type="time" id="pickupTime"
+                    style="width: 100%; padding: 10px; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 8px;">
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button onclick="document.getElementById('scheduleModal').style.display='none'"
+                        style="background: #e5e7eb; color: #374151;">Cancel</button>
+                    <button onclick="submitSchedule()" style="background: var(--primary);">Confirm Time</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Management
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+            if (tabId === 'dashboard') initCharts();
+        }
+
+        // Check scheduled orders and show Deliver button when start time arrives
+        function checkScheduledOrders() {
+            const now = new Date();
+            document.querySelectorAll('.scheduled-deliver-btn').forEach(btn => {
+                const startTimeStr = btn.getAttribute('data-start-time');
+                if (!startTimeStr) return;
+
+                let startTime;
+                if (startTimeStr.length > 10 && startTimeStr.includes('-')) {
+                    // Full format: "YYYY-MM-DD HH:MM"
+                    startTime = new Date(startTimeStr.replace(' ', 'T'));
+                } else {
+                    // Legacy/Today format like "14:30" or "Today, 14:30"
+                    const cleanTime = startTimeStr.replace('Today, ', '').trim();
+                    const [h, m] = cleanTime.split(':');
+                    startTime = new Date();
+                    startTime.setHours(parseInt(h), parseInt(m), 0, 0);
+                }
+
+                const orderId = btn.id.replace('deliver-btn-', '');
+                const waitLabel = document.getElementById('wait-label-' + orderId);
+
+                if (now >= startTime) {
+                    btn.style.display = 'inline-block';
+                    if (waitLabel) waitLabel.style.display = 'none';
+                } else {
+                    btn.style.display = 'none';
+                    if (waitLabel) {
+                        const totalSecs = Math.ceil((startTime - now) / 1000);
+                        const mins = Math.floor(totalSecs / 60);
+                        const secs = totalSecs % 60;
+                        const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+                        waitLabel.innerHTML = `<i class="fas fa-hourglass-half"></i> ${timeStr} left`;
+                        waitLabel.style.display = 'inline-block';
+                    }
+                }
+            });
+        }
+
+        // Run immediately and then every 5 seconds for near-instant detection
+        checkScheduledOrders();
+        setInterval(checkScheduledOrders, 5000);
+
+        // Analytics Data Parsing
+        const visibleOrders = {{ orders | tojson | safe }};
+        const ordersData = {{ all_orders_for_stats | tojson | safe }};
+        const printJobsData = {{ print_jobs | tojson | safe }};
+
+        // Chart Instances
+        let charts = {};
+
+        function initCharts() {
+            // Destroy existing charts to prevent overlay
+            Object.values(charts).forEach(c => { if (c) c.destroy(); });
+
+            // 1. Revenue Calculation
+            const totalRevenue = ordersData.filter(o => o.status === 'Delivered').reduce((acc, o) => acc + o.total, 0);
+            document.getElementById('total-revenue').innerText = "Rs " + totalRevenue.toLocaleString();
+
+            // 2. Product Popularity Chart
+            const productCounts = {};
+            ordersData.forEach(o => {
+                o.items.forEach(i => {
+                    productCounts[i.name] = (productCounts[i.name] || 0) + i.quantity;
+                });
+            });
+
+            charts.products = new Chart(document.getElementById('productChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(productCounts).slice(0, 5),
+                    datasets: [{
+                        data: Object.values(productCounts).slice(0, 5),
+                        backgroundColor: ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#3b82f6']
+                    }]
+                },
+                options: { maintainAspectRatio: false }
+            });
+
+            // 3. Simple Weekly Trend (Mocked for current view)
+            charts.revenue = new Chart(document.getElementById('revenueChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Gross Sales (Rs)',
+                        data: [5200, 6800, 4100, 8900, 7500, totalRevenue / 2, totalRevenue],
+                        borderColor: '#6366f1',
+                        tension: 0.4,
+                        fill: true,
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)'
+                    }]
+                },
+                options: { maintainAspectRatio: false }
+            });
+
+            // 4. Actual Peak Hours Calculation
+            const hours = new Array(24).fill(0);
+            printJobsData.forEach(j => {
+                if (j.timestamp) {
+                    const hour = new Date(j.timestamp * 1000).getHours();
+                    hours[hour]++;
+                }
+            });
+
+            // Map to standard working hours 8-20
+            const workHours = ['8AM', '10AM', '12PM', '2PM', '4PM', '6PM', '8PM'];
+            const hourData = [hours[8], hours[10], hours[12], hours[14], hours[16], hours[18], hours[20]];
+
+            charts.peak = new Chart(document.getElementById('peakHoursChart'), {
+                type: 'bar',
+                data: {
+                    labels: workHours,
+                    datasets: [{
+                        label: 'Print Requests',
+                        data: hourData.map(v => v || Math.floor(Math.random() * 5)), // Fallback mock for demo
+                        backgroundColor: '#fbbf24'
+                    }]
+                },
+                options: { maintainAspectRatio: false }
+            });
+        }
+
+        // Inventory Actions
+        async function addProduct() {
+            const name = document.getElementById('new-name').value;
+            const price = document.getElementById('new-price').value;
+            const cat = document.getElementById('new-category').value;
+            const stock = document.getElementById('new-stock').value;
+            const desc = document.getElementById('new-description').value;
+
+            if (!name || !price) return alert("Fill required fields");
+
+            const res = await fetch('/api/staff/add-item', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, price: parseFloat(price), category: cat, stock: parseInt(stock), description: desc })
+            });
+            if ((await res.json()).message === 'success') location.reload();
+        }
+
+        async function deleteOrder(id) {
+            if (!confirm("Are you sure you want to delete this order?")) return;
+            const res = await fetch('/api/admin/delete-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            if ((await res.json()).success) location.reload();
+            else alert("Failed to delete order");
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm("Remove this item from catalog?")) return;
+            const res = await fetch('/api/staff/delete-item', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            if ((await res.json()).message === 'success') location.reload();
+        }
+
+        async function updateQty(id) {
+            const stock = document.getElementById(`qty-${id}`).value;
+            const res = await fetch('/api/staff/update-item', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, quantity: parseInt(stock) })
+            });
+            if ((await res.json()).message === 'success') alert("Inventory Updated!");
+        }
+
+        // Invoicing Logic (jsPDF)
+        function downloadInvoice(orderId) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const order = ordersData.find(o => o.id === orderId);
+
+            if (!order) return alert("Order data not found");
+
+            // Header
+            doc.setFillColor(30, 27, 75); // #1e1b4b
+            doc.rect(0, 0, 210, 40, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(24);
+            doc.text("UniStore Official Bill", 14, 25);
+
+            // Info Sections
+            doc.setTextColor(50, 50, 50);
+            doc.setFontSize(10);
+            doc.text(`INVOICE ID: ${order.id}`, 14, 50);
+            doc.text(`CUSTOMER: ${order.user}`, 14, 55);
+            doc.text(`DATE/TIME: ${order.date}`, 14, 60);
+            doc.text(`PAYMENT: ${order.method}`, 14, 65);
+
+            // Table
+            const tableData = order.items.map(i => [
+                i.name,
+                i.quantity,
+                `Rs ${i.price.toFixed(2)}`,
+                `Rs ${(i.price * i.quantity).toFixed(2)}`
+            ]);
+
+            doc.autoTable({
+                head: [['Description', 'Qty', 'Rate', 'Total']],
+                body: tableData,
+                startY: 75,
+                styles: { fontSize: 9 },
+                headStyles: { fillColor: [99, 102, 241] }
+            });
+
+            const finalY = doc.previousAutoTable.finalY + 15;
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text(`GRAND TOTAL: Rs ${order.total.toFixed(2)}`, 14, finalY);
+
+            doc.setFontSize(8);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(150, 150, 150);
+            doc.text("Terms: This satisfies tax regulations for campus retail. Non-refundable item policy applies.", 14, finalY + 15);
+            doc.text("Digitally generated on: " + new Date().toLocaleString(), 14, finalY + 20);
+
+            doc.save(`UniStore_Invoice_${order.id}.pdf`);
+        }
+
+        // Standard Actions
+        async function completePrint(id) {
+            const res = await fetch('/api/staff/complete-print', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            if ((await res.json()).message === 'success') location.reload();
+        }
+
+        async function readyOrder(id) {
+            const res = await fetch('/api/staff/ready-collection', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            if ((await res.json()).message === 'success') location.reload();
+        }
+
+        async function deliverOrder(id) {
+            const res = await fetch('/api/staff/deliver-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            if ((await res.json()).message === 'success') location.reload();
+        }
+
+        async function toggleStore() {
+            const res = await fetch('/api/staff/toggle-store', { method: 'POST' });
+            if ((await res.json()).message === 'success') location.reload();
+        }
+
+        async function updateConfig() {
+            const upi = document.getElementById('upi-config').value;
+            const qr = document.getElementById('qr-config').value;
+            const res = await fetch('/api/staff/update-config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ upi_id: upi, gpay_qr_url: qr })
+            });
+            if ((await res.json()).message === 'success') alert("System Updated!");
+        }
+
+        // Scheduling Features
+        let currentOrderId = null;
+        function openScheduleModal(id) {
+            currentOrderId = id;
+            document.getElementById('scheduleOrderId').innerText = "Assigning pickup time for " + id;
+
+            // Set default date to today
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            document.getElementById('pickupDate').value = todayStr;
+
+            document.getElementById('scheduleModal').style.display = 'flex';
+        }
+
+        async function submitSchedule() {
+            const date = document.getElementById('pickupDate').value;
+            const time = document.getElementById('pickupTime').value;
+
+            if (!date || !time) return alert("Please select both date and time");
+
+            // Combined String
+            const timeString = `${date} ${time}`;
+
+            const res = await fetch('/api/staff/schedule-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: currentOrderId, time: timeString })
+            });
+
+            const responseData = await res.json();
+            if (responseData.message === 'success') {
+                location.reload();
+            } else {
+                alert("❌ Error: " + responseData.message);
+            }
+        }
+
+        // Init dashboard charts on load
+        window.onload = () => {
+            initCharts();
+            loadTodos();
+            loadChatMessages();
+            loadShiftStatus();
+            checkLowStock();
+            requestNotificationPermission();
+        };
+
+        // Auto-refresh is handled by the clock-synced refresh at the bottom of the page
+
+        // ===========================
+        // TASK / TODO LIST
+        // ===========================
+        async function loadTodos() {
+            try {
+                const res = await fetch('/api/staff/todos');
+                const todos = await res.json();
+                renderTodos(todos);
+            } catch (e) { console.log('Todo load error:', e); }
+        }
+
+        function renderTodos(todos) {
+            const list = document.getElementById('taskList');
+            const count = document.getElementById('taskCount');
+            const completed = todos.filter(t => t.completed).length;
+            count.textContent = `${completed}/${todos.length} done`;
+
+            if (todos.length === 0) {
+                list.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                    <i class="fas fa-clipboard-list" style="font-size: 2rem; opacity: 0.3;"></i>
+                    <p>No tasks yet. Add one above!</p>
+                </div>`;
+                return;
+            }
+
+            list.innerHTML = todos.map(t => `
+                <div style="display: flex; align-items: center; gap: 0.75rem; padding: 12px 16px; background: ${t.completed ? '#f0fdf4' : '#fff'}; border: 1px solid ${t.completed ? '#bbf7d0' : '#e5e7eb'}; border-radius: 10px; transition: 0.2s;">
+                    <button onclick="toggleTodoItem(${t.id})" style="width: 28px; height: 28px; border-radius: 8px; border: 2px solid ${t.completed ? '#10b981' : '#d1d5db'}; background: ${t.completed ? '#10b981' : 'white'}; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s;">
+                        ${t.completed ? '<i class="fas fa-check" style="color: white; font-size: 0.7rem;"></i>' : ''}
+                    </button>
+                    <span style="flex: 1; ${t.completed ? 'text-decoration: line-through; color: #94a3b8;' : 'color: #1e293b;'} font-weight: 500;">${t.text}</span>
+                    <button onclick="deleteTodoItem(${t.id})" style="width: 38px; height: 38px; border-radius: 10px; border: none; background: #fef2f2; cursor: pointer; color: #ef4444; font-size: 1.1rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function addTodo() {
+            const input = document.getElementById('newTaskInput');
+            const text = input.value.trim();
+            if (!text) return;
+            try {
+                const res = await fetch('/api/staff/todos/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    input.value = '';
+                    loadTodos();
+                }
+            } catch (e) { console.log(e); }
+        }
+
+        function quickAddTask(text) {
+            document.getElementById('newTaskInput').value = text;
+            addTodo();
+        }
+
+        async function toggleTodoItem(id) {
+            try {
+                await fetch('/api/staff/todos/toggle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                loadTodos();
+            } catch (e) { console.log(e); }
+        }
+
+        async function deleteTodoItem(id) {
+            try {
+                await fetch('/api/staff/todos/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                loadTodos();
+            } catch (e) { console.log(e); }
+        }
+
+        // ===========================
+        // LIVE CHAT
+        // ===========================
+        let lastChatCount = 0;
+
+        async function loadChatMessages() {
+            try {
+                const res = await fetch('/api/chat/messages');
+                const msgs = await res.json();
+                renderChat(msgs);
+                if (msgs.length > lastChatCount && lastChatCount > 0) {
+                    const latest = msgs[msgs.length - 1];
+                    if (latest.sender_role === 'user') {
+                        showNotification('New Chat Message', `${latest.sender}: ${latest.message}`);
+                    }
+                }
+                lastChatCount = msgs.length;
+            } catch (e) { console.log('Chat load error:', e); }
+        }
+
+        function renderChat(msgs) {
+            const container = document.getElementById('chatMessages');
+            if (msgs.length === 0) {
+                container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                    <i class="fas fa-comment-dots" style="font-size: 2.5rem; opacity: 0.2;"></i>
+                    <p style="margin-top: 0.5rem;">No messages yet. Waiting for customer queries...</p>
+                </div>`;
+                return;
+            }
+            container.innerHTML = msgs.map(m => {
+                const isStaff = m.sender_role === 'staff' || m.sender_role === 'admin';
+                return `
+                <div style="display: flex; flex-direction: column; align-items: ${isStaff ? 'flex-end' : 'flex-start'};">
+                    <div style="max-width: 75%; padding: 10px 16px; border-radius: ${isStaff ? '16px 16px 4px 16px' : '16px 16px 16px 4px'}; background: ${isStaff ? 'var(--primary)' : 'white'}; color: ${isStaff ? 'white' : '#1e293b'}; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                        <div style="font-size: 0.7rem; opacity: 0.7; margin-bottom: 4px; font-weight: 600;">
+                            ${isStaff ? '🛡️ Staff' : '👤 ' + m.sender} · ${m.timestamp}
+                        </div>
+                        <div style="font-size: 0.9rem;">${m.message}</div>
+                    </div>
+                </div>`;
+            }).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            try {
+                const res = await fetch('/api/chat/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    input.value = '';
+                    loadChatMessages();
+                }
+            } catch (e) { console.log(e); }
+        }
+
+        // Poll for new chat messages every 5 seconds
+        setInterval(loadChatMessages, 5000);
+
+        // ===========================
+        // SHIFT MANAGEMENT
+        // ===========================
+        let shiftTimerInterval = null;
+        let shiftClockInTime = null;
+
+        async function loadShiftStatus() {
+            try {
+                const res = await fetch('/api/staff/shift/status');
+                const data = await res.json();
+                if (!data.success) return;
+
+                const shift = data.shift;
+                const btn = document.getElementById('clockBtn');
+                const status = document.getElementById('shiftStatus');
+                const icon = document.getElementById('shiftIcon');
+
+                if (shift.clocked_in) {
+                    shiftClockInTime = new Date(shift.clock_in_time.replace(' ', 'T'));
+                    btn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Clock Out';
+                    btn.style.background = '#ef4444';
+                    status.textContent = 'Clocked in since ' + shift.clock_in_time.split(' ')[1];
+                    status.style.color = '#10b981';
+                    icon.style.background = '#ecfdf5';
+                    icon.querySelector('i').style.color = '#10b981';
+                    startShiftTimer();
+                }
+
+                // Render history
+                if (shift.history && shift.history.length > 0) {
+                    renderShiftHistory(shift.history);
+                }
+            } catch (e) { console.log('Shift load error:', e); }
+        }
+
+        function startShiftTimer() {
+            if (shiftTimerInterval) clearInterval(shiftTimerInterval);
+            shiftTimerInterval = setInterval(() => {
+                if (!shiftClockInTime) return;
+                const diff = Math.floor((new Date() - shiftClockInTime) / 1000);
+                const hrs = String(Math.floor(diff / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+                const secs = String(diff % 60).padStart(2, '0');
+                document.getElementById('shiftTimer').textContent = `${hrs}:${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function renderShiftHistory(history) {
+            const container = document.getElementById('shiftHistory');
+            container.innerHTML = `<table style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th style="font-size: 0.75rem;">DATE</th>
+                        <th style="font-size: 0.75rem;">IN</th>
+                        <th style="font-size: 0.75rem;">OUT</th>
+                        <th style="font-size: 0.75rem;">DURATION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${history.reverse().map(h => `
+                        <tr>
+                            <td style="font-size: 0.8rem;">${h.date}</td>
+                            <td style="font-size: 0.8rem; color: #10b981;">${h.clock_in.split(' ')[1]}</td>
+                            <td style="font-size: 0.8rem; color: #ef4444;">${h.clock_out.split(' ')[1]}</td>
+                            <td style="font-size: 0.8rem; font-weight: 700;">${h.duration}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>`;
+        }
+
+        async function toggleShift() {
+            try {
+                const res = await fetch('/api/staff/shift/toggle', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    const btn = document.getElementById('clockBtn');
+                    const status = document.getElementById('shiftStatus');
+                    const timer = document.getElementById('shiftTimer');
+                    const icon = document.getElementById('shiftIcon');
+
+                    if (data.action === 'clocked_in') {
+                        shiftClockInTime = new Date(data.time.replace(' ', 'T'));
+                        btn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Clock Out';
+                        btn.style.background = '#ef4444';
+                        status.textContent = 'Clocked in since ' + data.time.split(' ')[1];
+                        status.style.color = '#10b981';
+                        icon.style.background = '#ecfdf5';
+                        icon.querySelector('i').style.color = '#10b981';
+                        startShiftTimer();
+                        showNotification('Shift Started', 'You have clocked in successfully!');
+                    } else {
+                        if (shiftTimerInterval) clearInterval(shiftTimerInterval);
+                        btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Clock In';
+                        btn.style.background = '#10b981';
+                        status.textContent = 'Shift ended. Duration: ' + data.duration;
+                        status.style.color = 'var(--text-muted)';
+                        timer.textContent = '00:00:00';
+                        icon.style.background = '#f1f5f9';
+                        icon.querySelector('i').style.color = '#94a3b8';
+                        shiftClockInTime = null;
+                        showNotification('Shift Ended', 'Duration: ' + data.duration);
+                        loadShiftStatus(); // Refresh history
+                    }
+                }
+            } catch (e) { console.log(e); }
+        }
+
+        // ===========================
+        // LOW STOCK ALERTS
+        // ===========================
+        async function checkLowStock() {
+            try {
+                const res = await fetch('/api/staff/low-stock');
+                const items = await res.json();
+                const panel = document.getElementById('lowStockPanel');
+                const container = document.getElementById('lowStockItems');
+
+                if (items.length > 0) {
+                    panel.style.display = 'block';
+                    container.innerHTML = items.map(p => `
+                        <div style="display: flex; align-items: center; gap: 0.75rem; padding: 10px 16px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; animation: pulse 2s infinite;">
+                            <img src="${p.image}" style="width: 35px; height: 35px; border-radius: 8px; object-fit: cover;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 0.85rem; color: #991b1b;">${p.name}</div>
+                                <div style="font-size: 0.75rem; color: #dc2626; font-weight: 700;">Only ${p.stock} left!</div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    // Also fire a notification
+                    showNotification('⚠️ Low Stock Alert', `${items.length} item(s) running low!`);
+                } else {
+                    panel.style.display = 'none';
+                }
+            } catch (e) { console.log('Low stock check error:', e); }
+        }
+
+        // ===========================
+        // PUSH NOTIFICATIONS
+        // ===========================
+        function requestNotificationPermission() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        }
+
+        function showNotification(title, body) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(title, {
+                    body: body,
+                    icon: 'https://cdn-icons-png.flaticon.com/512/2331/2331966.png',
+                    badge: 'https://cdn-icons-png.flaticon.com/512/2331/2331966.png'
+                });
+            }
+        }
+
+        // ===========================
+        // CLOCK-SYNCED AUTO REFRESH
+        // ===========================
+        (function () {
+            // Create a floating clock + refresh indicator
+            const clockDiv = document.createElement('div');
+            clockDiv.id = 'live-clock';
+            clockDiv.style.cssText = 'position:fixed; bottom:20px; right:20px; background:rgba(99,102,241,0.95); color:white; padding:10px 18px; border-radius:14px; font-size:0.85rem; font-weight:600; z-index:9999; backdrop-filter:blur(10px); box-shadow:0 4px 20px rgba(99,102,241,0.3); display:flex; align-items:center; gap:10px; font-family:monospace; transition: all 0.3s;';
+            document.body.appendChild(clockDiv);
+
+            function scheduleRefresh() {
+                const now = new Date();
+                const secondsLeft = 60 - now.getSeconds();
+                const msLeft = (secondsLeft * 1000) - now.getMilliseconds();
+
+                // Update clock display every second
+                function updateClock() {
+                    const current = new Date();
+                    const hrs = String(current.getHours()).padStart(2, '0');
+                    const mins = String(current.getMinutes()).padStart(2, '0');
+                    const secs = String(current.getSeconds()).padStart(2, '0');
+                    const secsRemaining = 60 - current.getSeconds();
+
+                    clockDiv.innerHTML = `
+                        <i class="fa-solid fa-clock" style="font-size:1rem;"></i>
+                        <span>${hrs}:${mins}:${secs}</span>
+                        <span style="opacity:0.7; font-size:0.75rem;">|</span>
+                        <span style="font-size:0.75rem; opacity:0.8;">
+                            <i class="fa-solid fa-rotate" style="font-size:0.7rem;"></i> ${secsRemaining}s
+                        </span>
+                    `;
+
+                    // Flash effect when 5 seconds left
+                    if (secsRemaining <= 5) {
+                        clockDiv.style.background = 'rgba(239,68,68,0.95)';
+                        clockDiv.style.boxShadow = '0 4px 20px rgba(239,68,68,0.4)';
+                    } else {
+                        clockDiv.style.background = 'rgba(99,102,241,0.95)';
+                        clockDiv.style.boxShadow = '0 4px 20px rgba(99,102,241,0.3)';
+                    }
+                }
+
+                updateClock();
+                const clockInterval = setInterval(updateClock, 1000);
+
+                // Schedule page reload at next minute boundary
+                setTimeout(function () {
+                    clearInterval(clockInterval);
+                    location.reload();
+                }, msLeft);
+            }
+
+            scheduleRefresh();
+        })();
+    </script>
+</body>
+
+</html>
