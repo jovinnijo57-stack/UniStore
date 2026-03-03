@@ -204,6 +204,73 @@ def process_scheduled_pickup(order_id, pickup_time_str, current_attempts, is_rea
     except Exception as e:
         print(f"Scheduling thread error for {order_id}: {e}")
 
+def check_scheduled_orders():
+    """Database-driven scheduler check - works on Render/Gunicorn where threads die.
+    Called on every staff dashboard load to process any scheduled orders whose time has arrived."""
+    try:
+        db_orders = get_all_orders()
+        now = datetime.now()
+        
+        for order in db_orders:
+            if order.get('status') != 'Scheduled':
+                continue
+                
+            pickup_time_str = order.get('pickup_time')
+            if not pickup_time_str:
+                continue
+            
+            # Parse the pickup time
+            try:
+                if " " in pickup_time_str and len(pickup_time_str) > 10:
+                    target_dt = datetime.strptime(pickup_time_str, "%Y-%m-%d %H:%M")
+                else:
+                    clean_time = pickup_time_str.replace("Today, ", "").strip()
+                    time_obj = datetime.strptime(clean_time, "%H:%M")
+                    target_dt = now.replace(hour=time_obj.hour, minute=time_obj.minute, second=0, microsecond=0)
+            except ValueError:
+                continue
+            
+            # If pickup time has arrived → mark as Ready for Collection
+            if now >= target_dt:
+                print(f"[Scheduler] Order {order['id']} pickup time reached, marking Ready for Collection")
+                update_order_status(order['id'], "Ready for Collection", is_ready=True)
+                
+                # Also update in-memory list
+                for o in ORDERS:
+                    if o['id'] == order['id']:
+                        o['status'] = "Ready for Collection"
+                        o['is_ready'] = True
+                        break
+                
+                # Send email notification
+                user_email = order.get('user_email') or order.get('user')
+                if user_email:
+                    attempts = order.get('collection_attempts', 1)
+                    threading.Thread(target=send_notification_email, args=(
+                        user_email, order['id'],
+                        f"Your order is READY for collection! You have 1 minute to collect it. Attempt {attempts}/2."
+                    )).start()
+                
+                # Start timeout timer (1 minute)
+                threading.Thread(target=auto_handle_timeout, args=(order['id'],)).start()
+            
+            # If pickup time + 1 min has passed and still "Ready" → already handled by auto_handle_timeout
+            # But as a safety net for Render where threads die:
+            elif order.get('status') == 'Ready for Collection':
+                ready_since = target_dt
+                if now >= ready_since + timedelta(minutes=1):
+                    # Timeout: the collection window has expired
+                    current_attempts = order.get('collection_attempts', 0)
+                    if current_attempts >= 2:
+                        update_order_status(order['id'], "Cancelled", is_ready=False)
+                        print(f"[Scheduler] Order {order['id']} cancelled after 2 missed attempts")
+                    else:
+                        update_order_status(order['id'], "Pending", is_ready=False)
+                        print(f"[Scheduler] Order {order['id']} reverted to Pending after missed collection")
+        
+    except Exception as e:
+        print(f"[Scheduler] Check error: {e}")
+
 app = Flask(__name__)
 app.secret_key = 'super-secret-unistore-key'
 
@@ -264,15 +331,28 @@ def send_email(to_email, subject, message):
     msg.attach(MIMEText(message, "plain"))
 
     try:
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
+        # Use SSL on port 465 (works on Render and most cloud platforms)
+        # Port 587 with STARTTLS is often blocked by cloud providers
+        server = smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30)
         server.login(sender_email, sender_password)
         server.send_message(msg)
         server.quit()
+        print(f"✓ Email sent to {to_email}: {subject}")
         return True
     except Exception as e:
-        print(f"Error sending email: {e}")
-        return False
+        print(f"✗ Email error to {to_email}: {e}")
+        # Fallback: try port 587 with STARTTLS
+        try:
+            server = smtplib.SMTP("smtp.gmail.com", 587, timeout=30)
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.send_message(msg)
+            server.quit()
+            print(f"✓ Email sent (fallback 587) to {to_email}: {subject}")
+            return True
+        except Exception as e2:
+            print(f"✗ Email fallback also failed for {to_email}: {e2}")
+            return False
 
 # Mock Data
 PRODUCTS = [
@@ -653,6 +733,9 @@ def staff_dashboard():
         return render_template("maintenance.html")
     if 'staff' not in session:
         return redirect(url_for('staff_page'))
+    
+    # Process any scheduled orders whose time has arrived (critical for Render/Gunicorn)
+    check_scheduled_orders()
         
     # Get Orders from DB + Memory (Merged view, prioritizing DB)
     db_orders = get_all_orders()
