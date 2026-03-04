@@ -256,7 +256,7 @@ def login_required(f):
 def send_email(to_email, subject, message):
     # Retrieve API Key from Environment Variables (Set this in Railway Variables tab)
     # Falling back to the provided key if env var is missing
-    api_key = os.environ.get("BREVO_API_KEY", "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")
+    api_key = os.environ.get("BREVO_API_KEY", "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")
     
     url = "https://api.brevo.com/v3/smtp/email"
 
