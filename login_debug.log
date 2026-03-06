@@ -31,3 +31,87 @@ Session set for: jeswinnijo6@gmail.com
 Login attempt for: jovinnijo57@gmail.com
 Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
 Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Login attempt for: wrong@test.com
+Verify result: {'success': False, 'message': 'Invalid email or password'}
+Login attempt for: test_login_error@test.com
+Verify result: {'success': True, 'user': {'id': 19, 'name': 'Login Error Test', 'email': 'test_login_error@test.com', 'password': 'scrypt:32768:8:1$QNB0oQuBU0yAYjlh$7fb841bf57faba30778af3efa2b7d555bf10824dde1a8d706af4afdf1a8ae46661f72638a36cf519528e40bf85a52cb9c0c33323ea7e71f1391d2ae6fc4e0a1c', 'created_at': '2026-02-08 04:27:31', 'college': None}}
+Session set for: test_login_error@test.com
+Login attempt for: wrong@user.com
+Verify result: {'success': False, 'message': 'Invalid email or password'}
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: cod98@test.com
+Verify result: {'success': False, 'message': 'Invalid email or password'}
+Login attempt for: cod98@test.com
+Verify result: {'success': False, 'message': 'Invalid email or password'}
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: coduser@test.com
+Verify result: {'success': False, 'message': 'Invalid email or password'}
+Login attempt for: cod9999@test.com
+Verify result: {'success': False, 'message': 'Invalid email or password'}
+Login attempt for: cod99999@test.com
+Verify result: {'success': True, 'user': {'id': 40, 'name': 'COD User', 'email': 'cod99999@test.com', 'password': 'scrypt:32768:8:1$sK5zbSuUZzvgIXai$76938887689b7224ec33fac8f6f5994a1c7f06f41d7cbdd15f6fdbca1b857a393aa622152a0098672428eec8a8aff244a937a2f4ab1add976b3d72fd28330c80', 'created_at': '2026-03-05 18:13:31', 'college': 'Arts & Science'}}
+Session set for: cod99999@test.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: schedtest999@test.com
+Verify result: {'success': False, 'message': 'Invalid email or password'}
+Login attempt for: schedtest888@test.com
+Verify result: {'success': False, 'message': 'Invalid email or password'}
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com
+Login attempt for: jovinnijo57@gmail.com
+Verify result: {'success': True, 'user': {'id': 2, 'name': 'jovin', 'email': 'jovinnijo57@gmail.com', 'password': 'scrypt:32768:8:1$j9EX63y0tztKXvYz$a573508314e14e88e648192718e09246c8c4b8472d45d43f29b29b8aad5cbd2d325bb0d555e686642674257e22675a323aa93f94efc5d51f04037723ef81ef02', 'created_at': '2026-02-07 17:41:46', 'college': None}}
+Session set for: jovinnijo57@gmail.com

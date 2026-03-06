@@ -1023,8 +1023,20 @@
                 const waitLabel = document.getElementById('wait-label-' + orderId);
 
                 if (now >= startTime) {
-                    btn.style.display = 'inline-block';
-                    if (waitLabel) waitLabel.style.display = 'none';
+                    const elapsedMins = (now - startTime) / 1000 / 60;
+                    if (elapsedMins < 1) { // 1 minute window
+                        btn.style.display = 'inline-block';
+                        if (waitLabel) waitLabel.style.display = 'none';
+                    } else {
+                        // Window expired (locally hide until refresh)
+                        btn.style.display = 'none';
+                        if (waitLabel) {
+                            waitLabel.innerHTML = `<i class="fas fa-times-circle"></i> Window Expired`;
+                            waitLabel.style.background = '#fee2e2';
+                            waitLabel.style.color = '#ef4444';
+                            waitLabel.style.display = 'inline-block';
+                        }
+                    }
                 } else {
                     btn.style.display = 'none';
                     if (waitLabel) {

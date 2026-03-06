@@ -135,44 +135,59 @@ def auto_handle_timeout(order_id):
     
     # Check current status
     order = get_order_by_id(order_id)
-    if not order: return
+    if not order: 
+        print(f"Error: Order {order_id} not found during timeout check")
+        return
     
-    # Logic: If still 'Ready for Collection', mark as Timeout/Missed
+    print(f"Timeout check for {order_id}: current status is '{order['status']}', attempts: {order.get('collection_attempts')}")
+    
+    # Logic: If still 'Ready for Collection', it means the user missed the window
     if order['status'] == 'Ready for Collection':
         # Check attempts
         current_attempts = order.get('collection_attempts', 0)
         
-        # User requested: After 2nd attempt fail, order should be cancelled
+        # Determine new status based on attempts
         if current_attempts >= 2:
             new_status = "Cancelled"
             notification = "Order cancelled automatically after 2 missed collection windows."
         else:
-            new_status = "Pending" # Revert to Pending so staff can re-assign once
+            new_status = "Pending" # Revert to Pending for one more re-assignment
             notification = f"Collection attempt {current_attempts} missed. Order can be re-assigned ONE more time."
         
         # Update Database
-        update_order_status(order_id, new_status, is_ready=False)
+        update_result = update_order_status(order_id, new_status, is_ready=False)
+        print(f"Updated status of {order_id} to '{new_status}' (Attempt {current_attempts}). Result: {update_result}")
     
-        # Update Memory (ORDER list) for Staff Dashboard legacy support
+        # Update Memory (ORDER list)
         for o in ORDERS:
             if o['id'] == order_id:
                 o['status'] = new_status
                 o['is_ready'] = False
                 o['notification'] = notification
-                # Don't update attempts again here, DB is truth
+                break
         
-        # Refund to wallet if order was cancelled and was paid
+        # Refund if cancelled
         if new_status == "Cancelled":
             refund_to_wallet(order)
                 
-        # Send Email about timeout
+        # Send Email notification
         send_notification_email(order['user_email'], order_id, notification)
-        print(f"Order {order_id} timed out automatically.")
+    elif order['status'] == 'Scheduled':
+        # This shouldn't happen if everything is synced, but if it's still 'Scheduled',
+        # it might mean the window hasn't effectively started or status didn't update.
+        print(f"Warning: Order {order_id} is still in 'Scheduled' state at timeout. No action taken.")
 
 def process_scheduled_pickup(order_id, pickup_time_str, current_attempts, is_reassignment):
     """Background task: Wait until pickup_time, then trigger collection window"""
     try:
-        # 1. Parse Date and Time
+        # Import timezone explicitly inside function to stay clean
+        from datetime import timezone, timedelta
+        IST = timezone(timedelta(hours=5, minutes=30))
+        
+        # Get Current API / Server time but force it to look like India Local Time 
+        current_ist_time = datetime.now(IST).replace(tzinfo=None)
+
+        # 1. Parse Date and Time provided by Frontend (which is assuming India Time)
         try:
             # New format: "YYYY-MM-DD HH:MM"
             target_dt = datetime.strptime(pickup_time_str, "%Y-%m-%d %H:%M")
@@ -180,10 +195,12 @@ def process_scheduled_pickup(order_id, pickup_time_str, current_attempts, is_rea
             # Fallback for old format: "Today, HH:MM"
             clean_time = pickup_time_str.replace("Today, ", "").strip()
             time_obj = datetime.strptime(clean_time, "%H:%M")
-            target_dt = datetime.now().replace(hour=time_obj.hour, minute=time_obj.minute, second=0, microsecond=0)
+            target_dt = current_ist_time.replace(hour=time_obj.hour, minute=time_obj.minute, second=0, microsecond=0)
         
-        # 2. Wait until start time
-        sleep_seconds = (target_dt - datetime.now()).total_seconds()
+        # 2. Calculate true seconds between now and target time
+        # Both target_dt and current_ist_time are naive, representing India standard time
+        sleep_seconds = (target_dt - current_ist_time).total_seconds()
+        
         if sleep_seconds > 0:
              time.sleep(sleep_seconds)
 
@@ -226,9 +243,9 @@ else:
 # ==============================
 # Razorpay Configuration
 # ==============================
-RAZORPAY_KEY_ID = 'rzp_live_SFfhjxSZmc44Bz'
-RAZORPAY_KEY_SECRET = 'PQ4F0tA660QkaGK6jsHihm1o'
-RAZORPAY_WEBHOOK_SECRET = 'your_webhook_secret_here' # User should update this in dashboard and here
+RAZORPAY_KEY_ID = 'rzp_live_SNrmceLg38Vi2Z'
+RAZORPAY_KEY_SECRET = 'Ib1D67I3hQ8TaqPlKxMBYejv'
+RAZORPAY_WEBHOOK_SECRET = 'jovin@2005' # User should update this in dashboard and here
 
 # Initialize Razorpay Client
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))

@@ -641,11 +641,11 @@
 
                 const data = await response.json();
 
-                if (data.message === 'success') {
+                if (response.ok && data.success) {
                     localStorage.removeItem('cart');
                     window.location.href = '/order-success/' + data.order_id;
                 } else {
-                    alert('❌ Order failed. Please try again.');
+                    alert('❌ Order failed: ' + (data.message || 'Unknown error. Please try again.'));
                     btn.disabled = false;
                     btn.innerHTML = originalText;
                 }
