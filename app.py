@@ -243,9 +243,12 @@ else:
 # ==============================
 # Razorpay Configuration
 # ==============================
-RAZORPAY_KEY_ID = 'rzp_live_SNrmceLg38Vi2Z'
-RAZORPAY_KEY_SECRET = 'Ib1D67I3hQ8TaqPlKxMBYejv'
-RAZORPAY_WEBHOOK_SECRET = 'jovin@2005' # User should update this in dashboard and here
+RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', '')
+RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', '')
+RAZORPAY_WEBHOOK_SECRET = os.environ.get('RAZORPAY_WEBHOOK_SECRET', '')
+
+if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET:
+    print("⚠️ RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET not set. Payment features will fail.")
 
 # Initialize Razorpay Client
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
