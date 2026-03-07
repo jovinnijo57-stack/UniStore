@@ -583,7 +583,6 @@
                 Orders</button>
             <button class="tab-btn" onclick="switchTab('inventory', this)"><i class="fas fa-boxes"></i>
                 Inventory</button>
-            <button class="tab-btn" onclick="switchTab('tasks', this)"><i class="fas fa-tasks"></i> Tasks</button>
             <button class="tab-btn" onclick="switchTab('shifts', this)"><i class="fas fa-user-clock"></i>
                 Shifts</button>
             <button class="tab-btn" onclick="switchTab('config', this)"><i class="fas fa-cog"></i> Settings</button>
@@ -856,69 +855,7 @@
             <div id="lowStockItems" style="display: flex; flex-wrap: wrap; gap: 0.75rem;"></div>
         </div>
 
-        <!-- Tasks / Todo Tab -->
-        <div id="tasks" class="tab-content">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-                <div class="staff-card">
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                        <h3><i class="fas fa-tasks" style="color: var(--primary);"></i> Staff Task Board</h3>
-                        <span id="taskCount" class="badge" style="background: #eef2ff; color: var(--primary);">0
-                            tasks</span>
-                    </div>
 
-                    <!-- Add Task Form -->
-                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; align-items: center;">
-                        <input type="text" id="newTaskInput" placeholder="Add new task... (e.g. Refill Printer Paper)"
-                            style="flex: 1; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem; color: #1e293b; background: #fff; min-width: 0;"
-                            onkeydown="if(event.key==='Enter') addTodo()">
-                        <button onclick="addTodo()"
-                            style="padding: 10px 14px; border-radius: 10px; background: var(--primary); white-space: nowrap; width: auto; min-width: 40px; font-size: 0.85rem;">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-
-                    <!-- Task List -->
-                    <div id="taskList"
-                        style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 500px; overflow-y: auto;">
-                        <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
-                            <i class="fas fa-clipboard-list" style="font-size: 2rem; opacity: 0.3;"></i>
-                            <p>No tasks yet. Add one above!</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="staff-card">
-                    <h3><i class="fas fa-lightbulb" style="color: #f59e0b;"></i> Quick Suggestions</h3>
-                    <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
-                        <button onclick="quickAddTask('Refill Printer Paper')" class="btn-sm"
-                            style="background: #f8fafc; color: #334155; border: 1px solid #e2e8f0; text-align: left; padding: 12px 16px; border-radius: 10px;">
-                            🖨️ Refill Printer Paper
-                        </button>
-                        <button onclick="quickAddTask('Count Cash Register')" class="btn-sm"
-                            style="background: #f8fafc; color: #334155; border: 1px solid #e2e8f0; text-align: left; padding: 12px 16px; border-radius: 10px;">
-                            💰 Count Cash Register
-                        </button>
-                        <button onclick="quickAddTask('Restock Shelf A')" class="btn-sm"
-                            style="background: #f8fafc; color: #334155; border: 1px solid #e2e8f0; text-align: left; padding: 12px 16px; border-radius: 10px;">
-                            📦 Restock Shelf A
-                        </button>
-                        <button onclick="quickAddTask('Clean Display Area')" class="btn-sm"
-                            style="background: #f8fafc; color: #334155; border: 1px solid #e2e8f0; text-align: left; padding: 12px 16px; border-radius: 10px;">
-                            🧹 Clean Display Area
-                        </button>
-                        <button onclick="quickAddTask('Check Inventory Expiry Dates')" class="btn-sm"
-                            style="background: #f8fafc; color: #334155; border: 1px solid #e2e8f0; text-align: left; padding: 12px 16px; border-radius: 10px;">
-                            📋 Check Inventory Expiry Dates
-                        </button>
-                        <button onclick="quickAddTask('Update Price Tags')" class="btn-sm"
-                            style="background: #f8fafc; color: #334155; border: 1px solid #e2e8f0; text-align: left; padding: 12px 16px; border-radius: 10px;">
-                            🏷️ Update Price Tags
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
 
         <!-- Shifts Tab -->
@@ -1321,7 +1258,7 @@
         // Init dashboard charts on load
         window.onload = () => {
             initCharts();
-            loadTodos();
+            loadChatMessages();
             loadChatMessages();
             loadShiftStatus();
             checkLowStock();
@@ -1330,88 +1267,7 @@
 
         // Auto-refresh is handled by the clock-synced refresh at the bottom of the page
 
-        // ===========================
-        // TASK / TODO LIST
-        // ===========================
-        async function loadTodos() {
-            try {
-                const res = await fetch('/api/staff/todos');
-                const todos = await res.json();
-                renderTodos(todos);
-            } catch (e) { console.log('Todo load error:', e); }
-        }
 
-        function renderTodos(todos) {
-            const list = document.getElementById('taskList');
-            const count = document.getElementById('taskCount');
-            const completed = todos.filter(t => t.completed).length;
-            count.textContent = `${completed}/${todos.length} done`;
-
-            if (todos.length === 0) {
-                list.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 2rem;">
-                    <i class="fas fa-clipboard-list" style="font-size: 2rem; opacity: 0.3;"></i>
-                    <p>No tasks yet. Add one above!</p>
-                </div>`;
-                return;
-            }
-
-            list.innerHTML = todos.map(t => `
-                <div style="display: flex; align-items: center; gap: 0.75rem; padding: 12px 16px; background: ${t.completed ? '#f0fdf4' : '#fff'}; border: 1px solid ${t.completed ? '#bbf7d0' : '#e5e7eb'}; border-radius: 10px; transition: 0.2s;">
-                    <button onclick="toggleTodoItem(${t.id})" style="width: 28px; height: 28px; border-radius: 8px; border: 2px solid ${t.completed ? '#10b981' : '#d1d5db'}; background: ${t.completed ? '#10b981' : 'white'}; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s;">
-                        ${t.completed ? '<i class="fas fa-check" style="color: white; font-size: 0.7rem;"></i>' : ''}
-                    </button>
-                    <span style="flex: 1; ${t.completed ? 'text-decoration: line-through; color: #94a3b8;' : 'color: #1e293b;'} font-weight: 500;">${t.text}</span>
-                    <button onclick="deleteTodoItem(${t.id})" style="width: 38px; height: 38px; border-radius: 10px; border: none; background: #fef2f2; cursor: pointer; color: #ef4444; font-size: 1.1rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        async function addTodo() {
-            const input = document.getElementById('newTaskInput');
-            const text = input.value.trim();
-            if (!text) return;
-            try {
-                const res = await fetch('/api/staff/todos/add', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    input.value = '';
-                    loadTodos();
-                }
-            } catch (e) { console.log(e); }
-        }
-
-        function quickAddTask(text) {
-            document.getElementById('newTaskInput').value = text;
-            addTodo();
-        }
-
-        async function toggleTodoItem(id) {
-            try {
-                await fetch('/api/staff/todos/toggle', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id })
-                });
-                loadTodos();
-            } catch (e) { console.log(e); }
-        }
-
-        async function deleteTodoItem(id) {
-            try {
-                await fetch('/api/staff/todos/delete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id })
-                });
-                loadTodos();
-            } catch (e) { console.log(e); }
-        }
 
         // ===========================
         // LIVE CHAT

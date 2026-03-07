@@ -64,8 +64,8 @@ import time
 # Email Configuration (Placeholder - User must update this!)
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
-SENDER_EMAIL = "unistore153@gmail.com"
-SENDER_PASSWORD = "bfqp ipxb kfsq teps"
+SENDER_EMAIL = os.getenv("SENDER_EMAIL", "unistore153@gmail.com")
+SENDER_PASSWORD = os.getenv("SENDER_PASSWORD", "bfqp ipxb kfsq teps")
 
 def send_notification_email(recipient_email, order_id, status_msg):
     """Send email notification to user"""
@@ -274,38 +274,57 @@ def login_required(f):
     return decorated_function
 
 def send_email(to_email, subject, message):
+    """Universal email sender with Brevo API attempt and SMTP fallback"""
+    
+    # 1. Try Brevo API first if configured
     api_key = os.environ.get("BREVO_API_KEY")
-    if not api_key:
-        print("⚠️ BREVO_API_KEY not found in environment variables. Email sending will fail.")
-        return False
+    if api_key:
+        try:
+            url = "https://api.brevo.com/v3/smtp/email"
+            payload = {
+                "sender": {"name": "UniStore", "email": SENDER_EMAIL},
+                "to": [{"email": to_email}],
+                "subject": subject,
+                "textContent": message
+            }
+            headers = {
+                "accept": "application/json",
+                "content-type": "application/json",
+                "api-key": api_key
+            }
+            response = requests.post(url, json=payload, headers=headers, timeout=10)
+            if response.status_code in (200, 201):
+                print(f"✅ [Brevo API] Email sent to {to_email}")
+                return True
+            else:
+                print(f"⚠️ [Brevo API] Failed (Status {response.status_code}). Trying SMTP fallback...")
+        except Exception as e:
+            print(f"⚠️ [Brevo API] Connection error: {e}. Trying SMTP fallback...")
 
-    
-    url = "https://api.brevo.com/v3/smtp/email"
-
-    
-    payload = {
-        "sender": {"name": "UniStore", "email": "unistore153@gmail.com"},
-        "to": [{"email": to_email}],
-        "subject": subject,
-        "textContent": message
-    }
-    
-    headers = {
-        "accept": "application/json",
-        "content-type": "application/json",
-        "api-key": api_key
-    }
-
+    # 2. Fallback to Gmail SMTP
     try:
-        response = requests.post(url, json=payload, headers=headers, timeout=10)
-        if response.status_code in (200, 201):
-            print(f"✅ Email sent successfully to {to_email} via Brevo API")
-            return True
-        else:
-            print(f"❌ Brevo API Error ({response.status_code}): {response.text}")
+        if not SENDER_PASSWORD or "your-generated-app-password" in SENDER_PASSWORD:
+            print("❌ [SMTP] Configuration error: Credentials missing.")
             return False
+
+        msg = MIMEMultipart()
+        msg['From'] = f"UniStore <{SENDER_EMAIL}>"
+        msg['To'] = to_email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(message, 'plain'))
+
+        # Standard Gmail SMTP connection (Port 587 + TLS)
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server.set_debuglevel(0)
+        server.starttls()
+        server.login(SENDER_EMAIL, SENDER_PASSWORD)
+        server.send_message(msg)
+        server.quit()
+        
+        print(f"✅ [SMTP] Email sent to {to_email} successfully!")
+        return True
     except Exception as e:
-        print(f"❌ Failed to connect to Email API: {e}")
+        print(f"❌ [SMTP] Error sending email: {e}")
         return False
 
 # Mock Data
@@ -2451,4 +2470,11 @@ def get_low_stock():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    is_production = os.environ.get("RAILWAY_ENVIRONMENT") or os.environ.get("PORT") or os.environ.get("RENDER")
+    
+    if is_production:
+        # Production (Railway) - no debug, bind to 0.0.0.0
+        app.run(host="0.0.0.0", port=port, debug=False)
+    else:
+        # Local development - debug on, single process to avoid "two localhost"
+        app.run(host="127.0.0.1", port=5000, debug=True, use_reloader=False)

@@ -63,8 +63,7 @@
             }
 
             const subtotal = cart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
-            const shipping = 0.00;
-            const total = subtotal + shipping;
+            const total = subtotal;
 
             container.innerHTML = `
                 <div>
@@ -93,10 +92,6 @@
                         <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
                             <span style="color: var(--text-muted);">Subtotal</span>
                             <span style="font-weight: 600;">Rs ${subtotal.toFixed(2)}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
-                            <span style="color: var(--text-muted);">Shipping</span>
-                            <span style="font-weight: 600;">${shipping === 0 ? 'FREE' : 'Rs ' + shipping.toFixed(2)}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #f3f4f6;">
                             <span style="font-size: 1.3rem; font-weight: 800;">Total</span>

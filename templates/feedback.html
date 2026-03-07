@@ -75,11 +75,11 @@
             const data = await res.json();
 
             if (data.message === 'success') {
-                msg.innerText = "Thank you! Returning to Dashboard...";
+                msg.innerText = "Thank you! Returning to My Orders...";
                 msg.style.display = "block";
                 msg.style.background = "#f0fdf4";
                 msg.style.color = "#10b981";
-                setTimeout(() => location.href = "{{ url_for('user_dashboard') }}", 2000);
+                setTimeout(() => location.href = "/user/dashboard#orders", 2000);
             }
         }
     </script>

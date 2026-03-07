@@ -479,6 +479,7 @@
             .sidebar {
                 transform: translateX(-100%);
                 width: 250px;
+                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
             }
 
             .sidebar.active {
@@ -489,6 +490,80 @@
                 margin-left: 0;
                 width: 100%;
                 padding: 1rem;
+            }
+
+            .header {
+                padding: 1rem;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .mobile-menu-btn {
+                display: flex !important;
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.4);
+                backdrop-filter: blur(4px);
+                z-index: 95;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .close-sidebar-btn {
+            display: none;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.05);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .close-sidebar-btn {
+                display: flex;
             }
         }
 
@@ -546,6 +621,9 @@
 
 <body>
 
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
     <!-- Notification Panel -->
     <div class="notification-panel" id="notificationPanel">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
@@ -574,6 +652,9 @@
 
     <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
+        <button class="close-sidebar-btn" onclick="toggleSidebar()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
         <div class="logo">
             <i class="fa-solid fa-graduation-cap"></i> UniStore
         </div>
@@ -1056,8 +1137,13 @@
     <main class="main-content">
         <!-- Header -->
         <header class="header">
-            <div style="font-weight: 600; color: var(--text-muted);">
-                {{ datetime_now }}
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div style="font-weight: 600; color: var(--text-muted); font-size: 0.9rem;">
+                    {{ datetime_now }}
+                </div>
             </div>
 
             <div style="display: flex; align-items: center; gap: 1.5rem;">
@@ -1711,6 +1797,13 @@
 
     <script>
         // Tab Switching Logic
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
         function switchTab(tabId, element) {
             // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(tab => {
@@ -1725,7 +1818,36 @@
                 nav.classList.remove('active');
             });
             if (element) element.classList.add('active');
+
+            // On mobile, close sidebar after clicking
+            if (window.innerWidth <= 768) {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                if (sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                }
+            }
         }
+
+        // Auto-switch tab based on URL hash (e.g. /user/dashboard#orders)
+        (function () {
+            const hash = window.location.hash.replace('#', '');
+            if (hash) {
+                const tabEl = document.getElementById(hash);
+                if (tabEl) {
+                    // Find the matching nav link
+                    const navLinks = document.querySelectorAll('.nav-link');
+                    let matchingLink = null;
+                    navLinks.forEach(link => {
+                        if (link.getAttribute('onclick') && link.getAttribute('onclick').includes("'" + hash + "'")) {
+                            matchingLink = link;
+                        }
+                    });
+                    switchTab(hash, matchingLink);
+                }
+            }
+        })();
 
         // Notification Panel
         function toggleNotifications() {
