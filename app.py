@@ -229,7 +229,7 @@ app.secret_key = 'super-secret-unistore-key'
 app.config['SESSION_PERMANENT'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_SECURE'] = False 
+app.config['SESSION_COOKIE_SECURE'] = True
 
 
 # Initialize database on startup
@@ -2470,11 +2470,5 @@ def get_low_stock():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    is_production = os.environ.get("RAILWAY_ENVIRONMENT") or os.environ.get("PORT") or os.environ.get("RENDER")
-    
-    if is_production:
-        # Production (Railway) - no debug, bind to 0.0.0.0
-        app.run(host="0.0.0.0", port=port, debug=False)
-    else:
-        # Local development - debug on, single process to avoid "two localhost"
-        app.run(host="127.0.0.1", port=5000, debug=True, use_reloader=False)
+    # Simple run - Gunicorn will handle production binding
+    app.run(host="0.0.0.0", port=port, debug=True)
