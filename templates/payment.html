@@ -533,18 +533,13 @@
                 const orderResponse = await fetch('/api/create-razorpay-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
                     body: JSON.stringify({
                         amount: originalTotal,
                         cart: cart,
                         coupon_code: currentCoupon ? currentCoupon.code : null
                     })
                 });
-
-                if (orderResponse.status === 401) {
-                    alert('⚠️ Session expired. Please log in again.');
-                    window.location.href = '/login';
-                    return;
-                }
 
                 const orderData = await orderResponse.json();
 
@@ -567,6 +562,7 @@
                         fetch('/api/verify-payment', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
+                            credentials: 'same-origin',
                             body: JSON.stringify({
                                 razorpay_order_id: response.razorpay_order_id,
                                 razorpay_payment_id: response.razorpay_payment_id,
@@ -577,9 +573,13 @@
                         })
                             .then(async res => {
                                 if (res.status === 401) {
-                                    alert('⚠️ Session expired. Please log in again. Your payment is safe — the order will be created automatically.');
+                                    alert('Session expired. Please log in and try again.');
                                     window.location.href = '/login';
                                     return;
+                                }
+                                const contentType = res.headers.get('content-type') || '';
+                                if (!contentType.includes('application/json')) {
+                                    throw new Error('Server returned unexpected response. Please check your dashboard for the order.');
                                 }
                                 const data = await res.json();
                                 if (res.ok && data.success) {
