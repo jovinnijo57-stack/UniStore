@@ -1,5 +1,4 @@
 from flask import Flask, jsonify, g, render_template, request, session, redirect, url_for, send_from_directory
-from werkzeug.middleware.proxy_fix import ProxyFix
 from functools import wraps
 import os
 import sys
@@ -224,18 +223,13 @@ def process_scheduled_pickup(order_id, pickup_time_str, current_attempts, is_rea
         print(f"Scheduling thread error for {order_id}: {e}")
 
 app = Flask(__name__)
-
-# Trust proxy headers from Render/Railway so Flask sees the real HTTPS scheme
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
-
 app.secret_key = 'super-secret-unistore-key'
 
 # Session Configuration
 app.config['SESSION_PERMANENT'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-# Secure cookies only in production (HTTPS); disable for local HTTP dev
-app.config['SESSION_COOKIE_SECURE'] = bool(os.environ.get('RENDER') or os.environ.get('RAILWAY_ENVIRONMENT'))
+app.config['SESSION_COOKIE_SECURE'] = True
 
 
 # Initialize database on startup
@@ -275,9 +269,6 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user' not in session:
-            # For API calls (fetch/AJAX), return JSON error instead of redirect
-            if request.is_json or request.headers.get('Content-Type', '').startswith('application/json'):
-                return jsonify({'success': False, 'error': 'Session expired. Please log in again.'}), 401
             return redirect(url_for('login_page'))
         return f(*args, **kwargs)
     return decorated_function
@@ -2031,18 +2022,25 @@ def verify_razorpay_payment():
             record_coupon_usage(username, coupon_code)
         
         # Update user profile in memory (for legacy support)
+        # IMPORTANT: USER_PROFILES[username] may already exist as {} from dashboard/wallet init
+        # so we must ensure all required keys exist, not just check "if username not in"
         if username not in USER_PROFILES:
-            import random
-            import string
-            USER_PROFILES[username] = {
-                'points': 0,
-                'tier': 'Bronze',
-                'total_spent': 0,
-                'referral_code': ''.join(random.choices(string.ascii_uppercase + string.digits, k=6)),
-                'referred_by': ''
-            }
+            USER_PROFILES[username] = {}
         
-        USER_PROFILES[username]['total_spent'] += order['total']
+        import random
+        import string
+        profile_defaults = {
+            'points': 0,
+            'tier': 'Bronze',
+            'total_spent': 0,
+            'referral_code': ''.join(random.choices(string.ascii_uppercase + string.digits, k=6)),
+            'referred_by': ''
+        }
+        for key, default_val in profile_defaults.items():
+            if key not in USER_PROFILES[username]:
+                USER_PROFILES[username][key] = default_val
+        
+        USER_PROFILES[username]['total_spent'] = USER_PROFILES[username].get('total_spent', 0) + order['total']
         USER_PROFILES[username]['points'] = int(USER_PROFILES[username]['total_spent'] / 10)
         
         # Deduct Stock
