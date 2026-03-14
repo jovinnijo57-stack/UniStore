@@ -74,17 +74,6 @@ def init_database():
         except:
             pass
 
-        # Razorpay payment columns (needed by save_order)
-        for col in [
-            "ALTER TABLE orders ADD COLUMN razorpay_order_id TEXT",
-            "ALTER TABLE orders ADD COLUMN payment_id TEXT",
-            "ALTER TABLE orders ADD COLUMN payment_ref TEXT",
-        ]:
-            try:
-                cursor.execute(col)
-            except:
-                pass
-
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS coupons (
             code TEXT PRIMARY KEY,

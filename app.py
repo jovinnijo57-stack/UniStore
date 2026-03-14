@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, g, render_template, request, session, redirect, url_for, send_from_directory
+from werkzeug.middleware.proxy_fix import ProxyFix
 from functools import wraps
 import os
 import sys
@@ -223,15 +224,18 @@ def process_scheduled_pickup(order_id, pickup_time_str, current_attempts, is_rea
         print(f"Scheduling thread error for {order_id}: {e}")
 
 app = Flask(__name__)
+
+# Trust proxy headers from Render/Railway so Flask sees the real HTTPS scheme
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
 app.secret_key = 'super-secret-unistore-key'
 
 # Session Configuration
 app.config['SESSION_PERMANENT'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-# Only enforce Secure cookies when running behind HTTPS (production)
-is_production = bool(os.environ.get('RENDER') or os.environ.get('RAILWAY_ENVIRONMENT') or os.environ.get('PORT'))
-app.config['SESSION_COOKIE_SECURE'] = is_production
+# Secure cookies only in production (HTTPS); disable for local HTTP dev
+app.config['SESSION_COOKIE_SECURE'] = bool(os.environ.get('RENDER') or os.environ.get('RAILWAY_ENVIRONMENT'))
 
 
 # Initialize database on startup
@@ -271,8 +275,8 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user' not in session:
-            # For API endpoints, return JSON error instead of redirect
-            if request.path.startswith('/api/'):
+            # For API calls (fetch/AJAX), return JSON error instead of redirect
+            if request.is_json or request.headers.get('Content-Type', '').startswith('application/json'):
                 return jsonify({'success': False, 'error': 'Session expired. Please log in again.'}), 401
             return redirect(url_for('login_page'))
         return f(*args, **kwargs)
@@ -2475,9 +2479,5 @@ def get_low_stock():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    if is_production:
-        # Production - no debug, bind to 0.0.0.0
-        app.run(host="0.0.0.0", port=port, debug=False)
-    else:
-        # Local development
-        app.run(host="127.0.0.1", port=5000, debug=True, use_reloader=False)
+    # Simple run - Gunicorn will handle production binding
+    app.run(host="0.0.0.0", port=port, debug=True)
