@@ -229,7 +229,9 @@ app.secret_key = 'super-secret-unistore-key'
 app.config['SESSION_PERMANENT'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_SECURE'] = True
+# Only enforce Secure cookies when running behind HTTPS (production)
+is_production = bool(os.environ.get('RENDER') or os.environ.get('RAILWAY_ENVIRONMENT') or os.environ.get('PORT'))
+app.config['SESSION_COOKIE_SECURE'] = is_production
 
 
 # Initialize database on startup
@@ -269,6 +271,9 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user' not in session:
+            # For API endpoints, return JSON error instead of redirect
+            if request.path.startswith('/api/'):
+                return jsonify({'success': False, 'error': 'Session expired. Please log in again.'}), 401
             return redirect(url_for('login_page'))
         return f(*args, **kwargs)
     return decorated_function
@@ -2470,5 +2475,9 @@ def get_low_stock():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    # Simple run - Gunicorn will handle production binding
-    app.run(host="0.0.0.0", port=port, debug=True)
+    if is_production:
+        # Production - no debug, bind to 0.0.0.0
+        app.run(host="0.0.0.0", port=port, debug=False)
+    else:
+        # Local development
+        app.run(host="127.0.0.1", port=5000, debug=True, use_reloader=False)
