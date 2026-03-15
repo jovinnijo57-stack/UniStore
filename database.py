@@ -632,20 +632,23 @@ def get_user_active_token(email):
     except Exception as e:
         print("Error checking user active token: ", e)
         return None
-
-
-def update_wallet_balance(email, new_balance):
+def update_wallet_balance(email, amount):
+    """Update user's wallet balance in the database"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("""
-            UPDATE user_profiles 
-            SET wallet_balance = ? 
-            WHERE user_id = (SELECT id FROM users WHERE email = ?)
-        """, (new_balance, email))
-        conn.commit()
+        # Get user_id first
+        cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
+        user_row = cursor.fetchone()
+        if user_row:
+            uid = user_row['id']
+            # Update wallet balance
+            cursor.execute("UPDATE user_profiles SET wallet_balance = ? WHERE user_id = ?", (amount, uid))
+            conn.commit()
+            conn.close()
+            return True
         conn.close()
-        return True
+        return False
     except Exception as e:
-        print(f"Error updating wallet: {e}")
+        print(f"Error updating wallet balance in DB: {e}")
         return False
