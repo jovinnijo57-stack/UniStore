@@ -533,7 +533,6 @@
                 const orderResponse = await fetch('/api/create-razorpay-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    credentials: 'same-origin',
                     body: JSON.stringify({
                         amount: originalTotal,
                         cart: cart,
@@ -562,7 +561,6 @@
                         fetch('/api/verify-payment', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            credentials: 'same-origin',
                             body: JSON.stringify({
                                 razorpay_order_id: response.razorpay_order_id,
                                 razorpay_payment_id: response.razorpay_payment_id,
@@ -572,19 +570,11 @@
                             })
                         })
                             .then(async res => {
-                                if (res.status === 401) {
-                                    alert('Session expired. Please log in and try again.');
-                                    window.location.href = '/login';
-                                    return;
-                                }
-                                const contentType = res.headers.get('content-type') || '';
-                                if (!contentType.includes('application/json')) {
-                                    throw new Error('Server returned unexpected response. Please check your dashboard for the order.');
-                                }
                                 const data = await res.json();
                                 if (res.ok && data.success) {
                                     localStorage.removeItem('cart');
-                                    window.location.href = '/order-success/' + data.order_id;
+                                    // Use absolute path for redirection
+                                    window.location.href = window.location.origin + '/order-success/' + data.order_id;
                                 } else {
                                     throw new Error(data.message || data.error || 'Verification Failed');
                                 }
