@@ -422,17 +422,22 @@
             // Re-check wallet button
             const walletBalance = parseFloat("{{ wallet_balance }}");
             const walletBtn = document.getElementById('wallet-btn');
-            if (walletBtn && walletBalance > 0) {
-                if (walletBalance < total) {
-                    walletBtn.style.opacity = '0.7';
-                    walletBtn.innerHTML = `<i class="fas fa-wallet"></i> Insufficient Wallet Balance (₹${walletBalance})`;
-                    walletBtn.disabled = true;
-                    walletBtn.style.cursor = 'not-allowed';
+            if (walletBtn) {
+                if (walletBalance > 0) {
+                    walletBtn.style.display = 'flex'; // Show button if balance exists
+                    if (walletBalance < total) {
+                        walletBtn.style.opacity = '0.7';
+                        walletBtn.innerHTML = `<i class="fas fa-wallet"></i> Insufficient Wallet Balance (₹${walletBalance.toFixed(2)})`;
+                        walletBtn.disabled = true;
+                        walletBtn.style.cursor = 'not-allowed';
+                    } else {
+                        walletBtn.style.opacity = '1';
+                        walletBtn.innerHTML = `<i class="fas fa-wallet"></i> Pay using Wallet (Bal: ₹${walletBalance.toFixed(2)})`;
+                        walletBtn.disabled = false;
+                        walletBtn.style.cursor = 'pointer';
+                    }
                 } else {
-                    walletBtn.style.opacity = '1';
-                    walletBtn.innerHTML = `<i class="fas fa-wallet"></i> Pay using Wallet (Bal: ₹${walletBalance})`;
-                    walletBtn.disabled = false;
-                    walletBtn.style.cursor = 'pointer';
+                    walletBtn.style.display = 'none'; // Hide if balance is 0
                 }
             }
         }
