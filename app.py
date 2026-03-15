@@ -23,7 +23,8 @@ from database import (
     get_coupon, record_coupon_usage, get_user_active_token,
     get_db_connection, get_user_stats, get_user_orders,
     delete_coupon, update_coupon, has_user_used_coupon, 
-    get_max_token, add_review, get_product_reviews, create_coupon, get_all_coupons
+    get_max_token, add_review, get_product_reviews, create_coupon, get_all_coupons,
+    update_wallet_balance
 )
 
 # Global Token Management
@@ -100,8 +101,10 @@ def refund_to_wallet(order):
                 if user_email not in USER_PROFILES:
                     USER_PROFILES[user_email] = {}
                 current_bal = USER_PROFILES[user_email].get('wallet_balance', 0.0)
-                USER_PROFILES[user_email]['wallet_balance'] = current_bal + amount
-                print(f"Refunded ₹{amount} to {user_email}'s wallet (was {method}). New balance: ₹{current_bal + amount}")
+                new_bal = current_bal + amount
+                USER_PROFILES[user_email]['wallet_balance'] = new_bal
+                update_wallet_balance(user_email, new_bal)
+                print(f"Refunded ₹{amount} to {user_email}'s wallet (was {method}). New balance: ₹{new_bal}")
                 
                 # Extract user name from email (part before @)
                 user_name = user_email.split('@')[0].replace('.', ' ').replace('_', ' ').title()
@@ -560,11 +563,9 @@ def user_dashboard():
         # ==========================================
         
         # A. Wallet Balance
-        # Ensure profile has wallet_balance
-        if 'wallet_balance' not in USER_PROFILES.get(user_email, {}):
-             if user_email not in USER_PROFILES: USER_PROFILES[user_email] = {}
-             USER_PROFILES[user_email]['wallet_balance'] = 0.00
-        
+        if user_email not in USER_PROFILES: USER_PROFILES[user_email] = {}
+        # Sync from DB stats
+        USER_PROFILES[user_email]['wallet_balance'] = stats.get('wallet_balance', 0.0)
         profile['wallet_balance'] = USER_PROFILES[user_email]['wallet_balance']
         
         # B. Avatar
@@ -639,6 +640,7 @@ def wallet_topup():
     
     new_bal = current_bal + amount
     USER_PROFILES[user_email]['wallet_balance'] = new_bal
+    update_wallet_balance(user_email, new_bal)
     
     # Add notification
     NOTIFICATIONS.append({
@@ -2065,6 +2067,28 @@ def verify_razorpay_payment():
             'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         NOTIFICATIONS.append(notification)
+
+        # Send Confirmation Email for Razorpay Purchase
+        email_subject = f"Payment Confirmed: {order['id']}"
+        email_body = f"""
+Hello,
+
+🎉 Your payment for order {order['id']} was successful!
+
+Order Details:
+----------------
+Order ID: {order['id']}
+Method: Razorpay
+Total Paid: ₹{total_amount}
+
+Items:
+{chr(10).join([f"- {i['quantity']}x {i.get('name', 'Item')}" for i in cart_items])}
+
+You will receive another notification once your order is ready for collection.
+
+Thank you for choosing UniStore!
+"""
+        threading.Thread(target=send_email, args=(username, email_subject, email_body)).start()
         
         return jsonify({
             'success': True,
@@ -2212,6 +2236,7 @@ def wallet_verify_payment():
         current_bal = USER_PROFILES[user_email].get('wallet_balance', 0.0)
         new_bal = current_bal + amount
         USER_PROFILES[user_email]['wallet_balance'] = new_bal
+        update_wallet_balance(user_email, new_bal)
         
         # Notification
         NOTIFICATIONS.append({
@@ -2279,7 +2304,9 @@ def process_payment():
                 return jsonify({'success': False, 'message': 'Insufficient wallet balance'}), 400
                 
             # Deduct Balance
-            USER_PROFILES[username]['wallet_balance'] = current_bal - total_amount
+            new_bal = current_bal - total_amount
+            USER_PROFILES[username]['wallet_balance'] = new_bal
+            update_wallet_balance(username, new_bal)
             payment_status = "Pending"
         
         # Fix: Use millisecond precision for ID to prevent collisions
