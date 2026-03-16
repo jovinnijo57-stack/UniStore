@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -25,12 +25,15 @@
             --glass-border: rgba(255, 255, 255, 0.5);
             --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
             --sidebar-width: 280px;
+            --bottom-nav-height: 70px;
         }
 
         body {
             background: #f3f4f6;
             min-height: 100vh;
             display: flex;
+            overflow-x: hidden;
+            font-family: 'Outfit', sans-serif;
         }
 
         /* Glassmorphism Sidebar */
@@ -47,8 +50,8 @@
             padding: 2rem;
             display: flex;
             flex-direction: column;
-            z-index: 100;
-            transition: transform 0.3s ease;
+            z-index: 200;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .logo {
@@ -81,10 +84,6 @@
         .nav-links::-webkit-scrollbar-thumb {
             background: rgba(99, 102, 241, 0.25);
             border-radius: 10px;
-        }
-
-        .nav-links::-webkit-scrollbar-thumb:hover {
-            background: rgba(99, 102, 241, 0.5);
         }
 
         .nav-item {
@@ -121,6 +120,7 @@
             flex: 1;
             padding: 2rem;
             width: calc(100% - var(--sidebar-width));
+            transition: padding 0.3s ease;
         }
 
         /* Header */
@@ -184,10 +184,6 @@
             transition: transform 0.2s;
         }
 
-        .notification-btn:hover {
-            transform: scale(1.05);
-        }
-
         .badge {
             position: absolute;
             top: -5px;
@@ -212,6 +208,11 @@
 
         .tab-content.active {
             display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .page-title {
@@ -239,9 +240,7 @@
             transition: transform 0.3s ease;
         }
 
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
+        .stat-card:hover { transform: translateY(-5px); }
 
         .stat-icon {
             width: 60px;
@@ -254,34 +253,16 @@
             color: white;
         }
 
-        .stat-info h3 {
-            font-size: 1.8rem;
-            margin-bottom: 0.2rem;
-        }
-
-        .stat-info p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
+        .stat-info h3 { font-size: 1.8rem; margin-bottom: 0.2rem; }
+        .stat-info p { color: var(--text-muted); font-size: 0.9rem; }
 
         /* Gradients */
-        .bg-purple {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-        }
+        .bg-purple { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .bg-pink { background: linear-gradient(135deg, #ec4899, #8b5cf6); }
+        .bg-orange { background: linear-gradient(135deg, #f6d365, #fda085); }
+        .bg-green { background: linear-gradient(135deg, #84fab0, #8fd3f4); }
 
-        .bg-pink {
-            background: linear-gradient(135deg, #ec4899, #8b5cf6);
-        }
-
-        .bg-orange {
-            background: linear-gradient(135deg, #f6d365, #fda085);
-        }
-
-        .bg-green {
-            background: linear-gradient(135deg, #84fab0, #8fd3f4);
-        }
-
-        /* Loyalty Section */
+        /* Loyalty Card */
         .loyalty-card {
             background: var(--bg-gradient);
             color: white;
@@ -300,10 +281,7 @@
             margin-bottom: 2rem;
         }
 
-        .points-display {
-            font-size: 3.5rem;
-            font-weight: 800;
-        }
+        .points-display { font-size: 3.5rem; font-weight: 800; }
 
         .progress-container {
             background: rgba(255, 255, 255, 0.2);
@@ -321,30 +299,7 @@
             transition: width 1s ease;
         }
 
-        .tiers-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-        }
-
-        .tier-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 16px;
-            text-align: center;
-            border: 1px solid #e5e7eb;
-            transition: all 0.3s;
-            opacity: 0.6;
-        }
-
-        .tier-card.active {
-            border-color: var(--primary);
-            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.15);
-            opacity: 1;
-            transform: scale(1.05);
-        }
-
-        /* Orders Timeline */
+        /* Order Timeline */
         .order-timeline {
             display: flex;
             justify-content: space-between;
@@ -352,50 +307,17 @@
             position: relative;
         }
 
-        .timeline-step {
-            text-align: center;
-            z-index: 2;
-            flex: 1;
-        }
-
+        .timeline-step { text-align: center; z-index: 2; flex: 1; }
         .step-icon {
-            width: 40px;
-            height: 40px;
-            background: #e5e7eb;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 0.5rem;
-            color: #6b7280;
-            transition: all 0.3s;
+            width: 40px; height: 40px;
+            background: #e5e7eb; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 0.5rem; color: #6b7280;
         }
 
-        .timeline-step.completed .step-icon {
-            background: var(--success);
-            color: white;
-        }
-
-        .timeline-line {
-            position: absolute;
-            top: 20px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: #e5e7eb;
-            z-index: 1;
-        }
-
-        .timeline-progress {
-            position: absolute;
-            top: 20px;
-            left: 0;
-            height: 2px;
-            background: var(--success);
-            z-index: 1;
-            width: 0;
-            transition: width 1s ease;
-        }
+        .timeline-step.completed .step-icon { background: var(--success); color: white; }
+        .timeline-line { position: absolute; top: 20px; left: 0; width: 100%; height: 2px; background: #e5e7eb; z-index: 1; }
+        .timeline-progress { position: absolute; top: 20px; left: 0; height: 2px; background: var(--success); z-index: 1; width: 0; transition: width 1s ease; }
 
         /* Wishlist Grid */
         .wishlist-grid {
@@ -413,37 +335,6 @@
             position: relative;
         }
 
-        .wishlist-item:hover {
-            transform: translateY(-5px);
-        }
-
-        .wishlist-img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-        }
-
-        .wishlist-content {
-            padding: 1rem;
-        }
-
-        .remove-wishlist {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--secondary);
-            cursor: pointer;
-            border: none;
-        }
-
-        /* Notification Panel */
         .notification-panel {
             position: fixed;
             right: -350px;
@@ -458,114 +349,168 @@
             overflow-y: auto;
         }
 
-        .notification-panel.open {
-            right: 0;
-        }
+        .notification-panel.open { right: 0; }
 
         .notif-item {
-            padding: 1rem;
-            border-bottom: 1px solid #f3f4f6;
+            padding: 1rem; border-bottom: 1px solid #f3f4f6;
+            display: flex; gap: 1rem;
+        }
+
+        .notif-item.unread { background: #fdf2f8; border-left: 3px solid var(--secondary); }
+
+        /* Bottom Nav (Mobile Only) */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: var(--bottom-nav-height);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            z-index: 150;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 1rem;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .bottom-nav-item {
             display: flex;
-            gap: 1rem;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 500;
+            flex: 1;
+            padding: 0.5rem 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .notif-item.unread {
-            background: #fdf2f8;
-            border-left: 3px solid var(--secondary);
+        .bottom-nav-item i { font-size: 1.25rem; transition: transform 0.2s; }
+        .bottom-nav-item.active { color: var(--primary); }
+        .bottom-nav-item.active i { transform: translateY(-3px); }
+
+        .center-btn {
+            width: 55px;
+            height: 55px;
+            background: var(--bg-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white !important;
+            box-shadow: 0 8px 15px rgba(99, 102, 241, 0.3);
+            margin-top: -30px;
+            border: 4px solid white;
         }
 
-        /* Responsive */
+        .center-btn i { font-size: 1.5rem !important; }
+
+        /* Mobile Adjustments */
+        @media (max-width: 1024px) {
+            .sidebar { transform: translateX(-100%); width: 280px; }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; width: 100%; padding: 1.5rem; }
+            .header { padding: 1rem 1.5rem; }
+            .bottom-nav { display: flex; }
+            .main-content { padding-bottom: calc(var(--bottom-nav-height) + 1.5rem); }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
         @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                width: 250px;
-                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
-            }
-
-            .sidebar.active {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-                padding: 1rem;
-            }
-
-            .header {
-                padding: 1rem;
-                flex-wrap: wrap;
+            .stats-grid { grid-template-columns: 1fr; }
+            .loyalty-card { padding: 1.5rem; }
+            .points-display { font-size: 2.5rem; }
+            .header { flex-direction: row; justify-content: space-between; height: auto; }
+            .user-info { display: none; }
+            .notification-panel { width: 100%; right: -100%; }
+            .page-title { font-size: 1.5rem; }
+            .loyalty-level i { font-size: 2rem; }
+            .loyalty-card h2 { font-size: 1.5rem; }
+            
+            /* Compact Cards for mobile */
+            .card { padding: 1.25rem; }
+            
+            /* Horizontal Scroll for sections if needed */
+            .tiers-grid {
+                display: flex;
+                overflow-x: auto;
+                padding-bottom: 1rem;
                 gap: 1rem;
+                scrollbar-width: none;
             }
+            .tiers-grid::-webkit-scrollbar { display: none; }
+            .tier-card { min-width: 180px; flex-shrink: 0; }
 
-            .mobile-menu-btn {
-                display: flex !important;
+            .quick-actions-row {
+                flex-direction: row !important;
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
             }
-
-            .sidebar-overlay {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.4);
-                backdrop-filter: blur(4px);
-                z-index: 95;
-            }
-
-            .sidebar-overlay.active {
-                display: block;
-            }
-
-            .page-title {
-                font-size: 1.5rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .stat-card {
-                padding: 1rem;
-            }
+            .quick-action-item { min-width: 140px; }
         }
 
         .mobile-menu-btn {
-            display: none;
+            display: flex;
             background: white;
             border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
             color: var(--primary);
-            font-size: 1.2rem;
+            font-size: 1.1rem;
+        }
+
+        @media (min-width: 1025px) {
+            .mobile-menu-btn { display: none; }
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 180;
+        }
+
+        .sidebar-overlay.active { display: block; }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: var(--glass-shadow);
+            margin-bottom: 1.5rem;
         }
 
         .close-sidebar-btn {
-            display: none;
+            display: flex;
             position: absolute;
             top: 1rem;
             right: 1rem;
             background: rgba(0, 0, 0, 0.05);
             border: none;
-            width: 32px;
-            height: 32px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
             align-items: center;
             justify-content: center;
             cursor: pointer;
         }
 
-        @media (max-width: 768px) {
-            .close-sidebar-btn {
-                display: flex;
-            }
-        }
 
         .card {
             background: white;
@@ -2263,6 +2208,76 @@
         }
     </script>
 
+    <!-- Bottom Navigation (Mobile Friendly) -->
+    <nav class="bottom-nav">
+        <a href="#" class="bottom-nav-item active" onclick="switchTab('overview', this); updateBottomNav(this)">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="#" class="bottom-nav-item" onclick="switchTab('orders', this); updateBottomNav(this)">
+            <i class="fa-solid fa-receipt"></i>
+            <span>Orders</span>
+        </a>
+        <a href="/shop" class="bottom-nav-item center-btn">
+            <i class="fa-solid fa-shopping-bag"></i>
+        </a>
+        <a href="#" class="bottom-nav-item" onclick="switchTab('wishlist', this); updateBottomNav(this)">
+            <i class="fa-solid fa-heart"></i>
+            <span>Wishlist</span>
+        </a>
+        <a href="#" class="bottom-nav-item" onclick="switchTab('referral', this); updateBottomNav(this)">
+            <i class="fa-solid fa-gift"></i>
+            <span>Refer</span>
+        </a>
+    </nav>
+
+    <!-- Support Floating Button for Mobile -->
+    <button onclick="switchTab('support')" style="position: fixed; bottom: 85px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: white; color: var(--primary); box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: none; display: flex; align-items: center; justify-content: center; z-index: 100;" class="mobile-only-btn">
+        <i class="fa-solid fa-headset"></i>
+    </button>
+
+    <script>
+        function updateBottomNav(el) {
+            document.querySelectorAll('.bottom-nav-item').forEach(item => item.classList.remove('active'));
+            if (el) el.classList.add('active');
+        }
+
+        // Enhanced switchTab to sync with bottom nav
+        const originalSwitchTab = window.switchTab;
+        window.switchTab = function(tabName, el) {
+            // Call original if it exists or implement new
+            const tabs = document.querySelectorAll('.tab-content');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            navLinks.forEach(link => link.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            if (el) el.classList.add('active');
+
+            // Sync bottom nav
+            const bottomItems = document.querySelectorAll('.bottom-nav-item');
+            bottomItems.forEach(item => {
+                const icon = item.querySelector('i');
+                if (tabName === 'overview' && icon.classList.contains('fa-house')) item.classList.add('active');
+                else if (tabName === 'orders' && icon.classList.contains('fa-receipt')) item.classList.add('active');
+                else if (tabName === 'wishlist' && icon.classList.contains('fa-heart')) item.classList.add('active');
+                else if (tabName === 'referral' && icon.classList.contains('fa-gift')) item.classList.add('active');
+                else item.classList.remove('active');
+            });
+
+            // Close sidebar on mobile after selection
+            if (window.innerWidth <= 1024) {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+    </script>
 </body>
 
 </html>
