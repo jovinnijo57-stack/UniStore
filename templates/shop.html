@@ -9,9 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- GSAP for Cart Animation -->
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/MorphSVGPlugin.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/Physics2DPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
     <style>
         .shop-nav {
@@ -104,147 +102,87 @@
 
         /* No Results */
         /* Animated Add to Cart Button Styles */
+        /* Sleek Modern Add to Cart Button */
         .add-to-cart {
-            --color: #1e293b;
-            --background: #fff;
-            --drop: #38E739;
-            --background-s: 1;
-            --text-o: 1;
-            --text-x: 10px;
-            --bottle-x: -40%;
-            --bottle-y: -60px;
-            --bottle-s: .4;
-            --bottle-r: 0deg;
-            --bottle-o: 0;
-            --cart-x: -57px;
-            --cart-y: -2px;
-            --cart-r: 0deg;
-            --cart-s: 0.8;
-            --check-y: 0px;
-            --check-s: 0;
-            --check-offset: 8.5px;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-appearance: none;
-            outline: none;
-            background: none;
-            border: none;
-            padding: 12px 0;
-            margin: 0;
-            width: 142px;
-            color: var(--color);
-            cursor: pointer;
             position: relative;
-            text-align: center;
-            font: inherit;
-            transition: transform 0.2s;
+            outline: none;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-width: 120px;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+        }
+
+        .add-to-cart:hover:not(.disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+            background: #4f46e5;
+        }
+
+        .add-to-cart:active:not(.disabled) {
+            transform: scale(0.95);
         }
 
         .add-to-cart.disabled {
-            opacity: 0.6;
+            background: #cbd5e1;
             cursor: not-allowed;
-            --background: #94a3b8;
+            box-shadow: none;
         }
 
-        .add-to-cart.clipped {
-            clip-path: polygon(0 -80px, 100% -80px, 100% 80px, 0 80px);
-        }
-
-        .add-to-cart .background,
-        .add-to-cart .cart,
-        .add-to-cart .check {
-            position: absolute;
-            pointer-events: none;
-        }
-
-        .add-to-cart .background {
-            left: 0;
-            top: -4px;
-            right: 0;
-            bottom: 0;
-            display: block;
-            fill: var(--background);
-            transform: scale(var(--background-s)) translateZ(0);
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-        }
-
-        .add-to-cart span {
+        .add-to-cart .btn-text {
             position: relative;
-            z-index: 1;
-            line-height: 18px;
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            opacity: var(--text-o);
-            transform: translateX(var(--text-x)) translateZ(0);
-            color: var(--color);
-        }
-
-        .add-to-cart .drop {
-            position: absolute;
-            z-index: 1;
-            left: 70px;
-            top: 8px;
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            background: var(--drop);
-        }
-
-        .add-to-cart .cart {
             z-index: 2;
-            bottom: 11px;
-            left: calc(50% - 2px);
-            transform-origin: 10px 17px;
-            transform: translate(var(--cart-x), var(--cart-y)) scale(var(--cart-s)) rotate(var(--cart-r)) translateZ(0);
         }
 
-        .add-to-cart .cart svg {
-            display: block;
-            width: 24px;
-            height: 19px;
-            stroke: var(--color);
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            fill: none;
-            position: relative;
-            z-index: 1;
-            transform: translateZ(0);
+        .add-to-cart i {
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
         }
 
-        .add-to-cart .cart img {
-            display: block;
+        .add-to-cart.active i {
+            transform: scale(0);
+        }
+
+        .add-to-cart .success-icon {
             position: absolute;
-            bottom: 7px;
             left: 50%;
-            opacity: var(--bottle-o);
-            transform-origin: 50% 100%;
-            transform: translate(var(--bottle-x), var(--bottle-y)) scale(var(--bottle-s)) rotate(var(--bottle-r)) translateZ(0);
-            width: 16px;
-            height: 16px;
-            object-fit: contain;
+            top: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .add-to-cart .check {
-            bottom: 3px;
-            left: 50%;
-            padding: 4px;
-            background: var(--background);
+        .add-to-cart.added .success-icon {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .add-to-cart.added .btn-text, 
+        .add-to-cart.added i:not(.success-icon) {
+            opacity: 0;
+        }
+
+        /* Particle styles */
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--secondary);
             border-radius: 50%;
-            transform: translate(-50%, var(--check-y)) scale(var(--check-s)) translateZ(0);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .add-to-cart .check svg {
-            display: block;
-            width: 12px;
-            height: 12px;
-            fill: none;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            stroke: #10b981;
-            stroke-dasharray: 8.5px;
-            stroke-dashoffset: var(--check-offset);
+            pointer-events: none;
+            z-index: 10;
         }
 
         .no-results {
@@ -284,7 +222,14 @@
             transform: translateY(-2px);
         }
 
-        /* Product card fade-in */
+        /* Product card layout refinements */
+        .product-price {
+            font-size: 1.25rem !important;
+            font-weight: 800;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+
         .product-card {
             animation: fadeInUp 0.4s ease forwards;
             opacity: 0;
@@ -442,12 +387,12 @@
                         </div>
                         <h3 style="margin-top: 0.5rem; font-size: 1.3rem;">${highlightMatch(p.name)}</h3>
                         ${p.description ? `<p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.4rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${p.description}</p>` : ''}
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; gap: 0.5rem; flex-wrap: nowrap;">
                             <span class="product-price">${isService ? 'From ' : ''}Rs ${p.price.toFixed(2)}</span>
                             
                             ${isService ? `
                                 <button onclick="location.href='/print-service'" 
-                                    style="width: auto; padding: 10px 20px; border-radius: 50px; font-size: 0.9rem; background: var(--primary); color: white; border: none; cursor: pointer;">
+                                    style="width: auto; padding: 8px 16px; border-radius: 50px; font-size: 0.85rem; background: var(--primary); color: white; border: none; cursor: pointer; font-weight: 600;">
                                     Use Service
                                 </button>
                             ` : `
@@ -455,23 +400,9 @@
                                     data-id="${p.id}" data-name="${p.name}" data-price="${p.price}" data-image="${p.image}" data-stock="${p.stock}"
                                     onclick="handleAddToCart(this)"
                                     ${isOutOfStock ? 'disabled' : ''}>
-                                    <div class="cart">
-                                        <svg viewBox="0 0 24 19">
-                                            <path d="M11.25 17C11.25 17.6904 10.6904 18.25 10 18.25C9.30964 18.25 8.75 17.6904 8.75 17C8.75 16.3096 9.30964 15.75 10 15.75C10.6904 15.75 11.25 16.3096 11.25 17Z" stroke-width="1.5 "/>
-                                            <path d="M19.25 17C19.25 17.6904 18.6904 18.25 18 18.25C17.3096 18.25 16.75 17.6904 16.75 17C16.75 16.3096 17.3096 15.75 18 15.75C18.6904 15.75 19.25 16.3096 19.25 17Z" stroke-width="1.5 "/>
-                                            <path d="M1 1H5L5.91304 4M5.91304 4L8.06853 11.0823C8.32483 11.9245 9.10161 12.5 9.98188 12.5H18.585C19.4329 12.5 20.1887 11.9653 20.471 11.1656L23 4H5.91304Z" stroke-width="2" />
-                                        </svg>
-                                        <img src="${p.image}" alt="">
-                                    </div>
-                                    <span>${isOutOfStock ? 'Unavailable' : 'Add to Cart'}</span>
-                                    <div class="check">
-                                        <svg viewBox="0 0 10 10">
-                                            <path d="M2 5L4 7L8 3" />
-                                        </svg>
-                                    </div>
-                                    <svg class="background" viewBox="0 0 142 46">
-                                        <path d="M0 19C0 10.7157 6.71573 4 15 4H41.4599C53.6032 4 62.4844 4 72.5547 4C82.6251 4 91.5063 4 103.65 4H137C139.761 4 142 6.23858 142 9V31C142 39.2843 135.284 46 127 46H5C2.23858 46 0 43.7614 0 41V19Z" />
-                                    </svg>
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span class="btn-text">${isOutOfStock ? 'Unavailable' : 'Add to Cart'}</span>
+                                    <i class="fas fa-check success-icon"></i>
                                 </button>
                             `}
                         </div>
@@ -506,9 +437,7 @@
         }
 
         // Animated Add to Cart Logic
-        const { to, set, timeline } = gsap;
-        gsap.registerPlugin(MorphSVGPlugin, Physics2DPlugin);
-
+        // Modern Add to Cart Animation
         function handleAddToCart(button) {
             if (button.classList.contains('active')) return;
 
@@ -524,169 +453,66 @@
 
             // Start Animation
             button.classList.add('active');
-            let background = button.querySelector('.background path');
-
-            to(button, {
-                keyframes: [{
-                    '--background-s': .97,
-                    duration: .1
-                }, {
-                    '--background-s': 1,
-                    delay: .1,
-                    duration: .8,
-                    ease: 'elastic.out(1, .6)'
-                }]
-            });
-
-            to(button, {
-                '--text-x': '16px',
-                '--text-o': 0,
-                duration: .2
-            });
-
-            to(button, {
-                keyframes: [{
-                    '--cart-x': '-12px',
-                    '--cart-s': 1,
-                    duration: .25
-                }, {
-                    '--bottle-s': 1,
-                    '--bottle-o': 1,
-                    duration: .15,
-                    onStart() {
-                        to(button, {
-                            duration: .4,
-                            keyframes: [{
-                                '--bottle-r': '-8deg'
-                            }, {
-                                '--bottle-r': '8deg'
-                            }, {
-                                '--bottle-r': '0deg'
-                            }]
-                        });
-                    }
-                }, {
-                    '--bottle-y': '0px',
-                    duration: .3,
-                    delay: .15,
-                    onStart() {
-                        to(background, {
-                            keyframes: [{
-                                morphSVG: 'M0 19C0 10.7157 6.71573 4 15 4H41.4599C53.6032 4 62.4844 12 72.5547 12C82.6251 12 91.5063 4 103.65 4H137C139.761 4 142 6.23858 142 9V31C142 39.2843 135.284 46 127 46H5C2.23858 46 0 43.7614 0 41V19Z',
-                                duration: .1,
-                                delay: .18
-                            }, {
-                                morphSVG: 'M0 19C0 10.7157 6.71573 4 15 4H41.4599C53.6032 4 62.4844 4 72.5547 4C82.6251 4 91.5063 4 103.65 4H137C139.761 4 142 6.23858 142 9V31C142 39.2843 135.284 46 127 46H5C2.23858 46 0 43.7614 0 41V19Z',
-                                duration: .8,
-                                ease: 'elastic.out(1, .6)'
-                            }]
-                        });
-                        to(button, {
-                            '--bottle-s': .5,
-                            duration: .15
-                        });
-                    }
-                }, {
-                    '--cart-y': '3px',
-                    duration: .1,
-                    onStart() {
-                        to(button, {
-                            keyframes: [{
-                                '--check-y': '24px',
-                                '--check-s': 1,
-                                duration: .25
-                            }, {
-                                '--check-offset': '0px',
-                                duration: .25
-                            }]
-                        });
-                    }
-                }, {
-                    '--cart-y': '0px',
-                    duration: .2
-                }, {
-                    '--cart-x': '-6px',
-                    '--bottle-r': '12deg',
-                    '--bottle-x': '-25%',
-                    duration: .15
-                }, {
-                    '--cart-x': '-16px',
-                    '--bottle-r': '-12deg',
-                    '--bottle-x': '-50%',
-                    duration: .2,
-                    onStart() {
-                        drops(button, 5, -130, -100);
-                    },
-                }, {
-                    '--cart-x': '92px',
-                    '--cart-r': '-20deg',
-                    duration: .4,
-                    onStart() {
-                        button.classList.add('clipped');
-                    },
-                    onComplete() {
-                        set(button, {
-                            '--cart-x': '-120px',
-                            '--cart-s': .8,
-                            '--cart-y': '-2px',
-                            '--bottle-o': 0,
-                            '--text-x': '2px'
-                        });
-                    }
-                }, {
-                    '--cart-x': '-57px',
-                    '--cart-r': '0deg',
-                    '--check-s': 0,
-                    duration: .3,
-                    delay: .1,
-                    clearProps: true,
-                    onStart() {
-                        to(button, {
-                            '--text-x': '10px',
-                            '--text-o': 1,
-                            duration: .2,
-                            delay: .1
-                        });
-                    },
-                    onComplete() {
-                        button.classList.remove('active', 'clipped');
-                    }
-                }]
+            
+            // GSAP Sequence
+            const tl = gsap.timeline();
+            
+            tl.to(button, {
+                scale: 0.95,
+                duration: 0.1
+            })
+            .to(button, {
+                scale: 1,
+                duration: 0.3,
+                ease: "elastic.out(1, 0.5)"
+            })
+            .add(() => {
+                button.classList.add('added');
+                createParticles(button);
+            })
+            .to(button, {
+                backgroundColor: "#10b981", // Success green
+                duration: 0.3
+            })
+            .delay(2) // Wait while "Added" is shown
+            .add(() => {
+                button.classList.remove('added');
+                button.classList.remove('active');
+            })
+            .to(button, {
+                backgroundColor: "#6366f1", // Back to primary purple
+                duration: 0.3
             });
         }
 
-        function drops(parent, quantity, minAngle, maxAngle) {
-            for (let i = quantity - 1; i >= 0; i--) {
-                let angle = gsap.utils.random(minAngle, maxAngle),
-                    velocity = gsap.utils.random(60, 80);
-
-                let div = document.createElement('div');
-                div.classList.add('drop');
-                parent.appendChild(div);
-
-                set(div, {
-                    opacity: 1,
+        function createParticles(button) {
+            const colors = ['#6366f1', '#10b981', '#fbbf24', '#f472b6'];
+            const buttonRect = button.getBoundingClientRect();
+            
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random size and color
+                const size = Math.random() * 8 + 4;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                button.appendChild(particle);
+                
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 100 + 50;
+                
+                gsap.to(particle, {
+                    x: Math.cos(angle) * distance,
+                    y: Math.sin(angle) * distance,
+                    opacity: 0,
                     scale: 0,
+                    duration: Math.random() * 0.5 + 0.5,
+                    ease: "power2.out",
+                    onComplete: () => particle.remove()
                 });
-
-                timeline({
-                    onComplete() {
-                        div.remove();
-                    }
-                }).to(div, {
-                    duration: .4,
-                    scale: gsap.utils.random(.5, .7)
-                }, 0).to(div, {
-                    duration: 1,
-                    physics2D: {
-                        angle: angle,
-                        velocity: velocity,
-                        gravity: 80
-                    }
-                }, 0).to(div, {
-                    duration: .3,
-                    opacity: 0
-                }, .3);
             }
         }
 
