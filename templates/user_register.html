@@ -193,6 +193,8 @@
                 return;
             }
 
+            const referral_code = document.getElementById("referral_code") ? document.getElementById("referral_code").value.trim() : "";
+            
             btn.disabled = true;
             btn.innerText = "Creating Account...";
 
@@ -203,7 +205,8 @@
                     name: name,
                     email: email,
                     college: college,
-                    password: password
+                    password: password,
+                    referral_code: referral_code
                 })
             })
                 .then(res => res.json())

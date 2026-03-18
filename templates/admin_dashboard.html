@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -1034,7 +1034,7 @@
                         <p>Track fulfillment and delivery status.</p>
                     </div>
                     <div style="display:flex; gap:10px;">
-                        <input type="text" placeholder="Search Order ID..." class="form-control" style="width:200px;">
+                        <input type="text" id="adminOrderSearch" oninput="filterAdminOrders()" placeholder="Search ID, User, Status..." class="form-control" style="width:200px;">
                     </div>
                 </div>
                 <div class="table-container">
@@ -1048,7 +1048,7 @@
                                 <th>Date</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="orders-tbody">
                             {% for o in orders %}
                             <tr>
                                 <td><strong>#{{ o.id }}</strong></td>
@@ -1060,7 +1060,7 @@
                                         {{ o.status }}
                                     </span>
                                 </td>
-                                <td>{{ o.date }}</td>
+                                <td class="order-date-cell" data-timestamp="{{ o.timestamp }}">{{ o.date }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -1639,6 +1639,18 @@
         };
 
         function initCharts() {
+            // Format existing dates on load
+            document.querySelectorAll('.order-date-cell').forEach(cell => {
+                const ts = cell.getAttribute('data-timestamp');
+                if (ts && ts !== 'None') {
+                    const date = new Date(parseFloat(ts) * 1000);
+                    cell.innerText = date.toLocaleString('en-IN', { 
+                        day: '2-digit', month: 'short', 
+                        hour: '2-digit', minute: '2-digit', hour12: true 
+                    });
+                }
+            });
+
             const ctx = document.getElementById('revenueChart').getContext('2d');
             new Chart(ctx, {
                 type: 'line',
@@ -1996,33 +2008,38 @@
             } catch (e) { console.log('Shifts load error:', e); }
         }
 
-        // Load shifts on page load and refresh every 30s
-        loadAdminShifts();
         // ===========================
-        // MAINTENANCE TOGGLE
+        // LIVE SYNC & SEARCH
         // ===========================
-        async function toggleMaintenance() {
-            if (confirm("Are you sure you want to toggle maintenance mode? Users and Staff will not be able to access their dashboards.")) {
-                try {
-                    const res = await fetch('/api/admin/toggle-maintenance', { method: 'POST' });
-                    const data = await res.json();
-                    if (data.message === 'success') {
-                        alert("Maintenance mode is now: " + (data.maintenance_mode ? "ON" : "OFF"));
-                        const btn = document.getElementById('maintenance-toggle-btn');
-                        if (data.maintenance_mode) {
-                            btn.style.color = '#ef4444'; // Danger color when active
-                        } else {
-                            btn.style.color = 'var(--text-muted)';
-                        }
-                    } else {
-                        alert("Failed: " + data.message);
-                    }
-                } catch (e) {
-                    console.error('Toggle Error:', e);
-                    alert("Error toggling maintenance mode.");
-                }
-            }
+        function filterAdminOrders() {
+            const q = document.getElementById('adminOrderSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#orders-tbody tr');
+            rows.forEach(r => r.style.display = r.innerText.toLowerCase().includes(q) ? '' : 'none');
         }
+
+        // Auto-refresh is handled by the clock-synced refresh
+        (function() {
+            const clockDiv = document.createElement('div');
+            clockDiv.style.cssText = 'position:fixed; bottom:20px; right:20px; background:rgba(30,27,75,0.95); color:white; padding:10px 18px; border-radius:14px; font-size:0.85rem; font-weight:600; z-index:9999; backdrop-filter:blur(10px); box-shadow:0 4px 20px rgba(0,0,0,0.2); display:flex; align-items:center; gap:10px; font-family:monospace; transition: all 0.3s;';
+            document.body.appendChild(clockDiv);
+
+            function updateSync() {
+                const now = new Date();
+                const hrs = String(now.getHours()).padStart(2, '0');
+                const mins = String(now.getMinutes()).padStart(2, '0');
+                const secs = String(now.getSeconds()).padStart(2, '0');
+                const secsLeft = 60 - now.getSeconds();
+
+                clockDiv.innerHTML = `<i class="fa-solid fa-clock"></i> <span>${hrs}:${mins}:${secs}</span> <span style="opacity:0.5">|</span> <span style="font-size:0.75rem;"><i class="fa-solid fa-sync fa-spin"></i> ${secsLeft}s</span>`;
+                
+                if (secsLeft <= 5) clockDiv.style.background = '#ef4444';
+                else clockDiv.style.background = 'rgba(30,27,75,0.95)';
+
+                if (secsLeft === 1) setTimeout(() => location.reload(), 1000);
+            }
+            setInterval(updateSync, 1000);
+            updateSync();
+        })();
     </script>
 </body>
 

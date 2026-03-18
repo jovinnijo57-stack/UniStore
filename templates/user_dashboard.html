@@ -411,6 +411,58 @@
 
         .center-btn i { font-size: 1.5rem !important; }
 
+        /* Membership Tiers Styling */
+        .tiers-grid {
+            display: flex;
+            gap: 1.2rem;
+            overflow-x: auto;
+            padding: 0.5rem 0.5rem 1.5rem;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .tiers-grid::-webkit-scrollbar { display: none; }
+        
+        .tier-card {
+            background: white;
+            border-radius: 24px;
+            padding: 1.8rem 1.2rem;
+            min-width: 200px;
+            flex: 1;
+            text-align: center;
+            border: 1px solid #eef2ff;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        
+        .tier-card.active {
+            border: 2px solid var(--primary);
+            background: linear-gradient(135deg, #ffffff 0%, #f5f7ff 100%);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.15);
+        }
+        
+        .tier-card.active::after {
+            content: '✓ Current';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 50px;
+        }
+
+        .tier-card i {
+            transition: transform 0.3s ease;
+        }
+
+        .tier-card.active i {
+            transform: scale(1.1) translateY(-5px);
+        }
+
         /* Mobile Adjustments */
         @media (max-width: 1024px) {
             .sidebar { transform: translateX(-100%); width: 280px; }
@@ -433,19 +485,9 @@
             .loyalty-level i { font-size: 2rem; }
             .loyalty-card h2 { font-size: 1.5rem; }
             
-            /* Compact Cards for mobile */
             .card { padding: 1.25rem; }
             
-            /* Horizontal Scroll for sections if needed */
-            .tiers-grid {
-                display: flex;
-                overflow-x: auto;
-                padding-bottom: 1rem;
-                gap: 1rem;
-                scrollbar-width: none;
-            }
-            .tiers-grid::-webkit-scrollbar { display: none; }
-            .tier-card { min-width: 180px; flex-shrink: 0; }
+            .tier-card { min-width: 170px; flex-shrink: 0; }
 
             .quick-actions-row {
                 flex-direction: row !important;
@@ -597,9 +639,6 @@
 
     <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
-        <button class="close-sidebar-btn" onclick="toggleSidebar()">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
         <div class="logo">
             <i class="fa-solid fa-graduation-cap"></i> UniStore
         </div>
@@ -1210,7 +1249,7 @@
                         <div style="flex: 1;">
                             <h4 style="font-size: 0.95rem;">Order #{{ order.id }} - {{ order.status }}</h4>
                             <p style="font-size: 0.8rem; color: var(--text-muted);">{{ order['items']|length }} items
-                                â€¢
+                                &bull;
                                 Rs {{ order.total }}</p>
                         </div>
                         <a href="#" onclick="switchTab('orders', document.querySelectorAll('.nav-link')[1])"
@@ -1606,7 +1645,7 @@
                         <div style="display: flex; justify-content: space-between;">
                             <div>
                                 <h4 style="margin-bottom:0.2rem; font-size:1rem;">{{ ticket.subject }}</h4>
-                                <span style="font-size:0.8rem; color:var(--text-muted);">#{{ ticket.id }} â€¢ {{
+                                <span style="font-size:0.8rem; color:var(--text-muted);">#{{ ticket.id }} &bull; {{
                                     ticket.priority }}</span>
                             </div>
                             <span

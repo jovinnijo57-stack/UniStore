@@ -724,7 +724,7 @@
                                 <div style="font-weight: 600; color: #1e1b4b;">{{ order.user_name or 'Customer' }}</div>
                                 <div style="font-size: 0.8rem; color: #64748b;">{{ order.user_email or order.user }}
                                 </div>
-                                <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">{{ order.date }}</div>
+                                <div class="staff-order-date" data-timestamp="{{ order.timestamp }}" style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">{{ order.date }}</div>
                             </td>
                             <td>
                                 <span class="badge"
@@ -1001,6 +1001,18 @@
         let charts = {};
 
         function initCharts() {
+            // Format order dates to local browser time
+            document.querySelectorAll('.staff-order-date').forEach(cell => {
+                const ts = cell.getAttribute('data-timestamp');
+                if (ts && ts !== 'None') {
+                    const date = new Date(parseFloat(ts) * 1000);
+                    cell.innerText = date.toLocaleString('en-IN', { 
+                        day: '2-digit', month: 'short', 
+                        hour: '2-digit', minute: '2-digit', hour12: true 
+                    });
+                }
+            });
+
             // Destroy existing charts to prevent overlay
             Object.values(charts).forEach(c => { if (c) c.destroy(); });
 
