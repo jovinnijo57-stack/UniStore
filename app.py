@@ -8,6 +8,12 @@ import requests
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from datetime import datetime, timedelta
+import pytz
+
+IST = pytz.timezone('Asia/Kolkata')
+def get_ist_now():
+    return datetime.now(IST).replace(tzinfo=None)
+
 import json
 try:
     import razorpay
@@ -380,7 +386,7 @@ def add_audit_log(action, user, details=""):
     AUDIT_LOGS.append({
         "action": action,
         "user": user,
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "timestamp": get_ist_now().strftime("%Y-%m-%d %H:%M:%S"),
         "details": details
     })
     if len(AUDIT_LOGS) > 1000: AUDIT_LOGS.pop(0) # Keep last 1000 logs
@@ -394,10 +400,10 @@ USER_PROFILES = {}  # {username: {points: 0, tier: 'Bronze', total_spent: 0, ref
 
 # Loyalty Tiers Configuration
 LOYALTY_TIERS = {
-    'Bronze': {'min_points': 0, 'benefits': 'Welcome bonus', 'color': '#cd7f32'},
-    'Silver': {'min_points': 500, 'benefits': '5% discount on all orders', 'color': '#c0c0c0'},
-    'Gold': {'min_points': 1500, 'benefits': '10% discount + Free prints', 'color': '#ffd700'},
-    'Platinum': {'min_points': 3000, 'benefits': '15% discount + Priority support', 'color': '#e5e4e2'}
+    'Bronze': {'min_points': 0, 'benefits': 'Welcome bonus', 'color': '#cd7f32', 'discount_percent': 0},
+    'Silver': {'min_points': 500, 'benefits': '5% discount on all orders', 'color': '#c0c0c0', 'discount_percent': 5},
+    'Gold': {'min_points': 1500, 'benefits': '10% discount + Free prints', 'color': '#ffd700', 'discount_percent': 10},
+    'Platinum': {'min_points': 3000, 'benefits': '15% discount + Priority support', 'color': '#e5e4e2', 'discount_percent': 15}
 }
 
 # Notifications System
@@ -437,7 +443,11 @@ def print_page():
 @app.route("/cart")
 @login_required
 def cart_page():
-    return render_template("cart.html")
+    user_email = session['user']
+    stats = get_user_stats(user_email)
+    tier = stats['tier'] if stats else 'Bronze'
+    tier_discount = LOYALTY_TIERS.get(tier, {}).get('discount_percent', 0)
+    return render_template("cart.html", tier_discount=tier_discount, tier_name=tier)
 
 @app.route("/payment")
 @login_required
@@ -450,14 +460,19 @@ def payment_page():
             
     # Sync from DB if possible
     stats = get_user_stats(user_email)
+    tier = 'Bronze'
     if stats:
         USER_PROFILES[user_email]['wallet_balance'] = stats['wallet_balance']
+        tier = stats['tier']
         
     balance = USER_PROFILES[user_email]['wallet_balance']
+    tier_discount = LOYALTY_TIERS.get(tier, {}).get('discount_percent', 0)
     return render_template("payment.html", 
                          store_config=STORE_CONFIG,
                          razorpay_key_id=RAZORPAY_KEY_ID,
-                         wallet_balance=balance)
+                         wallet_balance=balance,
+                         tier_discount=tier_discount,
+                         tier_name=tier)
 
 @app.route("/retrieval/<order_id>")
 @login_required
@@ -623,7 +638,7 @@ def user_dashboard():
             notifications=user_notifications,
             wishlist_count=wishlist_count,
             wishlist_items=wishlist_items,
-            datetime_now=datetime.now().strftime("%A, %d %B %Y"),
+            datetime_now=get_ist_now().strftime("%A, %d %B %Y"),
             support_tickets=[t for t in SUPPORT_TICKETS if t['user'] == user_email]
         )
 
@@ -1038,13 +1053,21 @@ def submit_feedback():
     comment = data.get("comment")
     user_email = session['user']
     
+    # Check if the user has already reviewed this order
+    if any(f.get("order_id") == order_id for f in FEEDBACK):
+        return jsonify({"success": False, "message": "You have already reviewed this order"}), 400
+
+    from datetime import datetime
+    import pytz
+    ist_tz = pytz.timezone('Asia/Kolkata')
+    
     # Save to memory (Legacy)
     FEEDBACK.append({
         "order_id": order_id,
         "user": user_email,
         "rating": rating,
         "comment": comment,
-        "date": "Just now"
+        "date": datetime.now(ist_tz).strftime("%Y-%m-%d %H:%M:%S")
     })
     
     # Save to Database for Product Reviews
@@ -1060,6 +1083,9 @@ def submit_feedback():
     if order and "items" in order:
         try:
             items = order['items']
+            if isinstance(items, str):
+                import json
+                items = json.loads(items)
             # items is already a list of dicts from get_order_by_id or memory
             for item in items:
                 # Need product ID. Cart items usually have 'id'.
@@ -1067,11 +1093,11 @@ def submit_feedback():
                     # Persist review for this product
                     # Note: This applies the SAME rating to all products in the order.
                     # Ideally we should ask for individual ratings, but this bridges the gap.
-                    add_review(user_email, item['id'], rating, comment)
+                    add_review(item['id'], user_email, rating, comment)
         except Exception as e:
             print(f"Error saving reviews to DB: {e}")
             
-    return jsonify({"message": "success"})
+    return jsonify({"message": "success", "success": True})
 
 @app.route("/api/staff/update-item", methods=["POST"])
 def update_item():
@@ -1222,8 +1248,8 @@ def upload_print():
             "config": config,
             "cost": final_cost,
             "status": "Pending",
-            "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "timestamp": datetime.now().timestamp(),
+            "date": get_ist_now().strftime("%Y-%m-%d %H:%M:%S"),
+            "timestamp": get_ist_now().timestamp(),
             "token": get_token_for_user(session['user'])
         }
         PRINT_JOBS.append(job)
@@ -1460,6 +1486,8 @@ def admin_dashboard():
         u['total_orders'] = 0
         u['total_spent'] = 0
         u['last_order'] = 'Never'
+        u['cancelled_count'] = 0
+        u['risk'] = 'Low'
         
     for o in db_orders:
         email = o.get('user_email') or o.get('user')
@@ -1474,7 +1502,9 @@ def admin_dashboard():
                 'created_at': 'N/A',
                 'total_orders': 0,
                 'total_spent': 0,
-                'last_order': 'N/A'
+                'last_order': 'N/A',
+                'cancelled_count': 0,
+                'risk': 'Low'
             }
             
         customers_map[email]['total_orders'] += 1
@@ -1486,6 +1516,16 @@ def admin_dashboard():
             current_last = customers_map[email]['last_order']
             if current_last == 'Never' or current_last == 'N/A' or order_date > current_last:
                 customers_map[email]['last_order'] = order_date
+        
+        if o.get('status') == 'Cancelled':
+            customers_map[email]['cancelled_count'] += 1
+
+    # Apply Risk Rating
+    for u in customers_map.values():
+        cc = u.get('cancelled_count', 0)
+        if cc >= 3: u['risk'] = 'High'
+        elif cc >= 1: u['risk'] = 'Medium'
+        else: u['risk'] = 'Low'
 
     customers_list = list(customers_map.values())
     total_customers = len(customers_list)
@@ -1502,7 +1542,7 @@ def admin_dashboard():
     chart_status_data = [status_counts['Pending'], status_counts['Processing'], status_counts['Delivered'], status_counts['Cancelled']]
     
     # Calculate daily revenue for last 7 days
-    today = datetime.now()
+    today = get_ist_now()
     sales_labels = []
     sales_data = []
     
@@ -1702,7 +1742,7 @@ def create_support_ticket():
         'message': data.get('message'),
         'priority': data.get('priority', 'Medium'),
         'status': 'Open',
-        'created_at': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        'created_at': get_ist_now().strftime("%Y-%m-%d %H:%M:%S"),
         'responses': []
     }
     
@@ -1729,7 +1769,7 @@ def track_referral():
             'referee': referrer,
             'status': 'Pending',
             'reward_claimed': False,
-            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            'timestamp': get_ist_now().strftime("%Y-%m-%d %H:%M:%S")
         }
         REFERRALS.append(referral)
         
@@ -1770,7 +1810,7 @@ def reply_ticket():
             t['responses'].append({
                 'user': 'Admin',
                 'message': response_msg,
-                'time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                'time': get_ist_now().strftime("%Y-%m-%d %H:%M:%S")
             })
             t['status'] = 'Responded'
             # Send notification to user?
@@ -1781,7 +1821,7 @@ def reply_ticket():
                 'title': f'Support Reply: Ticket #{ticket_id}',
                 'message': f"Admin replied: {response_msg[:50]}...",
                 'read': False,
-                'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                'timestamp': get_ist_now().strftime("%Y-%m-%d %H:%M:%S")
             })
             return jsonify({"success": True})
     return jsonify({"success": False, "message": "Ticket not found"})
@@ -1890,20 +1930,29 @@ def create_razorpay_order():
         if not amount or not cart_items:
             return jsonify({'success': False, 'error': 'Invalid request'}), 400
 
-        # Calculate server-side total
+        # Calculate base total
         server_total = sum(float(item['price']) * int(item['quantity']) for item in cart_items)
         
-        # Apply Coupon if present
+        # Apply Tier Discount
+        user_email = session['user']
+        stats = get_user_stats(user_email)
+        tier = stats['tier'] if stats else 'Bronze'
+        tier_discount_percent = LOYALTY_TIERS.get(tier, {}).get('discount_percent', 0)
+        
+        tier_discount_amount = (server_total * tier_discount_percent) / 100
+        discounted_total = server_total - tier_discount_amount
+        
+        # Apply Coupon if present on top of the discounted total
         discount = 0
         if coupon_code:
             coupon = get_coupon(coupon_code)
-            if coupon and server_total >= coupon.get('min_spend', 0):
+            if coupon and discounted_total >= coupon.get('min_spend', 0):
                 if coupon['discount_type'] == 'percentage':
-                    discount = (server_total * coupon['value']) / 100
+                    discount = (discounted_total * coupon['value']) / 100
                 else:
                     discount = coupon['value']
         
-        final_amount = max(0, server_total - discount)
+        final_amount = max(0, discounted_total - discount)
 
         # Check Stock (skip print service items)
         for item in cart_items:
@@ -2012,8 +2061,8 @@ def verify_razorpay_payment():
             "method": "Razorpay",
             "payment_id": razorpay_payment_id,
             "razorpay_order_id": razorpay_order_id,
-            "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "timestamp": datetime.now().timestamp(),
+            "date": get_ist_now().strftime("%Y-%m-%d %H:%M:%S"),
+            "timestamp": get_ist_now().timestamp(),
             "collection_attempts": 0,
             "is_ready": False,
             "notification": None,
@@ -2071,7 +2120,7 @@ def verify_razorpay_payment():
             'title': 'Order Confirmed!',
             'message': f'Your order {order["id"]} has been placed successfully. Payment received via Razorpay.',
             'read': False,
-            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            'timestamp': get_ist_now().strftime("%Y-%m-%d %H:%M:%S")
         }
         NOTIFICATIONS.append(notification)
 
@@ -2173,8 +2222,8 @@ def razorpay_webhook():
                 "method": "Razorpay",
                 "payment_id": razorpay_payment_id,
                 "razorpay_order_id": razorpay_order_id,
-                "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "timestamp": datetime.now().timestamp(),
+                "date": get_ist_now().strftime("%Y-%m-%d %H:%M:%S"),
+                "timestamp": get_ist_now().timestamp(),
                 "collection_attempts": 0,
                 "is_ready": False,
                 "notification": None,
@@ -2202,7 +2251,7 @@ def wallet_create_order():
         data = {
             "amount": int(amount * 100), # Amount in paise
             "currency": "INR",
-            "receipt": f"wallet_topup_{int(datetime.now().timestamp())}",
+            "receipt": f"wallet_topup_{int(get_ist_now().timestamp())}",
             "notes": {
                 "user_email": session['user'],
                 "type": "wallet_topup"
@@ -2251,7 +2300,7 @@ def wallet_verify_payment():
             "user": user_email,
             "message": f"Wallet verification successful! Added ₹{amount}. New Balance: ₹{new_bal}",
             "read": False,
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M")
+            "timestamp": get_ist_now().strftime("%Y-%m-%d %H:%M")
         })
         
         return jsonify({"success": True, "new_balance": new_bal})
@@ -2276,20 +2325,29 @@ def process_payment():
             
         # Create Order
         username = session['user']
+        # Calculate base total
         cart_total = sum(float(item['price']) * int(item['quantity']) for item in cart_items)
+        
+        # Apply Tier Discount
+        stats = get_user_stats(username)
+        tier = stats['tier'] if stats else 'Bronze'
+        tier_discount_percent = LOYALTY_TIERS.get(tier, {}).get('discount_percent', 0)
+        
+        tier_discount_amount = (cart_total * tier_discount_percent) / 100
+        discounted_total = cart_total - tier_discount_amount
         
         # Apply Coupon
         coupon_code = data.get('coupon_code')
         discount = 0
         if coupon_code:
             coupon = get_coupon(coupon_code)
-            if coupon and cart_total >= coupon.get('min_spend', 0):
+            if coupon and discounted_total >= coupon.get('min_spend', 0):
                 if coupon['discount_type'] == 'percentage':
-                    discount = (cart_total * coupon['value']) / 100
+                    discount = (discounted_total * coupon['value']) / 100
                 else:
                     discount = coupon['value']
         
-        total_amount = max(0, cart_total - discount)
+        total_amount = max(0, discounted_total - discount)
         
         # Check Stock (skip print service items)
         for item in cart_items:
@@ -2327,8 +2385,8 @@ def process_payment():
             "total": total_amount,
             "status": payment_status if method == "Wallet" else "Pending",
             "method": method,
-            "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "timestamp": datetime.now().timestamp(),
+            "date": get_ist_now().strftime("%Y-%m-%d %H:%M:%S"),
+            "timestamp": get_ist_now().timestamp(),
             "collection_attempts": 0,
             "token": get_token_for_user(username),
             "is_ready": False,
@@ -2401,7 +2459,7 @@ def add_todo():
         "text": text,
         "completed": False,
         "created_by": session.get('staff', session.get('admin')),
-        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M")
+        "created_at": get_ist_now().strftime("%Y-%m-%d %H:%M")
     }
     STAFF_TODOS.append(todo)
     return jsonify({"success": True, "todo": todo})
@@ -2433,6 +2491,16 @@ def shift_status():
         return jsonify({"success": False}), 403
     user = session.get('staff', session.get('admin'))
     shift = SHIFT_LOG.get(user, {"clocked_in": False, "clock_in_time": None, "history": []})
+    
+    # Enrich with numeric timestamp for frontend timer
+    if shift['clocked_in'] and shift['clock_in_time']:
+        try:
+            # Parse existing record to get timestamp
+            dt = datetime.strptime(shift['clock_in_time'], "%Y-%m-%d %H:%M:%S")
+            shift['clock_in_timestamp'] = dt.timestamp() * 1000 # to ms
+        except:
+            shift['clock_in_timestamp'] = None
+    
     return jsonify({"success": True, "shift": shift})
 
 @app.route("/api/staff/shift/toggle", methods=["POST"])
@@ -2444,7 +2512,7 @@ def shift_toggle():
         SHIFT_LOG[user] = {"clocked_in": False, "clock_in_time": None, "history": []}
 
     shift = SHIFT_LOG[user]
-    now = datetime.now()
+    now = get_ist_now()
 
     if shift['clocked_in']:
         # Clock Out
@@ -2465,7 +2533,13 @@ def shift_toggle():
         shift['clocked_in'] = True
         shift['clock_in_time'] = now.strftime("%Y-%m-%d %H:%M:%S")
         add_audit_log("Clock In", user)
-        return jsonify({"success": True, "action": "clocked_in", "time": shift['clock_in_time']})
+        # return unix timestamp for the frontend
+        return jsonify({
+            "success": True, 
+            "action": "clocked_in", 
+            "time": shift['clock_in_time'],
+            "timestamp": now.timestamp() * 1000
+        })
 
 # Live Chat
 @app.route("/api/chat/messages", methods=["GET"])
@@ -2492,7 +2566,7 @@ def send_chat_message():
         "sender": sender,
         "sender_role": role,
         "message": msg_text,
-        "timestamp": datetime.now().strftime("%H:%M")
+        "timestamp": get_ist_now().strftime("%H:%M")
     }
     CHAT_MESSAGES.append(msg)
     if len(CHAT_MESSAGES) > 200:
