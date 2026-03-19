@@ -63,7 +63,9 @@
             }
 
             const subtotal = cart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
-            const total = subtotal;
+            const tierDiscountPercent = {{ tier_discount | default(0) }};
+            const tierDiscountAmount = subtotal * (tierDiscountPercent / 100);
+            const total = subtotal - tierDiscountAmount;
 
             container.innerHTML = `
                 <div>
@@ -93,6 +95,12 @@
                             <span style="color: var(--text-muted);">Subtotal</span>
                             <span style="font-weight: 600;">Rs ${subtotal.toFixed(2)}</span>
                         </div>
+                        ${tierDiscountPercent > 0 ? `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem; color: #10b981;">
+                            <span style="font-weight: 600;"><i class="fa-solid fa-medal"></i> {{ tier_name }} Discount (${tierDiscountPercent}%)</span>
+                            <span style="font-weight: 800;">- Rs ${tierDiscountAmount.toFixed(2)}</span>
+                        </div>
+                        ` : ''}
                         <div style="display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #f3f4f6;">
                             <span style="font-size: 1.3rem; font-weight: 800;">Total</span>
                             <span style="font-size: 1.3rem; font-weight: 800; color: var(--primary);">Rs ${total.toFixed(2)}</span>

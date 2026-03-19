@@ -1363,8 +1363,8 @@
                 const status = document.getElementById('shiftStatus');
                 const icon = document.getElementById('shiftIcon');
 
-                if (shift.clocked_in) {
-                    shiftClockInTime = new Date(shift.clock_in_time.replace(' ', 'T'));
+                if (shift.clocked_in && shift.clock_in_time) {
+                    shiftClockInTime = shift.clock_in_timestamp;
                     btn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Clock Out';
                     btn.style.background = '#ef4444';
                     status.textContent = 'Clocked in since ' + shift.clock_in_time.split(' ')[1];
@@ -1383,14 +1383,19 @@
 
         function startShiftTimer() {
             if (shiftTimerInterval) clearInterval(shiftTimerInterval);
-            shiftTimerInterval = setInterval(() => {
+            
+            const updateTimer = () => {
                 if (!shiftClockInTime) return;
-                const diff = Math.floor((new Date() - shiftClockInTime) / 1000);
+                // ShiftClockInTime is a server-side timestamp in ms
+                const diff = Math.floor((Date.now() - shiftClockInTime) / 1000);
                 const hrs = String(Math.floor(diff / 3600)).padStart(2, '0');
                 const mins = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
                 const secs = String(diff % 60).padStart(2, '0');
                 document.getElementById('shiftTimer').textContent = `${hrs}:${mins}:${secs}`;
-            }, 1000);
+            }
+
+            updateTimer(); // Initial update to show 00:00:00 or current duration immediately
+            shiftTimerInterval = setInterval(updateTimer, 1000);
         }
 
         function renderShiftHistory(history) {
@@ -1428,7 +1433,7 @@
                     const icon = document.getElementById('shiftIcon');
 
                     if (data.action === 'clocked_in') {
-                        shiftClockInTime = new Date(data.time.replace(' ', 'T'));
+                        shiftClockInTime = data.timestamp; // Start exactly from this timestamp
                         btn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Clock Out';
                         btn.style.background = '#ef4444';
                         status.textContent = 'Clocked in since ' + data.time.split(' ')[1];

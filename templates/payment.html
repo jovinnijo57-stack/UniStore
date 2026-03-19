@@ -395,7 +395,12 @@
             paymentMethodsDiv.style.display = 'flex';
             emptyCartDiv.style.display = 'none';
 
-            originalTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            let subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tierDiscountPercent = {{ tier_discount | default(0) }};
+            const tierDiscountAmount = subtotal * (tierDiscountPercent / 100);
+            
+            originalTotal = subtotal - tierDiscountAmount;
+            
             updatePriceDisplay();
 
             cartItemsDiv.innerHTML = cart.map(item => `
@@ -404,6 +409,14 @@
                     <span class="cart-item-price">₹${(item.price * item.quantity).toFixed(2)}</span>
                 </div>
             `).join('');
+            
+            if (tierDiscountPercent > 0) {
+                cartItemsDiv.innerHTML += `
+                <div class="cart-item" style="border-top:1px dashed #e2e8f0; margin-top:10px; padding-top:10px; color:#10b981;">
+                    <span class="cart-item-name"><i class="fa-solid fa-medal"></i> {{ tier_name }} Tier Discount (${tierDiscountPercent}%)</span>
+                    <span class="cart-item-price">- ₹${tierDiscountAmount.toFixed(2)}</span>
+                </div>`;
+            }
         }
 
         function updatePriceDisplay() {

@@ -1242,22 +1242,13 @@
                                 <th>User</th>
                                 <th>College</th>
                                 <th>Orders</th>
-                                <th>Spent</th>
-                                <th>Last Order</th>
+                                <th>Total Spent</th>
+                                <th>Risk Analysis</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for c in customers %}
-                            {% set cancelled_count = 0 %}
-                            {% for o in all_orders if (o.user_email == c.email or o.user == c.email) and o.status ==
-                            'Cancelled' %}
-                            {% set cancelled_count = cancelled_count + 1 %}
-                            {% endfor %}
-                            {% set risk = 'Low' %}
-                            {% if cancelled_count >= 3 %}{% set risk = 'High' %}
-                            {% elif cancelled_count >= 1 %}{% set risk = 'Medium' %}
-                            {% endif %}
                             <tr>
                                 <td>
                                     <div style="font-weight:600">{{ c.name }}</div>
@@ -1267,9 +1258,10 @@
                                 <td>{{ c.total_orders }}</td>
                                 <td>₹{{ c.total_spent }}</td>
                                 <td>
-                                    <span
-                                        class="badge {% if risk == 'High' %}badge-danger{% elif risk == 'Medium' %}badge-warning{% else %}badge-success{% endif %}">
-                                        {{ risk }} Risk
+                                    <span class="badge" 
+                                          style="background: {{ '#fee2e2' if c.risk == 'High' else ('#fef3c7' if c.risk == 'Medium' else '#dcfce7') }}; 
+                                                 color: {{ '#991b1b' if c.risk == 'High' else ('#92400e' if c.risk == 'Medium' else '#166534') }};">
+                                        {{ c.risk }} Risk
                                     </span>
                                 </td>
                                 <td>
@@ -1621,6 +1613,10 @@
 
             const title = tabId.charAt(0).toUpperCase() + tabId.slice(1);
             document.getElementById('page-title').innerText = title === 'Overview' ? 'Executive Overview' : title;
+            
+            // Re-fetch data if switching to specific tabs
+            if (tabId === 'shifts') loadAdminShifts();
+            if (tabId === 'orders') location.reload(); // Traditional reload for live orders
         }
 
         // Theme Toggle
@@ -1636,6 +1632,7 @@
         window.onload = () => {
             initCharts();
             checkLowStock();
+            loadAdminShifts(); // Initial load for shifts data
         };
 
         function initCharts() {
@@ -1992,7 +1989,7 @@
                 // Render shift history
                 const tbody = document.getElementById('shiftHistoryBody');
                 if (allHistory.length > 0) {
-                    allHistory.sort((a, b) => new Date(b.clock_out) - new Date(a.clock_out));
+                    allHistory.sort((a, b) => new Date(b.clock_out.replace(' ', 'T')) - new Date(a.clock_out.replace(' ', 'T')));
                     tbody.innerHTML = allHistory.map(h => `
                         <tr>
                             <td><strong>${h.staff}</strong></td>
