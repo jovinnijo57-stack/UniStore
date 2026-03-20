@@ -1616,7 +1616,8 @@
             
             // Re-fetch data if switching to specific tabs
             if (tabId === 'shifts') loadAdminShifts();
-            if (tabId === 'orders') location.reload(); // Traditional reload for live orders
+            // Removed location.reload() for orders to prevent tab reset bug. 
+            // The existing background poller handles live order updates automatically.
         }
 
         // Theme Toggle
