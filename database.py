@@ -522,7 +522,7 @@ def get_product_reviews(product_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('''
-        SELECT r.id, r.product_id, r.user_email, r.rating, r.comment, datetime(r.created_at, 'localtime') as created_at, u.name as user_name 
+        SELECT r.id, r.product_id, r.user_email, r.rating, r.comment, datetime(r.created_at, '+5 hours', '30 minutes') as created_at, u.name as user_name 
         FROM reviews r 
         JOIN users u ON r.user_email = u.email 
         WHERE r.product_id = ? 
@@ -587,7 +587,7 @@ def get_user_orders(email):
 def get_all_users():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, name, email, college, datetime(created_at, 'localtime') as created_at FROM users")
+    cursor.execute("SELECT id, name, email, college, datetime(created_at, '+5 hours', '30 minutes') as created_at FROM users")
     users = cursor.fetchall()
     conn.close()
     return [dict(u) for u in users]
