@@ -479,7 +479,6 @@
         }
 
         @media (max-width: 768px) {
-            .mobile-only-btn { display: flex !important; }
             .dashboard-grid { 
                 grid-template-columns: 1fr !important; 
                 gap: 1.5rem !important; 
@@ -656,6 +655,12 @@
             <li class="nav-item">
                 <a href="#" class="nav-link active" onclick="switchTab('overview', this)">
                     <i class="fa-solid fa-border-all"></i> Overview
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/shop" class="nav-link"
+                    style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; font-weight: 600;">
+                    <i class="fa-solid fa-bag-shopping"></i> Go to Shop
                 </a>
             </li>
             <li class="nav-item">
@@ -1365,6 +1370,8 @@
                 <i class="fa-solid fa-basket-shopping"
                     style="font-size: 3rem; color: #e5e7eb; margin-bottom: 1rem;"></i>
                 <p>No orders placed yet.</p>
+                <a href="/shop" style="color: var(--primary); text-decoration: none; font-weight: 600;">Start Shopping
+                    &rarr;</a>
             </div>
             {% endif %}
         </div>

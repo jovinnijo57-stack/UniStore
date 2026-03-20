@@ -28,12 +28,6 @@
             color: #ef4444;
             animation: pulse 1s infinite;
         }
-        @media (max-width: 600px) {
-            .logo-text { display: none; }
-            .auth-card { padding: 1.5rem !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; width: 100% !important; max-width: 100% !important; }
-            .timer-circle { width: 120px; height: 120px; font-size: 2.5rem; }
-            header { padding: 1rem !important; }
-        }
     </style>
 </head>
 
@@ -42,7 +36,7 @@
         style="background: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;">
         <a href="{{ url_for('user_dashboard') }}" class="logo"
             style="margin-bottom: 0; text-decoration: none; font-size: 1.5rem;">
-            <i class="fas fa-shopping-bag"></i> <span class="logo-text">UniStore</span>
+            <i class="fas fa-shopping-bag"></i> UniStore
         </a>
         <a href="{{ url_for('user_dashboard') }}"
             style="color: var(--primary); font-weight: 800; text-decoration: none;">DASHBOARD</a>

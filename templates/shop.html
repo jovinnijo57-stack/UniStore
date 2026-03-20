@@ -13,10 +13,11 @@
 
     <style>
         .shop-nav {
-            padding: 1.5rem 5%;
-            background: white;
+            padding: 1.2rem 5%;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end; /* Align all navigation items to the right */
             align-items: center;
             position: sticky;
             top: 0;
@@ -33,7 +34,7 @@
         /* Search Box in Nav */
         .search-box {
             position: relative;
-            width: 260px;
+            width: 350px; /* Increased width for better desktop usability */
             transition: width 0.3s ease;
         }
 
@@ -246,19 +247,13 @@
                 transform: translateY(0);
             }
         }
-
         @media (max-width: 768px) {
-            .search-box {
-                width: 180px;
-            }
-
-            .search-box input:focus {
-                width: 100%;
-            }
-
-            .nav-right {
-                gap: 0.8rem;
-            }
+            .shop-nav { padding: 1rem 4%; }
+            .nav-right { width: 100%; justify-content: space-between; gap: 0.5rem; }
+            .search-box { flex: 1; min-width: 120px; }
+            .search-box input:focus { width: 100%; }
+            .nav-item-text { display: none; } /* Hide dashboard text on mobile */
+            .nav-item-icon { display: flex !important; }
         }
 
         @media (max-width: 480px) {
@@ -271,9 +266,7 @@
 
 <body style="background: #f8fafc;">
     <nav class="shop-nav">
-        <a href="/" class="logo" style="margin-bottom: 0; font-size: 1.8rem; text-decoration: none;">
-            <i class="fas fa-shopping-bag"></i> UniStore
-        </a>
+        <!-- Logo removed as per user request -->
         <div class="nav-right">
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Search products..." oninput="handleSearch()">
@@ -287,8 +280,10 @@
                 <span id="cart-count"
                     style="position: absolute; top: -8px; right: -8px; background: var(--secondary); color: white; font-size: 0.7rem; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800;">0</span>
             </a>
-            <a href="/user/dashboard" class="nav-item"
-                style="color: var(--text-main); text-decoration: none; font-weight: 600;">Dashboard</a>
+            <a href="/user/dashboard" class="nav-item" style="color: var(--text-main); text-decoration: none; font-weight: 600;">
+                <span class="nav-item-text">Dashboard</span>
+                <span class="nav-item-icon" style="display: none; font-size: 1.4rem;"><i class="fa-solid fa-circle-user"></i></span>
+            </a>
         </div>
     </nav>
 
