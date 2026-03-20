@@ -471,10 +471,19 @@
             .header { padding: 1rem 1.5rem; }
             .bottom-nav { display: flex; }
             .main-content { padding-bottom: calc(var(--bottom-nav-height) + 1.5rem); }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+            .dashboard-grid { 
+                grid-template-columns: 1fr !important; 
+                gap: 1.5rem !important; 
+            }
         }
 
         @media (max-width: 768px) {
+            .mobile-only-btn { display: flex !important; }
+            .dashboard-grid { 
+                grid-template-columns: 1fr !important; 
+                gap: 1.5rem !important; 
+            }
             .stats-grid { grid-template-columns: 1fr; }
             .loyalty-card { padding: 1.5rem; }
             .points-display { font-size: 2.5rem; }
@@ -647,12 +656,6 @@
             <li class="nav-item">
                 <a href="#" class="nav-link active" onclick="switchTab('overview', this)">
                     <i class="fa-solid fa-border-all"></i> Overview
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="/shop" class="nav-link"
-                    style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; font-weight: 600;">
-                    <i class="fa-solid fa-bag-shopping"></i> Go to Shop
                 </a>
             </li>
             <li class="nav-item">
@@ -1159,7 +1162,9 @@
 
         <!-- Tab 1: Overview -->
         <div id="overview" class="tab-content active">
-            <h2 class="page-title">Dashboard Overview</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h2 class="page-title" style="margin-bottom: 0;">Dashboard Overview</h2>
+            </div>
 
             <!-- Stats Grid -->
             <div class="stats-grid">
@@ -1235,7 +1240,7 @@
             </div>
 
             <!-- Recent Activity / Quick Actions -->
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+            <div class="dashboard-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
                 <div class="card">
                     <h3 style="margin-bottom: 1.5rem;">Recent Activity</h3>
                     {% if orders %}
@@ -1360,8 +1365,6 @@
                 <i class="fa-solid fa-basket-shopping"
                     style="font-size: 3rem; color: #e5e7eb; margin-bottom: 1rem;"></i>
                 <p>No orders placed yet.</p>
-                <a href="/shop" style="color: var(--primary); text-decoration: none; font-weight: 600;">Start Shopping
-                    &rarr;</a>
             </div>
             {% endif %}
         </div>
@@ -2259,6 +2262,7 @@
         </a>
         <a href="/shop" class="bottom-nav-item center-btn">
             <i class="fa-solid fa-shopping-bag"></i>
+            <span style="font-size: 0.7rem; font-weight: 600;">Shop</span>
         </a>
         <a href="#" class="bottom-nav-item" onclick="switchTab('wishlist', this); updateBottomNav(this)">
             <i class="fa-solid fa-heart"></i>

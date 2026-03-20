@@ -1766,6 +1766,16 @@
             } catch (e) { console.error(e); }
         }
 
+        async function toggleMaintenance() {
+            if (!confirm("Are you sure you want to toggle Maintenance Mode? This will block all staff/user store access.")) return;
+            try {
+                const res = await fetch('/api/admin/toggle-maintenance', { method: 'POST' });
+                const data = await res.json();
+                if (data.message === 'success') location.reload();
+                else alert("Error: " + data.message);
+            } catch (e) { console.error(e); }
+        }
+
         // Support
         let currentTicketId = null;
         function openReplyModal(ticket) {
