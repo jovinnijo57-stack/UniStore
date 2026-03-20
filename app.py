@@ -420,6 +420,24 @@ SUPPORT_TICKETS = []  # [{id, user, subject, message, status, priority, created_
 
 
 # ==============================
+# Global Maintenance Handler
+# ==============================
+@app.before_request
+def check_maintenance():
+    # Only verify if maintenance mode is ACTIVE
+    if STORE_CONFIG.get("maintenance_mode", False):
+        # Don't block admin/staff logins, static files, or admin dashboard
+        allowed_prefixes = ['/admin', '/staff', '/static', '/uploads', '/login', '/api/admin']
+        is_allowed = any(request.path.startswith(pref) for pref in allowed_prefixes)
+        
+        # If not on an allowed path AND not logged in as Admin
+        if not is_allowed and 'admin' not in session:
+            # Special case for Staff: if they are already logged in, maybe let them see dash?
+            # Usually, maintenance blocks EVERYTHING except Admin.
+            return render_template("maintenance.html"), 503
+    return None
+
+# ==============================
 # Page Routes
 # ==============================
 @app.route("/")
@@ -509,8 +527,6 @@ def staff_page():
 @app.route("/user/dashboard")
 @login_required
 def user_dashboard():
-    if STORE_CONFIG.get("maintenance_mode", False):
-        return render_template("maintenance.html")
     try:
         user_email = session.get('user')
         if not user_email: return redirect(url_for('login_page'))
@@ -726,8 +742,6 @@ def order_receipt(order_id):
 
 @app.route("/staff/dashboard")
 def staff_dashboard():
-    if STORE_CONFIG.get("maintenance_mode", False):
-        return render_template("maintenance.html")
     if 'staff' not in session:
         return redirect(url_for('staff_page'))
         
