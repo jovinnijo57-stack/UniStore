@@ -64,6 +64,7 @@ def get_token_for_user(user_email):
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage
 import threading
 import time
 
@@ -239,16 +240,12 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = True
 
 
-# Initialize database once on app start
-with app.app_context():
-    print("Database initialization starting...")
-    try:
-        if init_database():
-            print("DB check complete. Ready.")
-        else:
-            print("Warning: Database init might have issues.")
-    except Exception as e:
-        print(f"Primary DB init error: {e}")
+# Initialize database on startup
+print("Initializing database...")
+if init_database():
+    print("✓ Database ready")
+else:
+    print("⚠ Database initialization failed - check your MySQL connection")
 
 
 # ==============================
@@ -284,9 +281,11 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def send_email(to_email, subject, message, is_html=False):
-    """Universal email sender with Brevo API attempt and SMTP fallback. 
-       Supports HTML templates if is_html=True."""
+def send_email(to_email, subject, message):
+    """Universal email sender with Brevo API attempt and SMTP fallback.
+       Auto-detects HTML if message starts with <html> tag."""
+    
+    is_html = message.strip().lower().startswith("<html>")
     
     # 1. Try Brevo API first if configured
     api_key = os.environ.get("BREVO_API_KEY")
@@ -296,10 +295,13 @@ def send_email(to_email, subject, message, is_html=False):
             payload = {
                 "sender": {"name": "UniStore", "email": SENDER_EMAIL},
                 "to": [{"email": to_email}],
-                "subject": subject,
-                "textContent": message if not is_html else "Email client does not support HTML",
-                "htmlContent": message if is_html else None
+                "subject": subject
             }
+            if is_html:
+                payload["htmlContent"] = message
+            else:
+                payload["textContent"] = message
+                
             headers = {
                 "accept": "application/json",
                 "content-type": "application/json",
@@ -307,7 +309,7 @@ def send_email(to_email, subject, message, is_html=False):
             }
             response = requests.post(url, json=payload, headers=headers, timeout=10)
             if response.status_code in (200, 201):
-                print(f"✅ [Brevo API] Email sent to {to_email}")
+                print(f"📧 [Brevo API] Email sent to {to_email}")
                 return True
             else:
                 print(f"⚠️ [Brevo API] Failed (Status {response.status_code}). Trying SMTP fallback...")
@@ -324,7 +326,23 @@ def send_email(to_email, subject, message, is_html=False):
         msg['From'] = f"UniStore <{SENDER_EMAIL}>"
         msg['To'] = to_email
         msg['Subject'] = subject
-        msg.attach(MIMEText(message, 'html' if is_html else 'plain'))
+        
+        if is_html:
+            msg.attach(MIMEText(message, 'html'))
+            # Check for welcome poster if it's the welcome email
+            poster_path = "static/welcome_poster.jpg"
+            if "welcome" in subject.lower() and os.path.exists(poster_path):
+                try:
+                    with open(poster_path, 'rb') as f:
+                        img_data = f.read()
+                        img = MIMEImage(img_data)
+                        img.add_header('Content-ID', '<welcome_poster>')
+                        img.add_header('Content-Disposition', 'inline', filename='welcome.jpg')
+                        msg.attach(img)
+                except Exception as img_err:
+                    print(f"⚠️ Could not attach welcome poster: {img_err}")
+        else:
+            msg.attach(MIMEText(message, 'plain'))
 
         # Standard Gmail SMTP connection (Port 587 + TLS)
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
@@ -446,10 +464,6 @@ def check_maintenance():
 # ==============================
 # Page Routes
 # ==============================
-@app.route("/health")
-def health_check():
-    return "OK", 200
-
 @app.route("/")
 def home():
     return render_template("intro.html")
@@ -1302,44 +1316,38 @@ def user_register_api():
     result = create_user(name, email, password, college, referred_by_code=referral_code if referral_code else None)
     
     if result["success"]:
-        # Send Welcome Email
-        # Construct HTML welcome body
-        email_body_html = f"""
-        <div style="font-family: 'Outfit', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eef2ff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(99,102,241,0.1);">
-            <!-- Image Header -->
-            <img src="https://raw.githubusercontent.com/morningsnow153/min/main/static/images/register_welcome.jpg" 
-                 alt="Welcome to UniStore" style="width: 100%; display: block; height: auto;">
-            
-            <div style="padding: 30px; background: white;">
-                <h2 style="color: #6366f1; margin-top: 0;">Hello {name}! 👋</h2>
-                <p style="color: #475569; line-height: 1.6; font-size: 16px;">
-                    🎉 **You have been registered successfully!**<br>
-                    Welcome to the <strong>UniStore</strong> community.
-                </p>
-                <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin: 20px 0;">
-                    <p style="margin: 0; color: #1e293b; font-weight: 600;">Your account details:</p>
-                    <p style="margin: 5px 0 0 0; color: #64748b; font-size: 14px;">Email: {email}</p>
-                </div>
-                
-                <h3 style="color: #1e293b; margin-bottom: 10px;">Get Started:</h3>
-                <ul style="color: #64748b; padding-left: 20px; line-height: 1.8;">
-                    <li>Log in to your dashboard</li>
-                    <li>Browse our exclusive campus products</li>
-                    <li>Place orders and track them instantly</li>
-                    <li>Use coupon code from above for your first order!</li>
-                </ul>
-                
-                <p style="color: #475569; font-size: 14px; margin-top: 30px;">
-                    We're happy to have you with us! <br>
-                    <strong>- The UniStore Team</strong>
-                </p>
+        # Send Welcome Email (HTML version with Poster)
+        email_subject = "Welcome to UniStore! 🎉"
+        email_body = f"""
+<html>
+<body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+    <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <img src="cid:welcome_poster" alt="Welcome to UniStore" style="width: 100%; display: block;">
+        <div style="padding: 2rem;">
+            <h2 style="color: #6366f1; margin-top: 0;">Hello {name},</h2>
+            <p style="font-size: 1.1rem;">🎉 <b>You have been registered successfully!</b></p>
+            <p>Welcome to <b>UniStore</b>, your smart campus online store.</p>
+            <p>Your account has been created using: <b>{email}</b></p>
+            <p>You can now:</p>
+            <ul>
+                <li>Log in to your account</li>
+                <li>Browse our collection</li>
+                <li>Place orders and track delivery</li>
+            </ul>
+            <div style="background: #eef2ff; padding: 1rem; border-radius: 8px; margin: 1.5rem 0; text-align: center;">
+                <p style="margin-bottom: 0.5rem; color: #4338ca; font-weight: bold;">Special Welcome Offer!</p>
+                <p style="font-size: 1.5rem; letter-spacing: 2px; color: #4338ca; font-weight: 800; margin: 0;">TIMEOUT10</p>
+                <p style="font-size: 0.8rem; margin-top: 0.5rem; color: #6366f1;">Use during checkout for extra points/discounts</p>
             </div>
+            <p>We're happy to have you with us!</p>
+            <p style="margin-bottom: 0;">Best regards,</p>
+            <p style="font-weight: bold; color: #6366f1; margin-top: 0;">UniStore</p>
         </div>
-        """
-        # Fallback text
-        email_body_text = f"Hello {name}, Welcome to UniStore! Use referral link/coupon code to get started. Visit your dashboard at {request.host_url}dashboard"
-        
-        threading.Thread(target=send_email, args=(email, email_subject, email_body_html, True)).start()
+    </div>
+</body>
+</html>
+"""
+        threading.Thread(target=send_email, args=(email, email_subject, email_body)).start()
 
         # Auto-login the user
         try:
