@@ -10,62 +10,67 @@
     <style>
         .cart-wrapper {
             display: grid;
-            grid-template-columns: 1fr 380px;
-            gap: 2.5rem;
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 4%;
+            grid-template-columns: 1fr 400px;
+            gap: 3rem;
+            max-width: 1300px;
+            margin: 50px auto;
+            padding: 0 5%;
         }
 
-        @media (max-width: 992px) {
+        @media (max-width: 1024px) {
             .cart-wrapper {
                 grid-template-columns: 1fr;
-                margin-top: 20px;
-                padding-bottom: 120px; /* Space for sticky mobile button */
-            }
-            .summary-card {
-                position: static !important;
-                padding: 1.5rem !important;
+                margin-top: 2rem;
             }
             .item-row {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 1.5rem !important;
                 padding: 1.5rem !important;
-                flex-wrap: wrap; /* Stack on small mobile */
+                background: #fdfdfd;
+                border-radius: 16px;
+                margin-bottom: 1rem;
+                border: 1px solid #f3f4f6;
             }
-            .item-details { width: 100%; }
-            .desktop-text { display: none; }
+            .item-row img {
+                width: 100% !important;
+                height: 200px !important;
+                object-fit: contain !important;
+            }
+            .order-summary-card {
+                padding: 1.5rem !important;
+                position: static !important;
+            }
         }
 
         .item-row {
             display: flex;
             align-items: center;
-            padding: 1.5rem;
-            background: white;
-            border-radius: 20px;
-            margin-bottom: 1rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-            gap: 1.5rem;
-            transition: transform 0.2s;
+            padding: 2rem 0;
+            border-bottom: 1px solid #e5e7eb;
+            gap: 2rem;
+            transition: all 0.2s;
         }
         
-        .item-row:hover { transform: translateY(-3px); box-shadow: 0 10px 15px rgba(0,0,0,0.05); }
-
-        .qty-btns {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            background: #f1f5f9;
-            padding: 6px 12px;
-            border-radius: 50px;
+        .order-summary-card {
+            background: white; 
+            padding: 3rem; 
+            border-radius: 24px; 
+            box-shadow: 0 10px 15px rgba(0,0,0,0.05); 
+            position: sticky; 
+            top: 120px;
         }
     </style>
 </head>
 
 <body style="background: #f8fafc; display: block;">
-    <header style="padding: 1.2rem 5%; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;">
-        <a href="/shop" class="logo" style="margin-bottom: 0; text-decoration: none; font-size: 1.6rem; color: var(--primary);">
-             <span style="font-weight: 800;"><i class="fas fa-shopping-bag"></i> Cart</span>
+    <header style="padding: 1.5rem 5%; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;">
+        <a href="/shop" class="logo" style="margin-bottom: 0; text-decoration: none; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-shopping-bag"></i> UniStore
         </a>
-        <a href="/shop" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 600;"><i class="fa-solid fa-arrow-left-long"></i> <span class="desktop-text">Back to Shop</span></a>
+        <a href="/shop" style="color: var(--primary); text-decoration: none; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-arrow-left-long"></i> Back to Shop
+        </a>
     </header>
 
     <div class="cart-wrapper" id="cart-content">
@@ -95,45 +100,45 @@
 
             container.innerHTML = `
                 <div>
-                    <h2 style="margin-bottom: 1.5rem; font-weight: 800;">Shopping Cart <span style="font-weight: 400; font-size: 1.1rem; color: var(--text-muted);">(${cart.length} items)</span></h2>
-                    <div>
+                    <h1 style="margin-bottom: 2rem;">Shopping Cart (${cart.length} items)</h1>
+                    <div style="background: white; padding: 0 2rem; border-radius: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                         ${cart.map(i => `
                             <div class="item-row">
-                                <img src="${i.image}" style="width: 85px; height: 85px; object-fit: cover; border-radius: 12px; background: #f8fafc;">
-                                <div style="flex: 1;" class="item-details">
-                                    <h3 style="font-size: 1.05rem; margin-bottom: 0.3rem;">${i.name}</h3>
-                                    <p style="color: #6366f1; font-weight: 700; font-size: 0.95rem;">Rs ${i.price.toFixed(2)}</p>
+                                <img src="${i.image}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 12px;">
+                                <div style="flex: 1;">
+                                    <h3 style="font-size: 1.1rem;">${i.name}</h3>
+                                    <p style="color: var(--primary); font-weight: 600; margin-top: 0.5rem;">Rs ${i.price.toFixed(2)}</p>
                                 </div>
-                                <div class="qty-btns">
-                                    <i class="fas fa-minus" style="cursor: pointer; font-size: 0.8rem; color: #64748b;" onclick="changeQty('${i.id}', -1)"></i>
-                                    <span style="font-weight: 800; min-width: 25px; text-align: center; font-size: 0.9rem;">${i.quantity}</span>
-                                    <i class="fas fa-plus" style="cursor: pointer; font-size: 0.8rem; color: #64748b;" onclick="changeQty('${i.id}', 1)"></i>
-                                </div>
-                                <div onclick="remove('${i.id}')" style="color: #fca5a5; cursor: pointer; padding: 10px; transition: color 0.2s;">
-                                    <i class="fas fa-trash-alt"></i>
+                                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 1rem;">
+                                    <div style="display: flex; align-items: center; gap: 1rem; background: #f3f4f6; padding: 10px 20px; border-radius: 50px;">
+                                        <i class="fas fa-minus" style="cursor: pointer;" onclick="changeQty('${i.id}', -1)"></i>
+                                        <span style="font-weight: 800; min-width: 25px; text-align: center;">${i.quantity}</span>
+                                        <i class="fas fa-plus" style="cursor: pointer;" onclick="changeQty('${i.id}', 1)"></i>
+                                    </div>
+                                    <i class="fas fa-trash-alt" style="color: #ef4444; cursor: pointer; font-size: 1.2rem; padding: 10px;" onclick="remove('${i.id}')"></i>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
                 </div>
                 <div>
-                    <div class="summary-card" style="background: white; padding: 2.5rem; border-radius: 28px; box-shadow: 0 15px 30px rgba(0,0,0,0.04); position: sticky; top: 120px; border: 1px solid #f1f5f9;">
-                        <h2 style="margin-bottom: 1.8rem; text-align: left; font-weight: 800;">Order Summary</h2>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 1.2rem; font-size: 0.95rem;">
-                            <span style="color: #94a3b8;">Subtotal</span>
-                            <span style="font-weight: 600; color: #1e293b;">Rs ${subtotal.toFixed(2)}</span>
+                    <div class="order-summary-card">
+                        <h2 style="margin-bottom: 2rem; text-align: left;">Order Summary</h2>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
+                            <span style="color: var(--text-muted);">Subtotal</span>
+                            <span style="font-weight: 600;">Rs ${subtotal.toFixed(2)}</span>
                         </div>
                         ${tierDiscountPercent > 0 ? `
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 1.2rem; color: #10b981; font-size: 0.95rem;">
-                            <span style="font-weight: 600;"><i class="fa-solid fa-bullseye" style="font-size: 0.8rem;"></i> {{ tier_name }} Discount (${tierDiscountPercent}%)</span>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem; color: #10b981;">
+                            <span style="font-weight: 600;"><i class="fa-solid fa-medal"></i> {{ tier_name }} Discount (${tierDiscountPercent}%)</span>
                             <span style="font-weight: 800;">- Rs ${tierDiscountAmount.toFixed(2)}</span>
                         </div>
                         ` : ''}
-                        <div style="display: flex; justify-content: space-between; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px dashed #f1f5f9;">
-                            <span style="font-size: 1.4rem; font-weight: 800; color: #1e293b;">Total</span>
-                            <span style="font-size: 1.4rem; font-weight: 800; color: #4f46e5;">Rs ${total.toFixed(2)}</span>
+                        <div style="display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #f3f4f6;">
+                            <span style="font-size: 1.3rem; font-weight: 800;">Total</span>
+                            <span style="font-size: 1.3rem; font-weight: 800; color: var(--primary);">Rs ${total.toFixed(2)}</span>
                         </div>
-                        <button onclick="checkout()" style="margin-top: 2rem; padding: 1.25rem; border-radius: 18px; font-weight: 700; font-size: 1.05rem; background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; box-shadow: 0 10px 20px rgba(99,102,241,0.2);">
+                        <button onclick="checkout()" style="margin-top: 2.5rem; padding: 1.2rem; border-radius: 50px;">
                             Checkout Securely
                         </button>
                     </div>
