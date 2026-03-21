@@ -280,29 +280,34 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def send_email(to_email, subject, message):
-    """Universal email sender with Brevo API attempt and SMTP fallback"""
+def send_email(to_email, subject, message, html_content=None, image_path=None):
+    """Universal email sender with Brevo API attempt and SMTP fallback (now with HTML/Image support)"""
     
     # 1. Try Brevo API first if configured
     api_key = os.environ.get("BREVO_API_KEY")
+    sender_name = "UniStore"
+    
     if api_key:
         try:
             url = "https://api.brevo.com/v3/smtp/email"
             payload = {
-                "sender": {"name": "UniStore", "email": SENDER_EMAIL},
+                "sender": {"name": sender_name, "email": SENDER_EMAIL},
                 "to": [{"email": to_email}],
                 "subject": subject,
-                "textContent": message
+                "textContent": message,
+                "htmlContent": html_content if html_content else message
             }
-            headers = {
-                "accept": "application/json",
-                "content-type": "application/json",
-                "api-key": api_key
-            }
-            response = requests.post(url, json=payload, headers=headers, timeout=10)
-            if response.status_code in (200, 201):
-                print(f"✅ [Brevo API] Email sent to {to_email}")
-                return True
+            # Note: Brevo image embedding is different; for now we use fallback for complex emails
+            if not image_path:
+                headers = {
+                    "accept": "application/json",
+                    "content-type": "application/json",
+                    "api-key": api_key
+                }
+                response = requests.post(url, json=payload, headers=headers, timeout=10)
+                if response.status_code in (200, 201):
+                    print(f"✅ [Brevo API] Email sent to {to_email}")
+                    return True
             else:
                 print(f"⚠️ [Brevo API] Failed (Status {response.status_code}). Trying SMTP fallback...")
         except Exception as e:
@@ -314,11 +319,27 @@ def send_email(to_email, subject, message):
             print("❌ [SMTP] Configuration error: Credentials missing.")
             return False
 
-        msg = MIMEMultipart()
+        msg = MIMEMultipart('related')
         msg['From'] = f"UniStore <{SENDER_EMAIL}>"
         msg['To'] = to_email
         msg['Subject'] = subject
-        msg.attach(MIMEText(message, 'plain'))
+
+        # Create alternative part (Plain text + HTML)
+        msg_alternative = MIMEMultipart('alternative')
+        msg.attach(msg_alternative)
+
+        msg_alternative.attach(MIMEText(message, 'plain'))
+        if html_content:
+            msg_alternative.attach(MIMEText(html_content, 'html'))
+
+        # Embed Image if provided
+        if image_path and os.path.exists(image_path):
+            from email.mime.image import MIMEImage
+            with open(image_path, 'rb') as f:
+                img = MIMEImage(f.read())
+                img.add_header('Content-ID', '<banner_image>')
+                img.add_header('Content-Disposition', 'inline', filename=os.path.basename(image_path))
+                msg.attach(img)
 
         # Standard Gmail SMTP connection (Port 587 + TLS)
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
@@ -1292,30 +1313,43 @@ def user_register_api():
     result = create_user(name, email, password, college, referred_by_code=referral_code if referral_code else None)
     
     if result["success"]:
-        # Send Welcome Email
-        email_subject = "Welcome to UniStore! 🎉"
-        email_body = f"""
-Hello {name},
+        # Send Welcome Email with Banner Image
+        email_subject = "Welcome to UniStore! 🎉 Your 10% Discount Inside"
+        email_body = f"Hello {name}, Welcome to UniStore! use code TIMEOUT10 for 10% off."
+        
+        # HTML Email with Banner
+        html_body = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #ffffff;">
+            <div style="text-align: center;">
+                <img src="cid:banner_image" alt="Welcome to UniStore" style="width: 100%; height: auto; display: block;">
+            </div>
+            <div style="padding: 30px; line-height: 1.6; color: #334155;">
+                <h2 style="color: #6366f1; margin-top: 0;">Welcome to UniStore, {name}! 🎉</h2>
+                <p>We are thrilled to have you as part of our smart campus community. Your account has been successfully created.</p>
+                
+                <div style="background: #f8fafc; border: 2px dashed #6366f1; border-radius: 12px; padding: 20px; text-align: center; margin: 25px 0;">
+                    <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: #64748b; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Your Exclusive Welcome Coupon</p>
+                    <h3 style="margin: 0; font-size: 2rem; color: #1e293b;">TIMEOUT10</h3>
+                    <p style="margin: 5px 0 0 0; color: #6366f1; font-weight: bold;">10% OFF on your first purchase</p>
+                </div>
 
-🎉 **You have been registered successfully!**
-
-Welcome to the **UniStore**.
-
-Your account has been created using this email address ({email}). You can now:
-
-* Log in to your account
-* Browse products
-* Place orders
-* Receive pickup time notifications after approval
-
-If you did not create this account, please contact the store admin immediately.
-
-We’re happy to have you with us!
-
-Best regards,
-**UniStore**
-"""
-        threading.Thread(target=send_email, args=(email, email_subject, email_body)).start()
+                <p><strong>What's Next?</strong></p>
+                <ul style="padding-left: 20px;">
+                    <li>Browse our latest stationery and tech products</li>
+                    <li>Avail smart pickup services from our campus store</li>
+                    <li>Track your orders in real-time</li>
+                </ul>
+                
+                <p style="margin-top: 30px;">Happy Shopping!<br><strong>UniStore Team</strong></p>
+            </div>
+            <div style="background: #f1f5f9; padding: 15px; text-align: center; font-size: 0.8rem; color: #94a3b8;">
+                &copy; 2026 UniStore. | Smart Campus Shopping Starts Here.
+            </div>
+        </div>
+        """
+        
+        image_path = os.path.join(os.getcwd(), 'static', 'unistore_welcome_banner.jpg')
+        threading.Thread(target=send_email, args=(email, email_subject, email_body, html_body, image_path)).start()
 
         # Auto-login the user
         try:
