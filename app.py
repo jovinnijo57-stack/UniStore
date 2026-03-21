@@ -239,12 +239,16 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = True
 
 
-# Initialize database on startup
-print("Initializing database...")
-if init_database():
-    print("✓ Database ready")
-else:
-    print("⚠ Database initialization failed - check your MySQL connection")
+# Initialize database once on app start
+with app.app_context():
+    print("Database initialization starting...")
+    try:
+        if init_database():
+            print("DB check complete. Ready.")
+        else:
+            print("Warning: Database init might have issues.")
+    except Exception as e:
+        print(f"Primary DB init error: {e}")
 
 
 # ==============================
@@ -442,6 +446,10 @@ def check_maintenance():
 # ==============================
 # Page Routes
 # ==============================
+@app.route("/health")
+def health_check():
+    return "OK", 200
+
 @app.route("/")
 def home():
     return render_template("intro.html")
